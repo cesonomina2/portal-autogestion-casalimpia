@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Desprendibles | SaberBot Casalimpia</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Roboto:wght@400;500;700&display=swap');
+        
+        :root {
+            --color-azul-logo: #0085CA; --color-verde-logo: #8DC63F; 
+            --color-robot-claro: #D4F1F9; --color-gris-texto: #334155;
+            --color-blanco: #ffffff; --sombra-suave: 0 4px 20px rgba(0, 133, 202, 0.1);
+            --bg-oscuro: #E2E8F0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', sans-serif; background-color: var(--bg-oscuro);
+            color: var(--color-gris-texto); min-height: 100vh; display: flex; flex-direction: column;
+        }
+
+        header {
+            background-color: var(--color-blanco); padding: 1rem 5%; display: flex;
+            justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-bottom: 4px solid var(--color-azul-logo); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 15px;
+        }
+
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .logo-img { height: 35px; width: auto; }
+        .logo-text { font-family: 'Outfit', sans-serif; font-weight: 700; display: flex; gap: 4px; }
+        .text-verde { color: var(--color-verde-logo); font-size: 1.4rem; }
+        .text-azul { color: var(--color-azul-logo); font-size: 1.4rem; }
+
+        .header-right { display: flex; align-items: center; gap: 15px; }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+            background: var(--color-robot-claro); padding: 8px 15px; border-radius: 50px;
+            color: var(--color-azul-logo); font-weight: 600;
+        }
+
+        .btn-logout {
+            background-color: transparent; color: #dc3545; border: 1px solid #dc3545;
+            padding: 8px 16px; border-radius: 50px; font-family: 'Outfit', sans-serif;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-logout:hover { background-color: #dc3545; color: white; }
+
+        .hero {
+            text-align: center; padding: 1.5rem 1.5rem 1rem 1.5rem; 
+            background: linear-gradient(180deg, var(--color-blanco) 0%, var(--bg-oscuro) 100%);
+        }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif; color: var(--color-azul-logo);
+            font-size: clamp(1.4rem, 5vw, 2.2rem); line-height: 1.2; margin: 0;
+        }
+
+        .container {
+            max-width: 500px; margin: 0 auto; padding: 15px; flex: 1; width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .card {
+            background: var(--color-blanco); border-radius: 16px; padding: 30px;
+            box-shadow: var(--sombra-suave); border: 1px solid rgba(0,0,0,0.03); width: 100%; text-align: center; margin-bottom: 20px;
+        }
+        .card-icon {
+            width: 65px; height: 65px; background-color: var(--color-robot-claro);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; font-size: 2rem;
+        }
+        .card h2 { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); margin-bottom: 20px; font-size: 1.4rem; }
+
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-label { display: block; font-size: 0.9rem; font-weight: 600; color: #334155; margin-bottom: 6px; }
+        .input-field {
+            width: 100%; padding: 14px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 1rem; font-family: 'Roboto', sans-serif; transition: border-color 0.2s; appearance: none; background-color: white;
+        }
+        .input-field:focus { border-color: var(--color-azul-logo); outline: none; }
+
+        .btn-primary {
+            background-color: var(--color-azul-logo); color: white; border: none;
+            padding: 15px 20px; border-radius: 8px; font-family: 'Outfit', sans-serif;
+            font-weight: 600; font-size: 1.1rem; cursor: pointer; width: 100%; transition: transform 0.2s;
+            display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+
+        .mensaje { margin-top: 15px; font-size: 0.95rem; color: #64748B; font-weight: 500; }
+
+        /* BANDEJA DE DESCARGAS */
+        .bandeja-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+        .bandeja-info h4 { margin: 0 0 4px 0; font-size: 0.9rem; color: var(--color-azul-logo); }
+        .bandeja-info p { margin: 0; font-size: 0.8rem; color: #64748B; }
+        
+        .btn-descargar {
+            background-color: var(--color-verde-logo); color: white; border: none; border-radius: 8px; font-size: 1.8rem; cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; padding: 0;
+        }
+        .btn-descargar:hover { transform: scale(1.05); background-color: #7cb332; }
+
+        .estado-generando { color: #f59e0b; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .alerta-caducidad { background-color: #FEF3C7; color: #92400E; border-radius: 6px; padding: 10px; font-size: 0.85rem; margin-bottom: 15px; display: flex; gap: 8px; text-align: left; }
+
+        #lista-descargas { max-height: 240px; overflow-y: auto; padding-right: 8px; }
+        #lista-descargas::-webkit-scrollbar { width: 6px; }
+        #lista-descargas::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+        #lista-descargas::-webkit-scrollbar-thumb { background: var(--color-azul-logo); border-radius: 8px; }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; padding: 1rem; text-align: center; }
+            .logo-container { justify-content: center; width: 100%; }
+            .header-right { width: 100%; flex-direction: column; gap: 10px; }
+            .user-profile { width: 100%; justify-content: center; }
+            .btn-logout { width: 100%; text-align: center; }
+            .card { padding: 25px 15px; } .card-icon { width: 55px; height: 55px; font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body style="display: none;"> <header>
+        <div class="logo-container">
+            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
+            <div class="logo-text"><span class="text-verde">SaberBot</span></div>
+        </div>
+        
+        <div class="header-right">
+            <div class="user-profile">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span id="user-email-display">Cargando...</span>
+            </div>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>Módulo de Desprendibles</h1>
+    </section>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-icon">📒</div>
+            <h2>Generar Reporte</h2>
+            
+            <div class="input-group">
+                <label class="input-label">Mes a Generar</label>
+                <input type="month" id="mes-generacion" class="input-field" required>
+            </div>
+
+            <div class="input-group" id="div-ceco">
+                <label class="input-label">Centro de Costos (CECO)</label>
+                <input type="text" id="ceco-admin" class="input-field" placeholder="Ej: 01045" minlength="5" maxlength="5" pattern="[0-9]{5}" style="display:none;">
+                <select id="ceco-user" class="input-field" style="display:none;">
+                    <option value="">Cargando CECOs autorizados...</option>
+                </select>
+                <small style="color: #64748B; font-size: 0.8rem;">Ej: 01045 - Operaciones.</small>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Alcance de la Consulta</label>
+                <select id="tipo-generacion" class="input-field" onchange="cambiarOpciones()">
+                    <option value="" disabled selected>Seleccione una opción...</option>
+                    <option value="ceco_masivo">Generar todos los del CECO (ZIP)</option>
+                    <option value="empleado">Generar para un Empleado (PDF)</option>
+                </select>
+            </div>
+
+            <div class="input-group" id="div-empleado" style="display: none;">
+                <label class="input-label">Número de Documento del Empleado</label>
+                <input type="number" id="documento-persona" class="input-field" placeholder="Ej: 1020304050">
+            </div>
+            
+            <button class="btn-primary" onclick="generarNomina()" id="btn-generar">⚡ Solicitar Documento</button>
+            <p id="dashboard-msg" class="mensaje"></p>
+        </div>
+
+        <div id="bandeja-section" class="card" style="display: none;">
+            <h2 style="font-size: 1.2rem; margin-bottom: 10px; text-align: left;">📥 Bandeja de Descargas</h2>
+            <div class="alerta-caducidad">
+                <span>⏱️</span>
+                <span>Los documentos estarán disponibles <strong>solo por 48 horas</strong> antes de ser eliminados.</span>
+            </div>
+            <div id="lista-descargas"></div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://tyhdwpdefiatmxihycae.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_LH1iVez6V1qmj8Lk_YVZFA_Y2nYwdKw';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let userRole = ""; 
+
+        // --- GUARDAESPALDAS (AUTH GUARD) ---
+        async function verificarAcceso() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html'; // Patea al login si no hay sesión
+            } else {
+                document.body.style.display = 'flex'; // Muestra la página si todo está OK
+                cargarDatosUsuario(session.user.email);
+            }
+        }
+        verificarAcceso();
+
+        async function cerrarSesion() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        async function cargarDatosUsuario(email) {
+            document.getElementById('user-email-display').innerText = email;
+            cargarBandejaDescargas();
+
+            const { data } = await supabaseClient.from('permisos_nomina').select('*').eq('email', email).single();
+            const inputAdmin = document.getElementById('ceco-admin');
+            const selectUser = document.getElementById('ceco-user');
+
+            if (data && data.rol === 'admin') {
+                userRole = "admin"; inputAdmin.style.display = 'block';
+            } else if (data) {
+                userRole = "usuario"; selectUser.style.display = 'block';
+                const cecosArray = (data['cecos autorizados'] || "").split(',').map(c => c.trim());
+                selectUser.innerHTML = '<option value="" disabled selected>Seleccione un CECO...</option>' + 
+                                       cecosArray.map(c => `<option value="${c.substring(0, 5)}">${c}</option>`).join('');
+            }
+        }
+
+        function cambiarOpciones() {
+            document.getElementById('div-empleado').style.display = document.getElementById('tipo-generacion').value === 'empleado' ? 'block' : 'none';
+        }
+
+        async function generarNomina() {
+            const mes = document.getElementById('mes-generacion').value;
+            const tipo = document.getElementById('tipo-generacion').value;
+            let ceco = userRole === "admin" ? document.getElementById('ceco-admin').value.trim() : document.getElementById('ceco-user').value;
+            let documento = tipo === 'empleado' ? document.getElementById('documento-persona').value.trim() : "";
+            
+            if (!mes || !tipo || !ceco) return mostrarMensajePanel("⚠️ Faltan datos.", "#dc3545");
+
+            mostrarMensajePanel("✅ Solicitud enviada. Revisa la bandeja abajo.", "var(--color-verde-logo)");
+            const btnGenerar = document.getElementById('btn-generar');
+            btnGenerar.disabled = true; btnGenerar.style.opacity = "0.7";
+            
+            const idTarea = 'job_' + Date.now();
+            const titulo = tipo === 'ceco_masivo' ? `Masivo CECO ${ceco} - ${mes}` : `Desprendible CC ${documento} - ${mes}`;
+            
+            await supabaseClient.from('historial_descargas').insert([{
+                id_tarea: idTarea, email: document.getElementById('user-email-display').innerText, descripcion: titulo, estado: 'generando'
+            }]);
+            cargarBandejaDescargas(); 
+
+            fetch('https://n8n.casalimpia.com/webhook/generar-nomina', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accion: "generar_desprendibles", usuario_solicitante: document.getElementById('user-email-display').innerText, mes_generacion: mes, ceco_solicitado: ceco, tipo_reporte: tipo, documento_empleado: documento, id_tarea: idTarea })
+            });
+
+            setTimeout(() => { btnGenerar.disabled = false; btnGenerar.style.opacity = "1"; document.getElementById('dashboard-msg').innerText = ""; }, 3000);
+        }
+
+        async function cargarBandejaDescargas() {
+            const email = document.getElementById('user-email-display').innerText;
+            const { data } = await supabaseClient.from('historial_descargas').select('id_tarea, descripcion, estado, fecha').eq('email', email).order('fecha', { ascending: false });
+
+            const bandeja = document.getElementById('bandeja-section');
+            if (data && data.length > 0) {
+                bandeja.style.display = 'block';
+                const contenedor = document.getElementById('lista-descargas');
+                contenedor.innerHTML = '';
+                data.forEach(t => {
+                    let btn = t.estado === 'completado' ? `<button class="btn-descargar" onclick="descargarArchivo('${t.id_tarea}', '${t.descripcion}')" title="Descargar">📥</button>` : `<span class="estado-generando">⏳ Generando...</span>`;
+                    contenedor.innerHTML += `<div class="bandeja-item"><div class="bandeja-info"><h4>${t.descripcion}</h4><p>Solicitado: ${new Date(t.fecha).toLocaleString()}</p></div><div>${btn}</div></div>`;
+                });
+            } else { bandeja.style.display = 'none'; }
+        }
+
+        async function descargarArchivo(idTarea, descripcion) {
+            mostrarMensajePanel("⏳ Descargando...", "var(--color-gris-texto)");
+            const { data } = await supabaseClient.from('historial_descargas').select('archivo_base64').eq('id_tarea', idTarea).single();
+            if (data && data.archivo_base64) {
+                try {
+                    const res = await fetch(data.archivo_base64);
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const ext = descripcion.includes('Masivo') ? '.zip' : '.pdf';
+                    const link = document.createElement('a'); link.href = url; link.download = `${descripcion.replace(/ /g, '_')}${ext}`;
+                    document.body.appendChild(link); link.click(); link.remove(); window.URL.revokeObjectURL(url);
+                    mostrarMensajePanel("✅ ¡Descarga exitosa!", "var(--color-verde-logo)");
+                } catch(e) { mostrarMensajePanel("❌ Error al descargar.", "#dc3545"); }
+            }
+        }
+
+        function mostrarMensajePanel(texto, color) { const m = document.getElementById('dashboard-msg'); m.innerText = texto; m.style.color = color; }
+        setInterval(cargarBandejaDescargas, 10000);
+    </script>
+</body>
+</html>
