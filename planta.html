@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Planta de Personal | SaberBot Casalimpia</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Roboto:wght@400;500;700&display=swap');
+        
+        :root {
+            --color-azul-logo: #0085CA; --color-verde-logo: #8DC63F; 
+            --color-robot-claro: #D4F1F9; --color-gris-texto: #334155;
+            --color-blanco: #ffffff; --sombra-suave: 0 4px 20px rgba(0, 133, 202, 0.1);
+            --bg-oscuro: #E2E8F0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-oscuro); color: var(--color-gris-texto); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* HEADER */
+        header { background-color: var(--color-blanco); padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-bottom: 4px solid var(--color-azul-logo); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 15px; }
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .logo-img { height: 60px; width: auto; }
+        .logo-text { font-family: 'Outfit', sans-serif; font-weight: 700; display: flex; gap: 4px; align-items: center;}
+        .text-verde { color: var(--color-verde-logo); font-size: 1.6rem; }
+        .text-azul { color: var(--color-azul-logo); font-size: 1.6rem; margin-left: 6px; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .btn-volver, .btn-logout { padding: 8px 16px; border-radius: 50px; font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .btn-volver { background-color: var(--color-robot-claro); color: var(--color-azul-logo); border: none; }
+        .btn-volver:hover { background-color: var(--color-azul-logo); color: white; }
+        .user-profile { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; background: var(--color-robot-claro); padding: 8px 15px; border-radius: 50px; color: var(--color-azul-logo); font-weight: 600; }
+        .btn-logout { background-color: transparent; color: #dc3545; border: 1px solid #dc3545; }
+        .btn-logout:hover { background-color: #dc3545; color: white; }
+
+        .hero { text-align: center; padding: 1.5rem 1.5rem 1rem 1.5rem; background: linear-gradient(180deg, var(--color-blanco) 0%, var(--bg-oscuro) 100%); }
+        .hero h1 { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); font-size: clamp(1.4rem, 5vw, 2.2rem); margin: 0; }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 15px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+
+        /* PANELES Y FILTROS */
+        .panel { background: var(--color-blanco); border-radius: 12px; padding: 20px; box-shadow: var(--sombra-suave); border: 1px solid rgba(0,0,0,0.03); }
+        .panel-header { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); font-size: 1.2rem; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px; }
+        .filtros-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; margin-bottom: 20px; }
+        .input-group { text-align: left; }
+        .input-label { display: block; font-size: 0.85rem; font-weight: 600; color: #64748B; margin-bottom: 6px; text-transform: uppercase;}
+        .input-field { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; background-color: #f8fafc; transition: border-color 0.2s; }
+        .input-field:focus { border-color: var(--color-azul-logo); outline: none; background-color: white;}
+        .btn-primary { background-color: var(--color-azul-logo); color: white; border: none; padding: 11px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; height: 42px; display: flex; align-items: center; justify-content: center; gap: 8px;}
+        .btn-primary:hover { background-color: #006b9e; }
+        .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
+
+        /* SELECTOR DE COLUMNAS */
+        .columnas-container { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        .columnas-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: var(--color-azul-logo); font-weight: 600; font-size: 0.95rem; }
+        .columnas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; max-height: 200px; overflow-y: auto; padding-top: 15px; margin-top: 10px; border-top: 1px dashed #cbd5e1; }
+        .columna-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569; }
+        .columna-item input[type="checkbox"] { accent-color: var(--color-verde-logo); cursor: pointer; width: 16px; height: 16px;}
+        .btn-link { background: none; border: none; color: var(--color-azul-logo); font-size: 0.8rem; cursor: pointer; text-decoration: underline; font-weight: 600; }
+
+        /* KPIs */
+        #dashboard-results { display: none; flex-direction: column; gap: 20px; }
+        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .kpi-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; text-align: center; }
+        .kpi-value { font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 700; color: var(--color-azul-logo); }
+        .kpi-label { font-size: 0.85rem; color: #64748B; font-weight: 600; text-transform: uppercase; }
+
+        /* TABLA DINÁMICA CON FILTROS */
+        .table-container { overflow-x: auto; border-radius: 8px; border: 1px solid #e2e8f0; max-height: 550px; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        thead { position: sticky; top: 0; z-index: 10; background-color: #f1f5f9; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        th { color: var(--color-azul-logo); font-family: 'Outfit', sans-serif; font-weight: 600; text-align: left; padding: 10px 15px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; background-color: #f1f5f9; }
+        td { padding: 10px 15px; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem; color: #334155; white-space: nowrap;}
+        tr:hover td { background-color: #f8fafc; }
+        .col-filter-input { width: 100%; padding: 6px 8px; font-size: 0.8rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; font-family: 'Roboto', sans-serif; background-color: white; }
+        .col-filter-input:focus { border-color: var(--color-azul-logo); outline: none; }
+        .badge-activo { background-color: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-retirado { background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-alerta { color: #d97706; font-weight: bold; }
+
+        /* PAGINACIÓN */
+        .paginacion-container { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 10px 0; border-top: 1px solid #E2E8F0; }
+        .paginacion-info { font-size: 0.9rem; color: #64748B; font-weight: 500; }
+        .paginacion-controles { display: flex; gap: 10px; }
+        .btn-pag { background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--color-azul-logo); transition: 0.2s;}
+        .btn-pag:hover:not(:disabled) { background: #f1f5f9; border-color: var(--color-azul-logo); }
+        .btn-pag:disabled { color: #cbd5e1; cursor: not-allowed; }
+
+        .export-actions { display: flex; gap: 10px; }
+        .btn-export { background-color: white; border: 1px solid #cbd5e1; color: #334155; padding: 8px 15px; border-radius: 6px; font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+        .btn-export:hover { background-color: #f1f5f9; border-color: #94a3b8; }
+        .btn-pdf { color: #dc2626; border-color: #fca5a5; } .btn-pdf:hover { background-color: #fef2f2; border-color: #dc2626; }
+        .btn-excel { color: #16a34a; border-color: #86efac; } .btn-excel:hover { background-color: #f0fdf4; border-color: #16a34a; }
+
+        @media (max-width: 600px) {
+            header { padding: 10px; gap: 8px; } .logo-container { justify-content: center; width: 100%; gap: 6px; } .logo-img { height: 35px; } .text-verde, .text-azul { font-size: 1.25rem; }
+            .header-right { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; } .user-profile { order: 1; width: 100%; justify-content: center; padding: 6px; } .btn-volver { order: 2; flex: 1; justify-content: center; padding: 8px; } .btn-logout { order: 3; flex: 1; justify-content: center; padding: 8px; }
+            .paginacion-container { flex-direction: column; gap: 10px; align-items: center; }
+        }
+    </style>
+</head>
+<body style="display: none;">
+
+    <header>
+        <div class="logo-container">
+            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
+            <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Casalimpia</span></div>
+        </div>
+        <div class="header-right">
+            <a href="inicio.html" class="btn-volver">← Volver</a>
+            <div class="user-profile"><span id="user-email-display">Cargando...</span></div>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>Dashboard de Planta de Personal</h1>
+    </section>
+
+    <div class="container">
+        <div class="panel">
+            <div class="panel-header">Parámetros de Consulta</div>
+            
+            <div class="filtros-grid">
+                <div class="input-group">
+                    <label class="input-label">Centro de Costos (CECO)</label>
+                    <input type="text" id="ceco-admin" class="input-field" placeholder="Ej: 01045 (o % para todos)" style="display:none;">
+                    <select id="ceco-user" class="input-field" style="display:none;"></select>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Estado del Personal</label>
+                    <select id="filtro-estado" class="input-field" onchange="aplicarFiltrosGlobales()">
+                        <option value="activos">Activos (Cualquiera menos Retirado)</option>
+                        <option value="todos">Todos los Históricos</option>
+                        <option value="retirados">Solo Retirados</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Mínimo Días Vacaciones</label>
+                    <input type="number" id="filtro-vacaciones" class="input-field" placeholder="Ej: 15" onkeyup="aplicarFiltrosGlobales()" onchange="aplicarFiltrosGlobales()">
+                </div>
+
+                <button class="btn-primary" onclick="consultarPlantaBaseDatos()" id="btn-generar">Generar Reporte</button>
+            </div>
+            
+            <div class="columnas-container">
+                <div class="columnas-header" onclick="toggleColumnas()">
+                    <span>⚙️ Personalizar Columnas del Informe</span>
+                    <span id="flecha-columnas">▼</span>
+                </div>
+                <div class="columnas-grid" id="columnas-grid" style="display: none;">
+                    </div>
+                <div style="text-align: right; margin-top: 10px; display: none;" id="columnas-actions">
+                    <button class="btn-link" onclick="marcarTodasColumnas(true)">Seleccionar Todas</button> | 
+                    <button class="btn-link" onclick="marcarTodasColumnas(false)">Limpiar</button>
+                </div>
+            </div>
+
+            <p id="msg-alerta" style="color: #dc3545; font-size: 0.9rem; margin-top: 5px; display: none;"></p>
+        </div>
+
+        <div id="dashboard-results">
+            
+            <div class="kpi-container">
+                <div class="kpi-card"><div class="kpi-value" id="kpi-total">0</div><div class="kpi-label">Total Filtrados</div></div>
+                <div class="kpi-card" style="border-bottom: 4px solid #8DC63F;"><div class="kpi-value" id="kpi-activos" style="color: #8DC63F;">0</div><div class="kpi-label">Total Activos</div></div>
+                <div class="kpi-card" style="border-bottom: 4px solid #f59e0b;"><div class="kpi-value" id="kpi-vacaciones" style="color: #f59e0b;">0</div><div class="kpi-label">Con Alerta Vacaciones</div></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Resultados de la Búsqueda</span>
+                    <div class="export-actions">
+                        <button class="btn-export btn-excel" onclick="exportarExcel()">📊 Exportar Excel</button>
+                        <button class="btn-export btn-pdf" onclick="exportarPDF()">📄 Exportar PDF</button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table id="tabla-planta">
+                        <thead id="tabla-head">
+                            </thead>
+                        <tbody id="tabla-body">
+                            </tbody>
+                    </table>
+                </div>
+
+                <div class="paginacion-container">
+                    <div class="paginacion-info" id="paginacion-texto">Mostrando 0 - 0 de 0</div>
+                    <div class="paginacion-controles">
+                        <button class="btn-pag" id="btn-prev" onclick="cambiarPagina(-1)" disabled>← Anterior</button>
+                        <button class="btn-pag" id="btn-next" onclick="cambiarPagina(1)" disabled>Siguiente →</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://tyhdwpdefiatmxihycae.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_LH1iVez6V1qmj8Lk_YVZFA_Y2nYwdKw';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let userRole = ""; 
+        let datosCrudos = [];       // Datos directos de Supabase
+        let datosFiltrados = [];    // Datos tras aplicar CECO, Estado y Vacaciones
+        let datosMostrados = [];    // Datos tras filtros por columna (ESTOS SE EXPORTAN)
+        
+        // VARIABLES DE PAGINACIÓN Y OPTIMIZACIÓN
+        let paginaActual = 1;
+        const filasPorPagina = 50; 
+        let timeoutFiltro = null; // Para el Debounce
+
+        const COLUMNAS_DB = [
+            { id: "codEmp", label: "Cédula", default: true },
+            { id: "nomEmp", label: "Nombre Completo", default: true },
+            { id: "nomCar", label: "Cargo", default: true },
+            { id: "nomEst", label: "Estado", default: true },
+            { id: "diaPenDis", label: "Días Vacaciones", default: true },
+            { id: "fecNac", label: "Fecha Nacimiento", default: false },
+            { id: "sexo", label: "Sexo", default: false },
+            { id: "nomCiuRes", label: "Ciudad/Zona", default: false },
+            { id: "dirRes", label: "Dirección", default: false },
+            { id: "telCel", label: "Tel. Celular", default: false },
+            { id: "eMail", label: "Correo", default: false },
+            { id: "ctaGas", label: "Cta. Gastos", default: false },
+            { id: "fecIng", label: "Fecha Ingreso", default: false },
+            { id: "fecEgr", label: "Fecha Egreso", default: false },
+            { id: "tipoContdesc", label: "Tipo Contrato", default: false },
+            { id: "horasMes", label: "Horas Mes", default: false },
+            { id: "salBas", label: "Salario Básico", default: false },
+            { id: "codCco", label: "Cód. CECO", default: false },
+            { id: "nomCco", label: "Nom. CECO", default: false },
+            { id: "codCl1", label: "Cód. CL1", default: false },
+            { id: "clasif1", label: "Clasif 1", default: false },
+            { id: "codCl2", label: "Cód. CL2", default: false },
+            { id: "clasif2", label: "Clasif 2", default: false },
+            { id: "codCl3", label: "Cód. CL3", default: false },
+            { id: "clasif3", label: "Clasif 3", default: false },
+            { id: "codCl4", label: "Cód. CL4", default: false },
+            { id: "clasif4", label: "Clasif 4", default: false },
+            { id: "epsDesc", label: "EPS", default: false },
+            { id: "afpDesc", label: "AFP", default: false },
+            { id: "arlDesc", label: "ARL", default: false },
+            { id: "ccfDesc", label: "CCF", default: false }
+        ];
+
+        function inicializarSelectorColumnas() {
+            const container = document.getElementById('columnas-grid');
+            COLUMNAS_DB.forEach(col => {
+                container.innerHTML += `<label class="columna-item"><input type="checkbox" id="chk-${col.id}" value="${col.id}" ${col.default ? 'checked' : ''} onchange="renderizarTablaCabecera()"> ${col.label}</label>`;
+            });
+        }
+
+        function toggleColumnas() {
+            const grid = document.getElementById('columnas-grid');
+            const actions = document.getElementById('columnas-actions');
+            const flecha = document.getElementById('flecha-columnas');
+            if(grid.style.display === 'none') { grid.style.display = 'grid'; actions.style.display = 'block'; flecha.innerText = '▲'; } 
+            else { grid.style.display = 'none'; actions.style.display = 'none'; flecha.innerText = '▼'; }
+        }
+
+        function marcarTodasColumnas(estado) {
+            COLUMNAS_DB.forEach(col => document.getElementById(`chk-${col.id}`).checked = estado);
+            renderizarTablaCabecera();
+        }
+
+        async function verificarAcceso() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; } 
+
+            const email = session.user.email;
+            const { data, error } = await supabaseClient.from('permisos_planta').select('*').eq('email', email).single();
+            if (error || !data) { window.location.href = 'inicio.html?alerta=sin_permiso'; return; }
+
+            document.body.style.display = 'flex'; 
+            cargarDatosUsuario(email, data);
+            inicializarSelectorColumnas();
+        }
+        verificarAcceso();
+
+        async function cerrarSesion() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
+
+        function cargarDatosUsuario(email, permisosData) {
+            document.getElementById('user-email-display').innerText = email;
+            const inputAdmin = document.getElementById('ceco-admin');
+            const selectUser = document.getElementById('ceco-user');
+
+            if (permisosData.rol === 'admin') {
+                userRole = "admin"; inputAdmin.style.display = 'block';
+            } else {
+                userRole = "usuario"; selectUser.style.display = 'block';
+                const cecosArray = (permisosData['cecos autorizados'] || "").split(',').map(c => c.trim());
+                selectUser.innerHTML = '<option value="" disabled selected>Seleccione un CECO...</option>' + cecosArray.map(c => `<option value="${c.substring(0, 5)}">${c}</option>`).join('');
+            }
+        }
+
+        function mostrarAlerta(msg) {
+            const alerta = document.getElementById('msg-alerta');
+            alerta.innerText = msg; alerta.style.display = msg ? 'block' : 'none';
+        }
+
+        async function consultarPlantaBaseDatos() {
+            mostrarAlerta("");
+            let ceco = userRole === "admin" ? document.getElementById('ceco-admin').value.trim() : document.getElementById('ceco-user').value;
+            
+            if (!ceco) return mostrarAlerta("⚠️ Por favor ingresa o selecciona un CECO válido.");
+            
+            if (userRole === "admin" && ceco !== "%") {
+                if (!/^0[0-9]{4}$/.test(ceco)) return mostrarAlerta("⚠️ El CECO debe tener 5 números y empezar con 0 (Ej: 01045), o usa % para ver a todos.");
+            }
+            
+            const btnGenerar = document.getElementById('btn-generar');
+            btnGenerar.innerText = "Consultando..."; btnGenerar.disabled = true;
+
+            let consulta = supabaseClient.from('empleados_datos').select('*');
+            if (ceco !== "%") consulta = consulta.eq('codCco', ceco);
+            // Limitamos a 50,000 para seguridad de Supabase si usan %
+            consulta = consulta.limit(50000); 
+
+            const { data, error } = await consulta;
+
+            btnGenerar.innerText = "Actualizar Reporte"; btnGenerar.disabled = false;
+
+            if (error) return mostrarAlerta("❌ Error al consultar Supabase. Verifica la conexión.");
+            if (!data || data.length === 0) return mostrarAlerta(`No se encontraron empleados.`);
+
+            datosCrudos = data;
+            document.getElementById('dashboard-results').style.display = 'flex';
+            
+            renderizarTablaCabecera();
+            aplicarFiltrosGlobales();
+        }
+
+        function aplicarFiltrosGlobales() {
+            const filtroEstado = document.getElementById('filtro-estado').value;
+            const inputVac = document.getElementById('filtro-vacaciones').value;
+            const minVacaciones = inputVac === "" ? 0 : parseFloat(inputVac);
+
+            datosFiltrados = datosCrudos.filter(emp => {
+                let estadoStr = (emp.nomEst || "").toLowerCase();
+                let diasVac = parseFloat(emp.diaPenDis) || 0;
+                
+                let pasaEstado = true;
+                if(filtroEstado === 'activos') pasaEstado = !estadoStr.includes('retirad') && !estadoStr.includes('inactivo');
+                if(filtroEstado === 'retirados') pasaEstado = estadoStr.includes('retirad') || estadoStr.includes('inactivo');
+
+                let pasaVacaciones = diasVac >= minVacaciones;
+                return pasaEstado && pasaVacaciones;
+            });
+
+            // Restablecer paginación y aplicar filtros de columnas
+            paginaActual = 1;
+            aplicarFiltrosColumnas();
+        }
+
+        function renderizarTablaCabecera() {
+            let textosPrevios = {};
+            document.querySelectorAll('.col-filter-input').forEach(input => { textosPrevios[input.getAttribute('data-col')] = input.value; });
+
+            const columnasActivas = COLUMNAS_DB.filter(col => document.getElementById(`chk-${col.id}`).checked);
+            const thead = document.getElementById('tabla-head');
+
+            let trTitulos = "<tr>"; let trFiltros = "<tr>";
+            columnasActivas.forEach(col => {
+                trTitulos += `<th>${col.label}</th>`;
+                let valorPrevio = textosPrevios[col.id] || '';
+                // AL CAMBIAR, LLAMAMOS A LA FUNCIÓN CON "DEBOUNCE"
+                trFiltros += `<th><input type="text" data-col="${col.id}" class="col-filter-input" placeholder="Buscar..." onkeyup="aplicarFiltrosConRetraso()" value="${valorPrevio}"></th>`;
+            });
+
+            thead.innerHTML = trTitulos + "</tr>" + trFiltros + "</tr>";
+            
+            paginaActual = 1;
+            aplicarFiltrosColumnas(); 
+        }
+
+        // --- DEBOUNCE: Espera 300ms antes de filtrar para no colapsar el navegador ---
+        function aplicarFiltrosConRetraso() {
+            clearTimeout(timeoutFiltro);
+            timeoutFiltro = setTimeout(() => {
+                paginaActual = 1;
+                aplicarFiltrosColumnas();
+            }, 300);
+        }
+
+        function aplicarFiltrosColumnas() {
+            const inputs = document.querySelectorAll('.col-filter-input');
+            let filtrosActivos = [];
+            
+            inputs.forEach(input => {
+                if (input.value.trim() !== '') filtrosActivos.push({ col: input.getAttribute('data-col'), texto: input.value.trim().toLowerCase() });
+            });
+
+            if (filtrosActivos.length === 0) {
+                datosMostrados = [...datosFiltrados]; 
+            } else {
+                datosMostrados = datosFiltrados.filter(emp => {
+                    return filtrosActivos.every(f => {
+                        let valorCelda = (emp[f.col] || "").toString().toLowerCase();
+                        return valorCelda.includes(f.texto);
+                    });
+                });
+            }
+
+            actualizarKPIs();
+            renderizarTablaCuerpo();
+        }
+
+        // --- RENDERIZADO CON PAGINACIÓN ---
+        function renderizarTablaCuerpo() {
+            const columnasActivas = COLUMNAS_DB.filter(col => document.getElementById(`chk-${col.id}`).checked);
+            const tbody = document.getElementById('tabla-body');
+            
+            tbody.innerHTML = "";
+            if(datosMostrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${columnasActivas.length}" style="text-align: center; color: #94a3b8;">No hay resultados con estos filtros.</td></tr>`;
+                actualizarTextosPaginacion();
+                return;
+            }
+
+            // Calculamos qué pedazo del arreglo mostrar
+            let inicio = (paginaActual - 1) * filasPorPagina;
+            let fin = inicio + filasPorPagina;
+            let datosPagina = datosMostrados.slice(inicio, fin);
+
+            let html = "";
+            datosPagina.forEach(emp => {
+                html += "<tr>";
+                columnasActivas.forEach(col => {
+                    let valor = emp[col.id] || ""; 
+                    if(col.id === 'nomEst') {
+                        let esRetirado = valor.toLowerCase().includes('retirad');
+                        html += `<td><span class="${esRetirado ? 'badge-retirado' : 'badge-activo'}">${valor}</span></td>`;
+                    } else if(col.id === 'diaPenDis') {
+                        let num = parseFloat(valor) || 0;
+                        html += `<td class="${num > 15 ? 'badge-alerta' : ''}">${valor}</td>`;
+                    } else if (col.id === 'nomEmp') {
+                        html += `<td><b>${valor}</b></td>`;
+                    } else {
+                        html += `<td>${valor}</td>`;
+                    }
+                });
+                html += "</tr>";
+            });
+            tbody.innerHTML = html;
+            actualizarTextosPaginacion();
+        }
+
+        function cambiarPagina(direccion) {
+            paginaActual += direccion;
+            renderizarTablaCuerpo();
+        }
+
+        function actualizarTextosPaginacion() {
+            const total = datosMostrados.length;
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const textoPag = document.getElementById('paginacion-texto');
+
+            if(total === 0) {
+                textoPag.innerText = "Mostrando 0 registros";
+                btnPrev.disabled = true; btnNext.disabled = true;
+                return;
+            }
+
+            let inicio = ((paginaActual - 1) * filasPorPagina) + 1;
+            let fin = Math.min(paginaActual * filasPorPagina, total);
+
+            textoPag.innerText = `Mostrando ${inicio} a ${fin} de ${total} registros`;
+            
+            btnPrev.disabled = paginaActual === 1;
+            btnNext.disabled = fin >= total;
+        }
+
+        function actualizarKPIs() {
+            let conteoActivos = 0; let conteoVacaciones = 0;
+            const inputVac = document.getElementById('filtro-vacaciones').value;
+            const umbralVacaciones = inputVac === "" ? 15 : parseFloat(inputVac); 
+
+            datosMostrados.forEach(emp => {
+                let estadoStr = (emp.nomEst || "").toLowerCase();
+                if(!estadoStr.includes('retirad') && !estadoStr.includes('inactivo')) conteoActivos++;
+                if((parseFloat(emp.diaPenDis) || 0) >= umbralVacaciones) conteoVacaciones++;
+            });
+            
+            document.getElementById('kpi-total').innerText = datosMostrados.length;
+            document.getElementById('kpi-activos').innerText = conteoActivos;
+            document.getElementById('kpi-vacaciones').innerText = conteoVacaciones;
+        }
+
+        // --- EXPORTACIONES (Exportan SIEMPRE toda la lista filtrada, no solo la página actual) ---
+        function obtenerDatosParaExportar() {
+            const columnasActivas = COLUMNAS_DB.filter(col => document.getElementById(`chk-${col.id}`).checked);
+            return {
+                columnas: columnasActivas,
+                dataRaw: datosMostrados.map(emp => {
+                    let filaExport = {};
+                    columnasActivas.forEach(col => { filaExport[col.label] = emp[col.id] || ""; });
+                    return filaExport;
+                })
+            };
+        }
+
+        function exportarExcel() {
+            if(datosMostrados.length === 0) return alert("No hay datos para exportar.");
+            const datosExport = obtenerDatosParaExportar();
+            const hoja = XLSX.utils.json_to_sheet(datosExport.dataRaw);
+            const libro = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(libro, hoja, "Planta Personal");
+            XLSX.writeFile(libro, `Reporte_Planta_Casalimpia.xlsx`);
+        }
+
+        function exportarPDF() {
+            if(datosMostrados.length === 0) return alert("No hay datos para exportar.");
+            const datosExport = obtenerDatosParaExportar();
+            const { jsPDF } = window.jspdf;
+            
+            const orientacion = datosExport.columnas.length > 6 ? 'landscape' : 'portrait';
+            const doc = new jsPDF(orientacion);
+            
+            doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.setTextColor(0, 133, 202); 
+            doc.text("Reporte Planta de Personal - Casalimpia", 14, 15);
+            doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+            doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 14, 22);
+
+            const headArr = [datosExport.columnas.map(c => c.label)];
+            const bodyArr = datosMostrados.map(emp => datosExport.columnas.map(c => emp[c.id] || ""));
+
+            doc.autoTable({
+                startY: 28, head: headArr, body: bodyArr,
+                headStyles: { fillColor: [141, 198, 63] }, 
+                styles: { fontSize: 8, font: "helvetica", cellPadding: 2 },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                horizontalPageBreak: true 
+            });
+
+            doc.save("Reporte_Planta_Casalimpia.pdf");
+        }
+    </script>
+</body>
+</html>
