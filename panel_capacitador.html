@@ -96,7 +96,7 @@
         @media (max-width: 600px) { .modulo-item { flex-direction: column; align-items: flex-start; gap: 10px; } }
     </style>
 </head>
-<body>
+<body style="display: none;">
 
     <header>
         <div class="logo-container">
@@ -245,6 +245,33 @@
 
         let chartInstanciaEstado = null;
         let chartInstanciaCeco = null;
+
+        // --- FUNCIÓN DE SEGURIDAD Y PERMISOS ---
+        async function verificarAccesoCapacitador() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            
+            if (!session) {
+                window.location.href = 'index.html'; 
+                return;
+            } 
+
+            const email = session.user.email;
+
+            const { data, error } = await supabaseClient
+                .from('permisos_capacitador')
+                .select('*')
+                .eq('email', email)
+                .single();
+
+            if (error || !data) {
+                window.location.href = 'inicio.html?alerta=sin_permiso';
+                return;
+            }
+
+            document.body.style.display = 'block'; 
+            cargarModulos(); 
+            cargarCecos();
+        }
 
         function switchTab(id, btn) {
             document.querySelectorAll('.view-section').forEach(v => v.style.display = 'none');
@@ -760,7 +787,8 @@
             }
         }
 
-        window.onload = function() { cargarModulos(); cargarCecos(); };
+        // --- ARRANQUE DE LA APLICACIÓN ---
+        window.onload = verificarAccesoCapacitador;
     </script>
 </body>
 </html>
