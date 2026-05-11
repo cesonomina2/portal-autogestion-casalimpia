@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal Empleados | SaberBot Casalimpia</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
+        
+        :root { 
+            --color-azul-logo: #0085CA; 
+            --color-verde-logo: #8DC63F; 
+            --bg-oscuro: #F1F5F9; 
+            --color-blanco: #ffffff; 
+            --text-principal: #1E293B; 
+            --text-secundario: #64748B;
+            --color-error: #EF4444;
+            --color-exito: #10B981;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        
+        body { 
+            color: var(--text-principal); line-height: 1.6; 
+            background-color: var(--bg-oscuro); min-height: 100vh; padding-bottom: 50px;
+        }
+
+        /* Cabecera */
+        header { 
+            background-color: rgba(255, 255, 255, 0.98); padding: 12px 5%; display: flex; 
+            align-items: center; justify-content: space-between; border-bottom: 3px solid var(--color-azul-logo); 
+            position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        }
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .logo-img { height: 45px; }
+        .logo-text { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.5rem; }
+        .text-verde { color: var(--color-verde-logo); } .text-azul { color: var(--color-azul-logo); margin-left: 5px; }
+        
+        .user-profile { font-size: 0.9rem; font-weight: 700; background: #E2E8F0; padding: 6px 14px; border-radius: 20px; color: var(--color-azul-logo); display: none; align-items: center; gap: 10px;}
+        .btn-logout-small { background: #FEE2E2; color: #EF4444; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8rem;}
+
+        .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* VISTA 1: LOGIN */
+        .hero { text-align: center; padding: 3rem 1.5rem 1.5rem; max-width: 800px; margin: 0 auto; }
+        .hero h1 { font-family: 'Outfit', sans-serif; color: var(--text-principal); font-size: 2rem; margin-bottom: 8px; }
+        .hero p { color: var(--text-secundario); }
+
+        .login-container {
+            max-width: 500px; margin: 0 auto 2rem auto; padding: 25px 20px;
+            background: var(--color-blanco); border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;
+            border-top: 4px solid var(--color-verde-logo);
+        }
+        .login-container h3 { font-family: 'Outfit', sans-serif; font-size: 1.2rem; margin-bottom: 5px; }
+        .login-container p { color: var(--text-secundario); font-size: 0.95rem; margin-bottom: 20px; }
+        .input-group { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .input-group input { padding: 12px 15px; font-size: 1rem; border: 1px solid #CBD5E1; border-radius: 8px; width: 100%; max-width: 250px; outline: none; }
+        .input-group input:focus { border-color: var(--color-azul-logo); }
+        .input-group button { padding: 12px 25px; font-size: 1rem; background-color: var(--color-verde-logo); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; transition: background 0.2s; }
+        .input-group button:hover { background-color: #7ab332; }
+        .input-group button:disabled { background-color: #94A3B8; cursor: not-allowed; }
+
+        /* VISTA 2: MENÚ PRINCIPAL */
+        .menu-container { max-width: 900px; margin: 2rem auto; padding: 0 20px; }
+        .greeting { text-align: center; margin-bottom: 30px; font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); font-size: 1.8rem; }
+        
+        .section-title { font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: var(--color-azul-logo); border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; margin-bottom: 15px; }
+        .grid-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        
+        .menu-card { 
+            background: var(--color-blanco); border-radius: 8px; padding: 16px 20px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03); border: 1px solid #E2E8F0;
+            border-left: 4px solid var(--color-azul-logo); display: flex; align-items: center; justify-content: space-between; 
+            text-decoration: none; color: var(--text-principal); transition: 0.2s ease; cursor: pointer;
+        }
+        .menu-card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.08); background: var(--color-azul-logo); color: white; }
+        .menu-card h3 { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; margin: 0; }
+        
+        .card-destacada { border-left-color: var(--color-verde-logo); border-width: 2px; border-left-width: 6px; background: #F8FAFC; }
+        .card-destacada:hover { background: var(--color-verde-logo); color: white; border-color: var(--color-verde-logo); }
+
+        /* VISTA 3: MIS CAPACITACIONES */
+        .btn-back { display: inline-flex; align-items: center; background: none; border: none; color: var(--color-azul-logo); font-size: 1rem; font-weight: 700; cursor: pointer; margin-bottom: 15px; padding: 10px 0; }
+        .courses-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .course-card { background: var(--color-blanco); border-radius: 12px; padding: 20px; border: 2px solid #E2E8F0; cursor: pointer; transition: all 0.2s ease; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between;}
+        .course-card:hover { border-color: var(--color-azul-logo); transform: translateY(-3px); }
+        .course-card.completed { border-color: var(--color-verde-logo); background: #F0FDF4; }
+        .course-title { font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; }
+        .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; align-self: flex-start;}
+        .badge-pending { background-color: #FEF3C7; color: #D97706; }
+        .badge-completed { background-color: #D1FAE5; color: #059669; }
+
+        /* VISTA 4: CLASE / QUIZ */
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; background: #000; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        
+        .quiz-container { background: var(--color-blanco); border-radius: 8px; padding: 25px; border-top: 4px solid var(--color-verde-logo); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .question { margin-bottom: 25px; background: #F8FAFC; padding: 15px; border-radius: 8px; border: 1px solid #E2E8F0; }
+        .question h3 { font-size: 1.05rem; margin-bottom: 6px; color: var(--color-azul-logo); }
+        .question-hint { color: var(--text-secundario); font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 15px; }
+
+        .options label { display: flex; align-items: center; padding: 12px 15px; margin-bottom: 8px; background-color: white; border: 1px solid #CBD5E1; border-radius: 8px; cursor: pointer; transition: 0.2s;}
+        .options label:hover { border-color: var(--color-verde-logo); }
+        
+        /* Aseguramos que tanto radios (única) como checkboxes (múltiple) se vean grandes y del color de la marca */
+        .options input[type="checkbox"], .options input[type="radio"] { margin-right: 12px; transform: scale(1.3); accent-color: var(--color-verde-logo); cursor: pointer; }
+        
+        .options.disabled label { cursor: default; opacity: 0.8; }
+        .options.disabled label:hover { border-color: #CBD5E1; }
+
+        .btn-submit { display: block; width: 100%; padding: 16px; font-size: 1.1rem; font-family: 'Outfit', sans-serif; font-weight: 700; background-color: var(--color-azul-logo); color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .btn-submit:disabled { background-color: #CBD5E1; cursor: not-allowed; }
+
+        .feedback-box { display: none; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: center; font-weight: 500; }
+        .feedback-error { background-color: #FEF2F2; color: #991B1B; border: 1px solid #FCA5A5; }
+        .feedback-success { background-color: #ECFDF5; color: #065F46; border: 1px solid #6EE7B7; }
+        .feedback-info { background-color: #EFF6FF; color: #1E40AF; border: 1px solid #93C5FD; }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; gap: 10px; padding: 15px 5%; }
+            .user-profile { width: 100%; justify-content: space-between; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo" class="logo-img">
+            <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Casalimpia</span></div>
+        </div>
+        <div id="perfilUsuario" class="user-profile">
+            <span id="txt-cedula-perfil">C.C. -----</span>
+            <button class="btn-logout-small" onclick="cerrarSesion()">Salir</button>
+        </div>
+    </header>
+
+    <div id="vista-login" class="view-section active">
+        <section class="hero">
+            <h1>Portal de Autocapacitación</h1>
+            <p>Ingresa tu número de documento para acceder a tus capacitaciones y novedades.</p>
+        </section>
+        <div class="login-container">
+            <h3>Identifícate para continuar</h3>
+            <p>Digita tu número de cédula sin puntos ni espacios.</p>
+            <div class="input-group">
+                <input type="number" id="cedulaInput" placeholder="Ej. 1020304050" onkeypress="if(event.key === 'Enter') validarCedula()">
+                <button id="btnIngresar" onclick="validarCedula()">Ingresar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="vista-menu" class="view-section">
+        <div class="menu-container">
+            <h1 class="greeting" id="texto-bienvenida">Hola, Cargando...</h1>
+            
+            <h2 class="section-title">Mi Formación</h2>
+            <div class="grid-menu">
+                <div class="menu-card card-destacada" onclick="abrirVistaCursos()">
+                    <h3>📺 Ver mis Capacitaciones Asignadas</h3>
+                    <span>→</span>
+                </div>
+            </div>
+
+            <div id="seccion-novedades" style="display: none;">
+                <h2 class="section-title">Consultas y Novedades SIC</h2>
+                <div class="grid-menu">
+                    <a href="SIC/pnr.html" class="menu-card"><h3>Permiso No Remunerado</h3><span>→</span></a>
+                    <a href="SIC/maternidad_paternidad.html" class="menu-card"><h3>Licencias Mat. y Pat.</h3><span>→</span></a>
+                    <a href="SIC/dia_familia.html" class="menu-card"><h3>Día de la Familia</h3><span>→</span></a>
+                    <a href="SIC/calamidad.html" class="menu-card"><h3>Calamidad Doméstica</h3><span>→</span></a>
+                    <a href="SIC/luto.html" class="menu-card"><h3>Licencias por Luto</h3><span>→</span></a>
+                    <a href="SIC/incapacidad.html" class="menu-card"><h3>Novedad Incapacidad</h3><span>→</span></a>
+                    <a href="SIC/otrosi.html" class="menu-card"><h3>Otrosí y Cambios CECO</h3><span>→</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="vista-mis-capacitaciones" class="view-section">
+        <div class="menu-container">
+            <button class="btn-back" onclick="cambiarVista('vista-menu')">← Volver al menú principal</button>
+            <h1 class="greeting" style="margin-bottom:10px;">Mis Capacitaciones</h1>
+            <p style="text-align:center; color:var(--text-secundario); margin-bottom:30px;">Selecciona un módulo para visualizar el video y responder la evaluación.</p>
+            
+            <div class="courses-grid" id="grid-cursos-asignados">
+                <p style="text-align:center; grid-column: 1/-1;">Cargando tus módulos...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="vista-clase" class="view-section">
+        <div class="menu-container">
+            <button class="btn-back" onclick="abrirVistaCursos()">← Volver a mis capacitaciones</button>
+            
+            <h1 class="section-title" id="tituloClase" style="border:none; margin-bottom:5px;">Cargando Módulo...</h1>
+            <p id="subtituloClase" style="color:var(--text-secundario); margin-bottom:20px;">Presta atención al material audiovisual antes de responder.</p>
+
+            <div class="video-container">
+                <iframe id="videoIframe" src="" allowfullscreen></iframe>
+            </div>
+
+            <div class="quiz-container">
+                <h2 style="font-family:'Outfit'; color:var(--color-azul-logo); margin-bottom:20px;" id="quizTitulo">Evaluación</h2>
+                <form id="quizForm">
+                    <div id="cuestionario-dinamico">
+                        </div>
+                    
+                    <button type="button" id="btnEnviarEvaluacion" class="btn-submit" onclick="evaluarCuestionario()">Validar Respuestas</button>
+                    <div id="feedback" class="feedback-box"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Configuración de Supabase
+        const SUPABASE_URL = 'https://tyhdwpdefiatmxihycae.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_LH1iVez6V1qmj8Lk_YVZFA_Y2nYwdKw';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const JEFATURAS_PERMITIDAS = ['001', '029', '030'];
+        
+        let misCursosData = []; 
+        let moduloActualId = null; 
+        let registroActualId = null;
+
+        // 2. Control de Sesión al Cargar la Página
+        window.onload = function() {
+            verificarSesion();
+        };
+
+        function cambiarVista(idVista) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById(idVista).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        // --- LÓGICA DE LOGIN ---
+        function verificarSesion() {
+            const cedulaGuardada = localStorage.getItem('saberbot_usuario_cedula');
+            const nombreGuardado = localStorage.getItem('saberbot_usuario_nombre');
+            const tieneAccesoSIC = localStorage.getItem('saberbot_acceso_sic');
+
+            if (cedulaGuardada) {
+                document.getElementById('perfilUsuario').style.display = 'flex';
+                document.getElementById('txt-cedula-perfil').innerText = `C.C. ${cedulaGuardada}`;
+                document.getElementById('texto-bienvenida').innerText = `Hola, ${nombreGuardado}`;
+                
+                if (tieneAccesoSIC === 'true') {
+                    document.getElementById('seccion-novedades').style.display = 'block';
+                } else {
+                    document.getElementById('seccion-novedades').style.display = 'none';
+                }
+                cambiarVista('vista-menu');
+            } else {
+                document.getElementById('perfilUsuario').style.display = 'none';
+                cambiarVista('vista-login');
+            }
+        }
+
+        async function validarCedula() {
+            const cedula = document.getElementById('cedulaInput').value.trim();
+            const btn = document.getElementById('btnIngresar');
+
+            if(cedula === '') {
+                alert("Por favor ingresa un número de cédula válido."); return;
+            }
+
+            const textoOriginal = btn.innerText;
+            btn.innerText = "Verificando en Base de Datos...";
+            btn.disabled = true;
+
+            try {
+                // Buscamos empleado en Supabase
+                const { data, error } = await supabaseClient
+                    .from('empleados_datos')
+                    .select('codEmp, nomEst, nomEmp, codCl3')
+                    .eq('codEmp', cedula)
+                    .single();
+
+                if (error || !data) {
+                    alert("Cédula no encontrada. Verifica el número e intenta nuevamente.");
+                    restaurarBoton(btn, textoOriginal); return;
+                }
+
+                if (data.nomEst && data.nomEst.toLowerCase().includes('retirado')) {
+                    alert("Acceso denegado. El empleado se encuentra registrado como inactivo/retirado.");
+                    restaurarBoton(btn, textoOriginal); return;
+                }
+
+                // --- VALIDACIÓN DE JEFATURA ---
+                const codigoJefatura = data.codCl3 ? data.codCl3.toString().trim() : '';
+                const tieneAccesoSIC = JEFATURAS_PERMITIDAS.includes(codigoJefatura) ? 'true' : 'false';
+
+                localStorage.setItem('saberbot_usuario_cedula', data.codEmp);
+                localStorage.setItem('saberbot_acceso_sic', tieneAccesoSIC);
+                
+                const nombreFormateado = data.nomEmp.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                localStorage.setItem('saberbot_usuario_nombre', nombreFormateado);
+
+                document.getElementById('cedulaInput').value = '';
+                verificarSesion();
+
+            } catch (err) {
+                console.error("Error:", err);
+                alert("Hubo un error de conexión.");
+            } finally {
+                restaurarBoton(btn, textoOriginal);
+            }
+        }
+
+        function restaurarBoton(btn, texto) {
+            btn.innerText = texto;
+            btn.disabled = false;
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('saberbot_usuario_cedula');
+            localStorage.removeItem('saberbot_usuario_nombre');
+            localStorage.removeItem('saberbot_acceso_sic');
+            verificarSesion();
+        }
+
+        // --- LÓGICA DE CAPACITACIONES (Vista 3) ---
+        async function abrirVistaCursos() {
+            cambiarVista('vista-mis-capacitaciones');
+            const grid = document.getElementById('grid-cursos-asignados');
+            grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1; color:var(--text-secundario);">Consultando capacitaciones asignadas...</p>';
+            
+            const cedula = localStorage.getItem('saberbot_usuario_cedula');
+            
+            try {
+                // 1. Buscar registros de este empleado
+                const { data: registros, error: errReg } = await supabaseClient
+                    .from('2-registro_capacitaciones')
+                    .select('*')
+                    .eq('cedula_empleado', cedula);
+
+                if(errReg) throw errReg;
+
+                if(!registros || registros.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">No tienes capacitaciones asignadas en este momento.</p>';
+                    return;
+                }
+
+                // 2. Extraer IDs de módulos y buscar sus detalles (Video, Cuestionario, Título)
+                const idsModulos = registros.map(r => r.id_modulo);
+                const { data: modulos, error: errMod } = await supabaseClient
+                    .from('2-modulos_capacitacion')
+                    .select('*')
+                    .in('id_modulo', idsModulos);
+
+                if(errMod) throw errMod;
+
+                // 3. Cruzar la información en memoria
+                misCursosData = registros.map(reg => {
+                    const modDetalle = modulos.find(m => m.id_modulo === reg.id_modulo);
+                    return { ...reg, modulo: modDetalle };
+                }).filter(item => item.modulo); 
+
+                // 4. Renderizar Tarjetas
+                grid.innerHTML = '';
+                misCursosData.forEach((curso, index) => {
+                    const isOk = curso.estado === 'Completado';
+                    const badgeClass = isOk ? 'badge-completed' : 'badge-pending';
+                    const badgeText = isOk ? '✅ Completado' : '⏳ Pendiente';
+                    const cardClass = isOk ? 'course-card completed' : 'course-card';
+
+                    grid.innerHTML += `
+                        <div class="${cardClass}" onclick="abrirClase(${index})">
+                            <div class="course-title">${curso.modulo.titulo}</div>
+                            <span class="badge ${badgeClass}">${badgeText}</span>
+                        </div>
+                    `;
+                });
+
+            } catch (error) {
+                console.error(error);
+                grid.innerHTML = '<p style="text-align:center; color:red; grid-column: 1/-1;">Error al cargar tus cursos.</p>';
+            }
+        }
+
+        // --- LÓGICA DE LA CLASE / EVALUACIÓN (Vista 4) ---
+        function abrirClase(indexData) {
+            const data = misCursosData[indexData];
+            moduloActualId = data.modulo.id_modulo;
+            registroActualId = data.id_registro;
+
+            cambiarVista('vista-clase');
+            
+            document.getElementById('tituloClase').innerText = data.modulo.titulo;
+            
+            // --- TRADUCTOR INTELIGENTE DE URLS (YouTube y Google Drive) ---
+            let videoUrl = data.modulo.url_recurso;
+            
+            if (videoUrl.includes('youtu.be/') || videoUrl.includes('youtube.com/')) {
+                let videoId = '';
+                if (videoUrl.includes('youtu.be/')) {
+                    videoId = videoUrl.split('youtu.be/')[1]?.split('?')[0];
+                } else if (videoUrl.includes('watch?v=')) {
+                    videoId = videoUrl.split('watch?v=')[1]?.split('&')[0];
+                } else if (videoUrl.includes('/shorts/')) {
+                    videoId = videoUrl.split('/shorts/')[1]?.split('?')[0];
+                } else if (videoUrl.includes('/embed/')) {
+                    videoId = videoUrl.split('/embed/')[1]?.split('?')[0];
+                }
+                if (videoId) {
+                    videoUrl = `https://www.youtube.com/embed/${videoId}`;
+                }
+            } 
+            else if (videoUrl.includes('drive.google.com/file/d/')) {
+                // Reemplaza /view (y cualquier parámetro extra) por /preview
+                videoUrl = videoUrl.replace(/\/view.*/, '/preview');
+            }
+
+            document.getElementById('videoIframe').src = videoUrl;
+            // ---------------------------------------------------------------
+
+            // Renderizar Cuestionario con Detección de Selección Única o Múltiple
+            const contenedorPreguntas = document.getElementById('cuestionario-dinamico');
+            contenedorPreguntas.innerHTML = '';
+            
+            data.modulo.cuestionario.forEach((q, idx) => {
+                let htmlOpciones = '';
+                
+                const numRespCorrectas = q.respuesta_correcta.length;
+                const isMultiple = numRespCorrectas > 1;
+                const tipoInput = isMultiple ? 'checkbox' : 'radio';
+                const textoAyuda = isMultiple ? `* Selección múltiple (Elige ${numRespCorrectas} opciones correctas)` : `* Única respuesta`;
+
+                for (const [letra, texto] of Object.entries(q.opciones)) {
+                    htmlOpciones += `
+                        <label>
+                            <input type="${tipoInput}" name="q_${idx}" value="${letra}">
+                            <span><b>${letra})</b> ${texto}</span>
+                        </label>`;
+                }
+                
+                contenedorPreguntas.innerHTML += `
+                    <div class="question">
+                        <h3>${idx + 1}. ${q.pregunta}</h3>
+                        <span class="question-hint">${textoAyuda}</span>
+                        <div class="options" id="opts_q_${idx}">
+                            ${htmlOpciones}
+                        </div>
+                    </div>`;
+            });
+
+            // Lógica de Estado (Pendiente vs Completado)
+            const btn = document.getElementById('btnEnviarEvaluacion');
+            const feedback = document.getElementById('feedback');
+            feedback.style.display = 'none';
+
+            if(data.estado === 'Completado') {
+                document.getElementById('subtituloClase').innerText = "Repasa el contenido. Ya has aprobado este módulo.";
+                document.getElementById('quizTitulo').innerText = "Evaluación (Aprobada)";
+                btn.disabled = true; btn.innerText = "Módulo Completado";
+
+                // Marcar respuestas correctas visualmente y bloquear
+                data.modulo.cuestionario.forEach((q, idx) => {
+                    q.respuesta_correcta.forEach(letraCorrecta => {
+                        const inputCheck = document.querySelector(`input[name="q_${idx}"][value="${letraCorrecta}"]`);
+                        if(inputCheck) inputCheck.checked = true;
+                    });
+                });
+                
+                document.querySelectorAll('.options').forEach(div => div.classList.add('disabled'));
+                document.querySelectorAll('#quizForm input').forEach(input => input.disabled = true);
+
+                feedback.className = 'feedback-box feedback-info';
+                feedback.innerHTML = "ℹ️ Este módulo es solo de consulta. Tus respuestas correctas están marcadas arriba.";
+                feedback.style.display = 'block';
+            } else {
+                document.getElementById('subtituloClase').innerText = "Visualiza el material y aprueba la evaluación.";
+                document.getElementById('quizTitulo').innerText = "Evaluación de Conocimientos";
+                btn.disabled = false; btn.innerText = "Validar Respuestas";
+                
+                document.querySelectorAll('.options').forEach(div => div.classList.remove('disabled'));
+                document.querySelectorAll('#quizForm input').forEach(input => input.disabled = false);
+            }
+        }
+
+        async function evaluarCuestionario() {
+            const data = misCursosData.find(m => m.id_registro === registroActualId);
+            const btn = document.getElementById('btnEnviarEvaluacion');
+            const feedback = document.getElementById('feedback');
+            
+            let esCorrectoTotal = true;
+            let todasRespondidas = true;
+            let preguntasMalas = []; // Guarda el índice visual de las preguntas falladas
+
+            // Validar cada pregunta y recolectar errores
+            data.modulo.cuestionario.forEach((q, idx) => {
+                const seleccionados = Array.from(document.querySelectorAll(`input[name="q_${idx}"]:checked`)).map(cb => cb.value);
+                
+                if(seleccionados.length === 0) {
+                    todasRespondidas = false;
+                } else {
+                    let preguntaEsCorrecta = true;
+                    const respuestasReales = q.respuesta_correcta;
+                    
+                    if(seleccionados.length !== respuestasReales.length) {
+                        preguntaEsCorrecta = false;
+                    } else {
+                        seleccionados.forEach(val => {
+                            if(!respuestasReales.includes(val)) preguntaEsCorrecta = false;
+                        });
+                    }
+
+                    if(!preguntaEsCorrecta) {
+                        esCorrectoTotal = false;
+                        preguntasMalas.push(idx + 1); // Guarda el número de pregunta (1, 2, 3...)
+                    }
+                }
+            });
+
+            if(!todasRespondidas) {
+                feedback.className = 'feedback-box feedback-error';
+                feedback.innerHTML = "⚠️ Debes seleccionar al menos una opción en todas las preguntas.";
+                feedback.style.display = 'block';
+                return;
+            }
+
+            if(!esCorrectoTotal) {
+                feedback.className = 'feedback-box feedback-error';
+                feedback.innerHTML = `❌ Revisa de nuevo. Tienes errores en la(s) pregunta(s): <b>${preguntasMalas.join(', ')}</b>.`;
+                feedback.style.display = 'block';
+                return;
+            }
+
+            // Si todo es correcto, actualizar en Supabase
+            btn.innerText = "Guardando resultado..."; btn.disabled = true;
+
+            const { error } = await supabaseClient
+                .from('2-registro_capacitaciones')
+                .update({ estado: 'Completado' })
+                .eq('id_registro', registroActualId);
+
+            if(error) {
+                feedback.className = 'feedback-box feedback-error';
+                feedback.innerHTML = "Error de conexión al guardar el resultado.";
+                feedback.style.display = 'block';
+                btn.innerText = "Validar Respuestas"; btn.disabled = false;
+            } else {
+                feedback.className = 'feedback-box feedback-success';
+                feedback.innerHTML = "✅ ¡Excelente! Has aprobado la capacitación.";
+                feedback.style.display = 'block';
+
+                document.querySelectorAll('.options').forEach(div => div.classList.add('disabled'));
+                document.querySelectorAll('#quizForm input').forEach(input => input.disabled = true);
+                btn.innerText = "Módulo Completado";
+
+                data.estado = 'Completado';
+            }
+        }
+    </script>
+</body>
+</html>
