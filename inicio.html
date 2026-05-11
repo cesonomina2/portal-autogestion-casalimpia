@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Roboto:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
         
         :root {
             --color-azul-logo: #0085CA; --color-verde-logo: #8DC63F; 
@@ -218,11 +218,11 @@
             <a href="#" class="btn-modulo" style="background-color: var(--color-verde-logo);">Ingresar al Módulo</a>
         </div>
 
-        <div class="modulo-card">
+        <div class="modulo-card bloqueado" id="card-capacitador" onclick="mostrarAlertaBloqueo('card-capacitador')">
             <div class="modulo-icon">🎓</div>
             <h3>Capacitador Casalimpia</h3>
             <p>Panel de gestión para crear módulos, subir recursos de Drive y asignar capacitaciones al personal.</p>
-            <a href="panel_capacitador.html" class="btn-modulo">Ingresar al Módulo</a>
+            <a href="#" class="btn-modulo" id="btn-capacitador">🔒 Acceso Restringido</a>
         </div>
 
     </div>
@@ -245,18 +245,20 @@
             document.body.style.display = 'flex';
             document.getElementById('user-email-display').innerText = session.user.email;
 
-            // Revisamos si viene "rebotado" de desprendibles.html por intentar entrar directo
+            // Revisamos si viene "rebotado" de algún módulo por intentar entrar directo
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.get('alerta') === 'sin_permiso') {
                 const alerta = document.getElementById('alerta-global');
-                alerta.innerText = "🛑 No tienes autorización para ingresar al Módulo de Desprendibles.";
+                alerta.innerText = "🛑 No tienes autorización para ingresar a este módulo.";
                 alerta.style.display = "block";
                 // Limpiamos la URL para que si recarga no le siga saliendo el error
                 window.history.replaceState(null, null, window.location.pathname);
             }
 
+            // Llamamos a las validaciones de cada tarjeta
             verificarPermisosNomina(session.user.email);
             verificarPermisosPlanta(session.user.email);
+            verificarPermisosCapacitador(session.user.email);
         }
 
         async function verificarPermisosNomina(email) {
@@ -277,7 +279,6 @@
                 btnDesprendibles.innerText = "Ingresar al Módulo";
                 btnDesprendibles.href = "desprendibles.html";
             }
-            // Si no tiene, se queda bloqueada por defecto como está en el HTML
         }
 
         async function verificarPermisosPlanta(email) {
@@ -291,11 +292,31 @@
             const btnPlanta = document.getElementById('btn-planta');
 
             if (data && !error) {
-                // SI TIENE PERMISO: Desbloqueamos y queda Azul por defecto
+                // SI TIENE PERMISO: Desbloqueamos
                 cardPlanta.classList.remove('bloqueado');
                 cardPlanta.removeAttribute('onclick'); 
                 btnPlanta.innerText = "Ingresar al Módulo";
                 btnPlanta.href = "planta.html";
+            }
+        }
+
+        async function verificarPermisosCapacitador(email) {
+            // Consultamos la tabla permisos_capacitador
+            const { data, error } = await supabaseClient
+                .from('permisos_capacitador')
+                .select('*')
+                .eq('email', email)
+                .single();
+
+            const cardCapacitador = document.getElementById('card-capacitador');
+            const btnCapacitador = document.getElementById('btn-capacitador');
+
+            if (data && !error) {
+                // SI TIENE PERMISO: Desbloqueamos la tarjeta
+                cardCapacitador.classList.remove('bloqueado');
+                cardCapacitador.removeAttribute('onclick'); 
+                btnCapacitador.innerText = "Ingresar al Módulo";
+                btnCapacitador.href = "panel_capacitador.html";
             }
         }
 
@@ -320,5 +341,3 @@
 </body>
 
 </html>
-
-
