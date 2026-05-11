@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Novedad de Incapacidad | SaberBot Casalimpia</title>
+    <script>
+        (function verificarAcceso() {
+            const cedula = localStorage.getItem('saberbot_usuario_cedula');
+            const accesoSIC = localStorage.getItem('saberbot_acceso_sic');
+            if (!cedula || accesoSIC !== 'true') {
+                window.location.replace('../autocapacitacion.html');
+            }
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Roboto:wght@400;500;700&display=swap');
+        :root { --color-azul: #0085CA; --color-verde: #8DC63F; --bg: #E2E8F0; --text: #334155; --blanco: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--blanco); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--color-azul); margin-top: 20px; margin-bottom: 10px; }
+        h1 { font-size: 2rem; border-bottom: 3px solid var(--color-verde); padding-bottom: 10px; }
+        p, li { margin-bottom: 15px; font-size: 1.05rem; line-height: 1.6; }
+        ul { margin-left: 20px; margin-bottom: 15px; }
+        .img-placeholder { background: #f1f5f9; border: 2px dashed #94a3b8; color: #64748b; text-align: center; padding: 40px 20px; margin: 20px 0; border-radius: 8px; font-size: 0.9rem; }
+        .btn-volver { display: inline-block; background: var(--text); color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; margin-bottom: 20px; }
+        .btn-pdf { display: block; width: 100%; text-align: center; background: var(--color-azul); color: white; padding: 15px 20px; border: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 30px; transition: background 0.3s; }
+        .btn-pdf:hover { background: #006b9e; }
+        @media (max-width: 600px) { .container { padding: 15px; } h1 { font-size: 1.5rem; } }
+        
+        @media print {
+            @page { size: letter; margin: 2.54cm; }
+            body { background-color: var(--blanco); padding: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            .no-print { display: none !important; }
+            .img-placeholder { border: 1px solid #000; background: #fff; color: #000; page-break-inside: avoid; padding: 20px; }
+            h1, h2, h3 { page-break-after: avoid; }
+            p, ul, li { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../autocapacitacion.html" class="btn-volver no-print">⬅ Volver al Menú</a>
+        
+        <div class="img-placeholder">[Imagen: Portada Calendario con X roja marcando días]</div>
+        <h1>Novedad de Incapacidad</h1>
+        
+        <p>Es fundamental asegurar que las ausencias por incapacidad de tu equipo se registren de manera correcta y adecuada. Esta guía te proporcionará el protocolo exacto para gestionar estas novedades.</p>
+
+        <h2>Principios Clave para tu Gestión</h2>
+        
+        <h3>1. Acción Inmediata ante el Reporte:</h3>
+        <p>En cuanto un colaborador te notifique sobre su incapacidad (por teléfono, mensaje o cualquier otro medio), tu responsabilidad es registrar la novedad en el sistema a la brevedad posible. No esperes a que el colaborador lo haga.</p>
+
+        <h3>2. La Regla de los 2 Días: Tu Máxima Prioridad</h3>
+        <p>Una novedad se considera “extemporánea" (tardía) si se registran los hechos 2 días desde la fecha de inicio de la incapacidad. Tu objetivo principal es evitar a toda costa la creación de novedades extemporáneas.</p>
+
+        <h3>3. Registre la Novedad, Incluso sin Soporte</h3>
+        <p>No debes esperar a recibir el certificado médico para crear el registro. Procede a subir la novedad con la información que tienes. La falta de soporte se puede indicar en las observaciones.</p>
+
+        <h2>COMO REGISTRAR LA NOVEDAD</h2>
+        <div class="img-placeholder">[Imagen: Flecha paso 1]</div>
+        <p>Para acceder a la nueva plataforma donde centralizaremos los registros (el nuevo módulo), solo tienes que entrar en el aplicativo 'SIC' y después ir a la sección 'Mis perfiles / Gestión de personal'.</p>
+        
+        <div class="img-placeholder">[Imagen: Flecha paso 2]</div>
+        <p>Una vez ahí, haz click en el Panel de 'Registro'.</p>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 3]</div>
+        <p>En el panel que aparece, se debe digitar la cédula de la persona a la que se le realizara la novedad, después haz click en el botón "buscar"</p>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 4]</div>
+        <p>Dentro de la información de la persona que aparece, desplázate hasta la sección 'Estados' (generalmente al final) y localiza el botón 'Incapacidad'.</p>
+        <div class="img-placeholder">[Imagen: Botones de Estados con Incapacidad resaltado]</div>
+
+        <h2>Proceso de Registro en el Sistema: Tu Paso a Paso</h2>
+        <p>Cuando un miembro de tu equipo te informa sobre una incapacidad, sigue estos pasos:</p>
+
+        <h3>Paso 1: Diligencia las Fechas de la Incapacidad</h3>
+        <ul>
+            <li>Fecha inicial: Selecciona el primer día de ausencia que te reportó el colaborador.</li>
+            <li>Fecha final: Ingresa el último día de la incapacidad.</li>
+        </ul>
+        <div class="img-placeholder">[Imagen: Campos Fecha Inicio y Fecha Final]</div>
+
+        <h3>Paso 2: Verifica el Horario del Colaborador</h3>
+        <p>Diligencia las horas asignadas del turno del colaborador</p>
+        <div class="img-placeholder">[Imagen: Campos de Horario]</div>
+
+        <h3>Paso 3: Adjunta Soportes (si están disponibles)</h3>
+        <p>Si el colaborador ya te envió el soporte médico, adjúntalo en este paso, si no lo tienes, deja el campo vacío y procede. Tu prioridad es que la novedad quede registrada.</p>
+        <div class="img-placeholder">[Imagen: Botón Adjuntos]</div>
+
+        <h3>Paso 4: Agregue Observaciones Claras y Profesionales</h3>
+        <p>Este es un campo crucial para la trazabilidad. Sé específico.</p>
+        <ul>
+            <li>Ejemplo 1: "Colaborador Juan Pérez informa vía WhatsApp su incapacidad a las 7:30 am Se registra novedad y queda pendiente de enviar el soporte."</li>
+            <li>Ejemplo 2: "Registro de incapacidad con fecha extemporánea, ya que el colaborador notificó con dos días de retraso. Se le retroalimenta sobre la importancia del reporte oportuno."</li>
+        </ul>
+        <div class="img-placeholder">[Imagen: Campo Observación]</div>
+
+        <h3>Paso 5: Guarda para Formalizar el Registro</h3>
+        <p>Revisa la información y haz clic en "Guardar". Con esta acción, la novedad queda formalmente registrada en el sistema.</p>
+        <div class="img-placeholder">[Imagen: Botón Guardar]</div>
+
+        <h2>Buenas Prácticas para una Gestión Exitosa</h2>
+        <ul>
+            <li><div class="img-placeholder">[Imagen: Icono persona hablando]</div><strong>Fomenta la Cultura del Reporte Oportuno:</strong> En tus reuniones de equipo, recuerda a tus colaboradores la importancia de notificarte sobre cualquier incapacidad el mismo día que ocurra.</li>
+            <li><div class="img-placeholder">[Imagen: Icono persona]</div><strong>Sé proactivo, no reactivo:</strong> No hay novedades acumuladas. Regístralas tan pronto te sean comunicadas para garantizar la calidad de la información.</li>
+            <li><div class="img-placeholder">[Imagen: Icono alianza/rebelde]</div><strong>La trazabilidad es tu alianza:</strong> Recuérdale al colaborador que debe radicar sus incapacidades de lo contrario la misma será descontada como ausentismo. Tu gestión rigurosa de este proceso es vital para el correcto funcionamiento de la operación y la administración de personal.</li>
+        </ul>
+
+        <button class="btn-pdf no-print" onclick="window.print()">📄 Exportar a PDF</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Otrosí y Cambios CECO | SaberBot Casalimpia</title>
+    <script>
+        (function verificarAcceso() {
+            const cedula = localStorage.getItem('saberbot_usuario_cedula');
+            const accesoSIC = localStorage.getItem('saberbot_acceso_sic');
+            if (!cedula || accesoSIC !== 'true') {
+                window.location.replace('../autocapacitacion.html');
+            }
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Roboto:wght@400;500;700&display=swap');
+        :root { --color-azul: #0085CA; --color-verde: #8DC63F; --bg: #E2E8F0; --text: #334155; --blanco: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--blanco); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--color-azul); margin-top: 20px; margin-bottom: 10px; }
+        h1 { font-size: 2rem; border-bottom: 3px solid var(--color-verde); padding-bottom: 10px; }
+        p, li { margin-bottom: 15px; font-size: 1.05rem; line-height: 1.6; }
+        ul { margin-left: 20px; margin-bottom: 15px; }
+        .img-placeholder { background: #f1f5f9; border: 2px dashed #94a3b8; color: #64748b; text-align: center; padding: 40px 20px; margin: 20px 0; border-radius: 8px; font-size: 0.9rem; }
+        .btn-volver { display: inline-block; background: var(--text); color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; margin-bottom: 20px; }
+        .btn-pdf { display: block; width: 100%; text-align: center; background: var(--color-azul); color: white; padding: 15px 20px; border: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 30px; transition: background 0.3s; }
+        .btn-pdf:hover { background: #006b9e; }
+        @media (max-width: 600px) { .container { padding: 15px; } h1 { font-size: 1.5rem; } }
+        
+        @media print {
+            @page { size: letter; margin: 2.54cm; }
+            body { background-color: var(--blanco); padding: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            .no-print { display: none !important; }
+            .img-placeholder { border: 1px solid #000; background: #fff; color: #000; page-break-inside: avoid; padding: 20px; }
+            h1, h2, h3 { page-break-after: avoid; }
+            p, ul, li { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../autocapacitacion.html" class="btn-volver no-print">⬅ Volver al Menú</a>
+        
+        <h1>ACTUALIZACIÓN SIC: Proceso de Cambios de Centros de Costos, Cambios de conceptos y/o bonificaciones</h1>
+        
+        <p>Este documento tiene como objetivo principal guiar al personal administrativo de la compañía en la implementación del nuevo proceso para la solicitud de cambios en centros de costos y los siguientes conceptos:</p>
+        <ul>
+            <li>Sobreremuneracion</li>
+            <li>Auxilio extra legal no salarial de alimentación</li>
+            <li>Auxilio extra legal no salarial de movilización</li>
+            <li>Auxilio extra legal no salarial de calzado</li>
+            <li>Auxilio extra legal no salarial de comunicaciones</li>
+            <li>Reembolso de gastos de transporte</li>
+            <li>Bonificación variable salarial (según indicadores)</li>
+            <li>Bonificación salarial por única vez</li>
+            <li>Incentivo no salarial por desarrollo de proyecto</li>
+            <li>Cubrimiento de novedades (licencia de maternidad, incapacidad, vacaciones extensas)</li>
+            <li>Tipo de contrato</li>
+            <li>Cargo</li>
+            <li>Intensidad horaria</li>
+            <li>Salario básico</li>
+            <li>Traslados de ciudad</li>
+            <li>Encargos</li>
+            <li>Ratificaciones - Finalización o ampliación de encargo</li>
+            <li>Cambio de nómina (operativa a administrativa o viceversa)</li>
+        </ul>
+        <p>En esta guía encontrará toda la información necesaria para comprender los pasos a seguir, las autorizaciones requeridas y las recomendaciones para un correcto uso de las nuevas herramientas del SIC.</p>
+
+        <h2>¿QUÉ DEBES SABER?</h2>
+        <p>El procedimiento general para solicitar un cambio de centro de costos sigue siendo el mismo dentro de la plataforma. La única variación que notarán afecta a los cambios de centros de costos para contratos de obra o labor que implican un traslado entre clientes.</p>
+        <p>Recordamos que estos son los únicos casos que requieren la generación de un documento "Otro Sí".</p>
+        <p>Anteriormente, para estos casos, se generaba y adjuntaba manualmente dicho documento. Ahora, este documento ya no se generará ni adjuntará de forma manual. La plataforma, integrada con el aplicativo T3DIGITAL, genera y envía automáticamente los documentos necesarios al correo electrónico que el empleado tiene registrado en Casalimpia.</p>
+        <p>Por lo tanto, no necesitarán adjuntar ningún documento "Otro Sí" para este tipo específico de cambio ni tampoco para cambios de conceptos y/o bonificaciones.</p>
+        <p>Una vez ingresados los datos, el sistema enviará la solicitud a los niveles correspondientes para su aprobación. Los tiempos de respuesta están definidos por la política interna de la empresa, y el personal administrativo (supervisores, lideres, gestores) podrá dar seguimiento a su solicitud a través de los reportes y alertas disponibles en el SIC.</p>
+
+        <h2>CENTRALIZACIÓN DE SOLICITUDES DE CAMBIO DE CENTROS DE COSTOS, CONCEPTOS Y/O BONIFICACIONES</h2>
+        <p>Como parte de la innovación y actualización de nuestros procesos internos, se ha determinado que las gestiones relacionadas a Conceptos, Bonificaciones, Cambios de centros de costos (cecos), cambios de intensidades horarias o tipos de contrato y todas las relacionadas al inicio de este documento ahora se canalizarán de forma centralizada.</p>
+        <p>El sistema SIC es el único canal habilitado para la solicitud de apertura, cierre o modificación de estos conceptos y/o bonificaciones. Esto significa que cualquier trámite referente a estos conceptos debe ser iniciado y gestionado exclusivamente a través del SIC.</p>
+        <p>Toda solicitud realizada a través de otros canales como chat o correo corporativo no sera tenida en cuenta.</p>
+
+        <h2>PASO A PASO PARA ACCEDER A LA NUEVA HERRAMIENTA</h2>
+        <div class="img-placeholder">[Imagen: Flecha paso 1]</div>
+        <p>Para acceder a la nueva plataforma donde centralizaremos los registros (el nuevo módulo), solo tienes que entrar en el aplicativo 'SIC' y después ir a la sección 'Mis perfiles / Gestión de personal'.</p>
+        
+        <div class="img-placeholder">[Imagen: Flecha paso 2]</div>
+        <p>Una vez ahí, haz click en el Panel de 'Registro'.</p>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 3]</div>
+        <p>En el panel que aparece, se debe digitar la cédula de la persona a la que se le realizara la novedad, después haz click en el botón "buscar"</p>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 4]</div>
+        <p>Dentro de la información de la persona que aparece, desplázate hasta la sección 'Estados' (generalmente al final) y localiza el botón 'OTROSI Y/O TRASLADO DE CECO'.</p>
+        <div class="img-placeholder">[Imagen: Botones de Estados con Otrosi y/o Traslado Ceco resaltado]</div>
+
+        <p>Al entrar al nuevo módulo, encontrarás dos opciones principales. Deberás elegir la opción que corresponda al tipo de cambio que vas a realizar. Cada una de estas opciones tiene sus propios pasos a seguir (lo que llamamos 'rutas').</p>
+
+        <h3>RUTA 1</h3>
+        <div class="img-placeholder">[Imagen: Opciones Otrosi con primer recuadro en SI]</div>
+        <p>Si solo necesitas cambiar el Centro de Costo (CECO): Marca con 'Sí' únicamente la primera opción/casilla</p>
+
+        <h3>RUTA 2</h3>
+        <div class="img-placeholder">[Imagen: Opciones Otrosi con segundo recuadro en SI]</div>
+        <p>Si solo necesitas cambiar Conceptos o Bonificaciones: Marca con 'Sí' únicamente la segunda opción/casilla.</p>
+
+        <h3>RUTA 3</h3>
+        <div class="img-placeholder">[Imagen: Opciones Otrosi con ambos recuadros en SI]</div>
+        <p>Si necesitas cambiar tanto el Centro de Costo (CECO) como algún Concepto/Bonificación: Marca con 'Sí' ambas casillas.</p>
+
+        <h2>📢 Aclaraciones Importantes en los Cambios:</h2>
+        <ul>
+            <li><strong>Consideración 1: Cambio de CECO entre clientes diferentes.</strong> Si la persona tiene bonificaciones (fijas o variables) y cambias su CECO de un cliente a otro cliente diferente, el sistema marcará automáticamente la bonificación para ser eliminada. Esto ocurre porque las bonificaciones están ligadas a clientes o labores específicas. Si la persona sí debe tener bonificaciones en el nuevo cliente, deberás agregarlas manualmente después para que sus condiciones contractuales queden correctas. Si en el nuevo cliente no aplica bonificación, el sistema simplemente asegurará que pase sin ellas.</li>
+            <li><strong>Consideración 2: Cambio de CECO dentro del mismo cliente.</strong> Si la persona cambia de puesto o frente de trabajo dentro del mismo cliente, las bonificaciones no se eliminarán automáticamente. De todas formas, es crucial que verifiques si las condiciones del nuevo puesto/frente de trabajo requieren algún cambio manual en sus bonificaciones (si aplican otras, si no aplican, etc.) y las ajustes si es necesario.</li>
+            <li><strong>Recordatorio sobre las rutas:</strong> Ten presente que las 3 rutas existen precisamente porque no siempre un cambio de CECO implica un cambio de conceptos/bonificaciones, y viceversa. Elige la opción que refleje exactamente el cambio que necesitas realizar para esa persona.</li>
+        </ul>
+
+        <h2>PASO A PASO PARA SOLICITAR UN CAMBIO O TRASLADO DE CENTRO DE COSTOS (CECO)</h2>
+        <p>✅ Si seleccionaste una opción que incluye Cambio de Centro de Costo (CECO) (Ruta 1 o Ruta 3):</p>
+        <p>Verás un panel para ingresar los datos del nuevo CECO de la persona</p>
+        <div class="img-placeholder">[Imagen: Panel Cambio de Centro de Costo vacío]</div>
+        <p>En este panel, deberás completar la siguiente información en orden:</p>
+        <ul>
+            <li><strong>Fecha de Cambio:</strong> Indica la fecha exacta en que la persona comenzará a trabajar en el nuevo puesto/frente de trabajo.</li>
+            <li><strong>Cliente:</strong> Digita y Selecciona el nombre del cliente al que se traslada la persona.</li>
+            <li><strong>Frente de Trabajo:</strong> Elige la ubicación o dirección específica donde trabajará dentro de ese cliente.</li>
+            <li><strong>Jefatura:</strong> Indica cual sera la jefatura de la persona en el nuevo puesto/frente.</li>
+            <li><strong>Motivo del Cambio:</strong> Selecciona la razón del traslado.</li>
+        </ul>
+        <div class="img-placeholder">[Imagen: Panel Cambio de Centro de Costo diligenciado]</div>
+        <p>Una vez completados todos los campos, es fundamental que hagas click en el botón 'Adicionar'. Este paso es obligatorio. Si no haces click en 'Adicionar', el cambio NO se registrará correctamente.</p>
+        <p>Después de hacer click en 'Adicionar', la información del cambio se añadirá a un listado o aparecerá confirmada, indicando que está lista para ser guardada</p>
+        <div class="img-placeholder">[Imagen: Panel listando el CECO adicionado]</div>
+
+        <h2>PASO A PASO PARA SOLICITAR UN CAMBIO DE CONCEPTOS Y/O BONIFICACIONES</h2>
+        <p>✅ Si seleccionaste una opción que incluye Cambio de Conceptos y/o Bonificaciones (Ruta 2 o Ruta 3):</p>
+        <p>Verás un panel específico para gestionar los conceptos y bonificaciones.</p>
+        <div class="img-placeholder">[Imagen: Panel Datos Otrosi - Concepto a Cambiar]</div>
+        <p>Aquí, el proceso es el siguiente:</p>
+        <p><strong>Selecciona el Concepto:</strong> Utiliza la lista desplegable para elegir el concepto o bonificación específico que deseas modificar (ya sea para aumentar, disminuir, eliminar o agregar uno nuevo). Verás la selección reflejada así:</p>
+        <div class="img-placeholder">[Imagen: Panel con concepto Auxilio Extralegal seleccionado]</div>
+        <p><strong>Completa los Campos del Concepto:</strong> Dependiendo del concepto que elegiste, aparecerán campos específicos que debes llenar. Estos campos son intuitivos y se adaptan al tipo de concepto.</p>
+        <p>Lo primero que debes ingresar es la Fecha de Cambio para ese concepto, que es la fecha exacta a partir de la cual aplica la modificación (Ejemplo: Si agregas un bono de alimentación desde el 5 de junio, esa es la fecha a relacionar). Si hay algún dato incorrecto, el sistema te avisará con una alerta al intentar generar la novedad para que lo corrijas. La información ingresada se verá así:</p>
+        <div class="img-placeholder">[Imagen: Panel diligenciando Auxilio de alimentación con 200,000]</div>
+        <p><strong>Adjunta los Documentos de Soporte:</strong> Dependiendo del concepto seleccionado, en la parte inferior del panel se indicará si se requieren documentos adjuntos (como soportes de planilla de ejecución, novedades de facturación, informativas, autorizaciones, etc.).</p>
+        <p>Todo cambio de concepto requiere un soporte, el cual debes tener listo previamente. Para adjuntarlo:</p>
+        <ul>
+            <li>Haz click en el botón 'Escoger' para buscar el archivo(s) en tu computador.</li>
+            <li>Selecciona el(los) documento(s) necesario(s) y confirma tu selección en la ventana que se abra (ej: haciendo click en 'Abrir' o 'Guardar' en el explorador de archivos).</li>
+            <li>Luego, en el panel del aplicativo, haz click en el botón 'Subir' para adjuntar el(los) documento(s) a la novedad.</li>
+        </ul>
+        <p>Una vez adjunto, se verá:</p>
+        <div class="img-placeholder">[Imagen: Panel inferior adjuntos]</div>
+        <p><strong>Adiciona el Cambio de Concepto:</strong> Después de completar los campos y adjuntar los soportes para un concepto, haz click en el botón 'Agregar'. Esto añade ese cambio de concepto específico a la lista de novedades para esta persona.</p>
+        <div class="img-placeholder">[Imagen: Concepto agregado a la tabla listado]</div>
+        <p>Si necesitas agregar otros conceptos, repite los pasos de seleccionar concepto, llenar campos, adjuntar soporte y hacer click en 'Agregar' para cada uno.</p>
+
+        <h2>📝 OBSERVACIONES, REVISIÓN Y REGISTRO FINAL:</h2>
+        <p>Una vez que hayas añadido todos los cambios necesarios (tanto de centro de costos como de conceptos y/o bonificaciones, si aplicaron), dirígete al final de la página.</p>
+        <p><strong>Campo 'Motivo':</strong> Escribe de forma clara y concisa cualquier detalle adicional, nota importante o aclaración sobre esta novedad específica en este campo.</p>
+        <p><strong>¡¡Antes de registrar la novedad definitivamente, es CRUCIAL que revises cuidadosamente!! Verifica que:</strong></p>
+        <ul>
+            <li>Toda la información que digitaste es correcta.</li>
+            <li>Todos los conceptos y/o bonificaciones que cargaste (si aplica) tengan sus respectivos soportes adjuntos.</li>
+        </ul>
+        <p>⚠️ <strong>Nota Importante sobre Valores:</strong> Al digitar el valor de las bonificaciones fijas o variables, NO uses comas, puntos, espacios ni ningún otro carácter especial. Digita únicamente los números. Ejemplo: Para cincuenta mil pesos, escribe 50000</p>
+        <p>Si identificas que algún concepto quedó mal cargado o que no aplica, puedes eliminarlo directamente en el apartado de conceptos dentro de esta misma novedad. Para eliminarlo, haz click en el icono de eliminar que es la opción correspondiente en la parte derecha del concepto listado (como se evidencia aquí:</p>
+        <div class="img-placeholder">[Imagen: Icono eliminar en la tabla de conceptos subrayado en rojo]</div>
+        <p>Una vez eliminado el concepto incorrecto, puedes volver a generarlo siguiendo los pasos vistos anteriormente si es necesario</p>
+        <p>Para registrar definitivamente la novedad en el sistema y que todos los cambios se hagan efectivos, haz click en el botón 'Guardar' que encontrarás en la parte inferior de la página.</p>
+        <p>✅ <strong>Confirmación de Registro:</strong> Inmediatamente después de hacer click en 'Guardar', el sistema te mostrará un mensaje de confirmación que incluirá el Número de Novedad. Este número es el identificador de tu solicitud.</p>
+
+        <h2>🔑 CONSIDERACIONES IMPORTANTES (Para tener en cuenta siempre):</h2>
+        <ul>
+            <li>A partir de ahora, todos los procesos relacionados con cambios de centros de costos, conceptos y/o bonificaciones deben ser canalizados únicamente a través del aplicativo SIC siguiendo los pasos detallados anteriormente. Toda solicitud que llegue por otros medios (correo electrónico, teléfono, formatos manuales, etc.) NO será tenida en cuenta. Deben usar obligatoriamente el SIC.</li>
+            <li>Para una correcta trazabilidad, NO deben crear múltiples novedades para una misma persona si tienen varios cambios. Deben crear una única novedad que incluya todos los cambios que le tengan que hacer a esa persona en ese momento (CECO, varios conceptos, etc.). Esto facilita el seguimiento integral de cada caso.</li>
+            <li>Es su responsabilidad monitorear la gestión de cada novedad a través de su 'línea de vida' en la aplicación SIC, donde se visualiza el estado actual del proceso. Realice un seguimiento continuo hasta que la novedad aparezca como 'Finalizado' o 'Aplicado' para asegurar la correcta implementación del cambio. Adicionalmente, la persona que crea la novedad debe verificar que el empleado afectado acceda a la plataforma y firme los documentos correspondientes.</li>
+            <li><strong>¡Una gran mejora!</strong> Ya no tienen que generar ningún "otrosí" de manera manual ni tampoco imprimir ni firmar manualmente con el empleado ningún formato. El aplicativo SIC, gracias a su integración con el aplicativo T3DIGITAL, ahora realiza esa tarea automáticamente y envía un correo electrónico a cada persona afectada por un cambio (como traslado de CECO o cambios de bonificaciones) con los documentos que debe revisar y firmar digitalmente cuando corresponda.</li>
+            <li>Revisen meticulosamente la novedad antes de hacer click en 'Guardar'. Asegurarse de que toda la información sea correcta es vital. Si se detectan errores después de guardar, la novedad podría ser devuelta al usuario que la creó para que realice las correcciones necesarias, o incluso ser anulada, lo que implicaría tener que crearla nuevamente.</li>
+            <li>Es crucial que todos los cambios requeridos para una persona en un momento dado queden incluidos dentro de la misma novedad. Una vez que una novedad de este tipo es creada para una persona, no se podrán generar más novedades similares para esa misma persona hasta que la primera novedad sea 'Finalizada' o 'Anulada'. Esto refuerza la importancia del punto 3.</li>
+            <li>Si tienen dudas acerca de qué soportes específicos deben subir para ciertos tipos de cambios de conceptos, por favor, consulten previamente con el área de Talento Humano antes de crear la novedad. Esto les ayudará a asegurar que adjuntan los documentos correctos y evitará que la novedad sea devuelta o anulada por falta de soportes válidos.</li>
+        </ul>
+
+        <button class="btn-pdf no-print" onclick="window.print()">📄 Exportar a PDF</button>
+    </div>
+</body>
+</html>

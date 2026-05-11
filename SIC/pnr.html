@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Permiso No Remunerado | SaberBot Casalimpia</title>
+    <script>
+        (function verificarAcceso() {
+            const cedula = localStorage.getItem('saberbot_usuario_cedula');
+            const accesoSIC = localStorage.getItem('saberbot_acceso_sic');
+            if (!cedula || accesoSIC !== 'true') {
+                window.location.replace('../autocapacitacion.html');
+            }
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Roboto:wght@400;500;700&display=swap');
+        :root { --color-azul: #0085CA; --color-verde: #8DC63F; --bg: #E2E8F0; --text: #334155; --blanco: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--blanco); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--color-azul); margin-top: 20px; margin-bottom: 10px; }
+        h1 { font-size: 2rem; border-bottom: 3px solid var(--color-verde); padding-bottom: 10px; }
+        p, li { margin-bottom: 15px; font-size: 1.05rem; line-height: 1.6; }
+        ul { margin-left: 20px; margin-bottom: 15px; }
+        .img-placeholder { background: #f1f5f9; border: 2px dashed #94a3b8; color: #64748b; text-align: center; padding: 40px 20px; margin: 20px 0; border-radius: 8px; font-size: 0.9rem; }
+        .btn-volver { display: inline-block; background: var(--text); color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; margin-bottom: 20px; }
+        .btn-pdf { display: block; width: 100%; text-align: center; background: var(--color-azul); color: white; padding: 15px 20px; border: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 30px; transition: background 0.3s; }
+        .btn-pdf:hover { background: #006b9e; }
+        @media (max-width: 600px) { .container { padding: 15px; } h1 { font-size: 1.5rem; } }
+        
+        /* Estilos para exportación a PDF (Tamaño Carta y Márgenes) */
+        @media print {
+            @page { size: letter; margin: 2.54cm; }
+            body { background-color: var(--blanco); padding: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            .no-print { display: none !important; }
+            .img-placeholder { border: 1px solid #000; background: #fff; color: #000; page-break-inside: avoid; padding: 20px; }
+            h1, h2, h3 { page-break-after: avoid; }
+            p, ul, li { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../autocapacitacion.html" class="btn-volver no-print">⬅ Volver al Menú</a>
+        
+        <div class="img-placeholder">[Imagen: Portada Calendario Leave PNR]</div>
+        <h1>Permiso No Remunerado (PNR)</h1>
+        
+        <p>La gestión adecuada de los Permisos No Remunerados (PNR) es crucial para mantener la transparencia con el colaborador y asegurar la correcta aplicación en la nómina. Esta guía te orientará en el proceso y tus responsabilidades como líder.</p>
+
+        <h2>Principios Clave para tu Gestión</h2>
+        
+        <h3>1. Definición y consecuencias:</h3>
+        <p>El PNR es una ausencia solicitada por el colaborador y autorizada por la empresa, durante la cual no se genera pago de salario. Importante: Este permiso no solo afecta los días solicitados, sino que también implica el descuento del día de descanso correspondiente a esa semana.</p>
+
+        <h3>2. Requisito Indispensable</h3>
+        <p>La novedad no es válida sin documentos firmados por el colaborador:</p>
+        <ul>
+            <li>El formato de solicitud</li>
+            <li>El acuerdo de licencia.</li>
+        </ul>
+
+        <h3>3. Jerarquía de Autorización:</h3>
+        <ul>
+            <li>Permisos de 1 a 3 días: La autorización recae directamente sobre el jefe inmediato.</li>
+            <li>Permisos de 4 días o más: Requieren una aprobación adicional del área de Talento Humano. Se debe iniciar el proceso y de manera crucial hacer seguimiento hasta obtener su aprobación en la línea de vida del requerimiento.</li>
+        </ul>
+
+        <h3>4. Solicitud programada</h3>
+        <p>Una novedad se considera “extemporánea" (tardía) si se registran los hechos 1 día después desde la fecha de inicio del permiso no remunerado. El objetivo principal es evitar a toda costa la creación de novedades extemporáneas. Un registro tardío puede generar inconsistencias en la nómina y en los indicadores de ausentismo.</p>
+
+        <h2>COMO REGISTRAR LA NOVEDAD</h2>
+        <div class="img-placeholder">[Imagen: Flecha paso 1]</div>
+        <p>Para acceder a la nueva plataforma donde centralizaremos los registros (el nuevo módulo), solo tienes que entrar en el aplicativo 'SIC' y después ir a la sección 'Mis perfiles / Gestión de personal'.</p>
+        <div class="img-placeholder">[Imagen: Menú SIC Gestión Personal]</div>
+        
+        <div class="img-placeholder">[Imagen: Flecha paso 2]</div>
+        <p>Una vez ahí, haz click en el Panel de 'Registro'.</p>
+        <div class="img-placeholder">[Imagen: Panel Registro Novedad]</div>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 3]</div>
+        <p>En el panel que aparece, se debe digitar la cédula de la persona a la que se le realizara la novedad, después haz click en el botón "buscar"</p>
+        <div class="img-placeholder">[Imagen: Búsqueda de cédula]</div>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 4]</div>
+        <p>Dentro de la información de la persona que aparece, desplázate hasta la sección 'Estados' (generalmente al final) y localiza el botón 'OTROSI Y/O TRASLADO DE CECO'.</p>
+        <div class="img-placeholder">[Imagen: Botones de Estados con Permiso no remunerado resaltado]</div>
+
+        <h2>Proceso de Registro en el Sistema: Tu Paso a Paso</h2>
+        <p>Cuando un colaborador solicita un Permiso No Remunerado, sigue este protocolo de manera rigurosa:</p>
+
+        <h3>Paso 1: Definir Fechas</h3>
+        <p>Diligencia la Fecha inicial y la Fecha final que abarca el permiso.</p>
+        <div class="img-placeholder">[Imagen: Campos Fecha Inicio y Fecha Final]</div>
+
+        <h3>Paso 2: Generar y Gestionar los Formatos Oficiales</h3>
+        <p>Una vez asignadas las fechas, el sistema habilitará dos botones azules. Estos son para generar los documentos obligatorios:</p>
+        <ul>
+            <li>Formato de Permiso No Remunerado: Es la solicitud formal que el empleado hace a la compañía. <div class="img-placeholder">[Imagen: Botón Formato Permiso No Remunerado]</div></li>
+            <li>Acuerdo de Licencia No Remunerada: Es el documento donde la compañía acepta y otorga la licencia. <div class="img-placeholder">[Imagen: Botón Formato Acuerdo Licencia]</div></li>
+        </ul>
+        <p>Descarga ambos formatos y entrégalos al colaborador para que los diligencie y firme.</p>
+
+        <h3>Paso 3: Adjuntar los Documentos Firmados</h3>
+        <p>Una vez tengas los formatos debidamente firmados, escanéalos y súbelos al sistema usando el botón "Adjuntos", este paso es obligatorio.</p>
+        <div class="img-placeholder">[Imagen: Botón Adjuntos]</div>
+
+        <h3>Paso 4: Diligenciar el Horario y Añadir Observaciones</h3>
+        <p>Verificar y asignar el horario que el colaborador debía cumplir durante su ausencia.</p>
+        <div class="img-placeholder">[Imagen: Campos de Horario]</div>
+        <p>Usa el campo de "Observaciones" para registrar detalles relevantes.</p>
+        <div class="img-placeholder">[Imagen: Campo Observación]</div>
+        <ul>
+            <li>Ejemplo (Permiso corto): "PNR de 2 días autorizado para trámite personal. Se adjuntan formatos firmados por el colaborador."</li>
+            <li>Ejemplo (Permiso largo): "Se registra solicitud de PNR de 5 días. Formatos firmados y enviados a Talento Humano para su aprobación final. Pendiente de confirmación."</li>
+        </ul>
+
+        <h3>Paso 5: Guardar para Finalizar el Registro</h3>
+        <p>Revisa que toda la información y los documentos adjuntos sean correctos y haz clic en el botón. "Guardar".</p>
+        <div class="img-placeholder">[Imagen: Botón Guardar]</div>
+
+        <h2>Buenas Prácticas para una Gestión Exitosa</h2>
+        <div class="img-placeholder">[Imagen: Icono documento]</div>
+        <ul>
+            <li><strong>Realiza un Seguimiento Activo (Permisos de 4+ días):</strong> Debes hacerle seguimiento en la línea de vida y asegurar que se apruebe el permiso desde talento humano.</li>
+            <li><strong>No hay permiso sin formatos:</strong> Nunca se debe aprobar un permiso de manera informal. Los documentos firmados son el respaldo legal y administrativo tanto para la empresa como para el colaborador.</li>
+            <li><strong>Comunica con Claridad al Colaborador:</strong> Se debe asegurar que su colaborador comprenda plenamente que el permiso no será pagado y que esto incluye el descuento de su día de descanso. La transparencia previene futuros malentendidos.</li>
+        </ul>
+
+        <button class="btn-pdf no-print" onclick="window.print()">📄 Exportar a PDF</button>
+    </div>
+</body>
+</html>

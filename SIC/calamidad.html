@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calamidad Doméstica | SaberBot Casalimpia</title>
+    <script>
+        (function verificarAcceso() {
+            const cedula = localStorage.getItem('saberbot_usuario_cedula');
+            const accesoSIC = localStorage.getItem('saberbot_acceso_sic');
+            if (!cedula || accesoSIC !== 'true') {
+                window.location.replace('../autocapacitacion.html');
+            }
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Roboto:wght@400;500;700&display=swap');
+        :root { --color-azul: #0085CA; --color-verde: #8DC63F; --bg: #E2E8F0; --text: #334155; --blanco: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--blanco); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--color-azul); margin-top: 20px; margin-bottom: 10px; }
+        h1 { font-size: 2rem; border-bottom: 3px solid var(--color-verde); padding-bottom: 10px; }
+        p, li { margin-bottom: 15px; font-size: 1.05rem; line-height: 1.6; }
+        ul { margin-left: 20px; margin-bottom: 15px; }
+        .img-placeholder { background: #f1f5f9; border: 2px dashed #94a3b8; color: #64748b; text-align: center; padding: 40px 20px; margin: 20px 0; border-radius: 8px; font-size: 0.9rem; }
+        .btn-volver { display: inline-block; background: var(--text); color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; margin-bottom: 20px; }
+        .btn-pdf { display: block; width: 100%; text-align: center; background: var(--color-azul); color: white; padding: 15px 20px; border: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 30px; transition: background 0.3s; }
+        .btn-pdf:hover { background: #006b9e; }
+        @media (max-width: 600px) { .container { padding: 15px; } h1 { font-size: 1.5rem; } }
+        
+        /* Estilos para exportación a PDF (Tamaño Carta y Márgenes) */
+        @media print {
+            @page { size: letter; margin: 2.54cm; }
+            body { background-color: var(--blanco); padding: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            .no-print { display: none !important; }
+            .img-placeholder { border: 1px solid #000; background: #fff; color: #000; page-break-inside: avoid; padding: 20px; }
+            h1, h2, h3 { page-break-after: avoid; }
+            p, ul, li { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../autocapacitacion.html" class="btn-volver no-print">⬅ Volver al Menú</a>
+        
+        <div class="img-placeholder">[Imagen: Portada Mujer preocupada con celular]</div>
+        <h1>Licencias por Grave Calamidad Doméstica</h1>
+        
+        <p>La gestión de una Licencia por Calamidad Doméstica requiere un manejo diligente y comprensivo, asegurando que se cumplan las políticas de la compañía para su correcta aprobación y registro. Este protocolo detalla el procedimiento estándar a seguir.</p>
+
+        <h2>Principios Clave de la Gestión</h2>
+        
+        <h3>1. Definición y Alcance:</h3>
+        <p>Es un permiso remunerado que se otorga por un máximo de cinco (5) días.</p>
+        <p>Se considera calamidad doméstica cualquier suceso familiar imprevisto y grave que requiere la presencia indispensable del trabajador. Ejemplos incluyen:</p>
+        <ul>
+            <li>Enfermedad o accidente grave de un familiar cercano (cónyuge, padres, hijos, hermanos).</li>
+            <li>Siniestros que afecten la vivienda del trabajador (incendio, inundación, etc.).</li>
+            <li>Desaparición o secuestro de un familiar.</li>
+            <li>Otras situaciones de fuerza mayor debidamente comprobadas.</li>
+        </ul>
+        <p>Aplicación en Nómina: Durante la licencia, únicamente se descuenta el valor del subsidio de transporte.</p>
+
+        <h3>2. Requisito Indispensable: Documentación de Soporte:</h3>
+        <p>La aprobación de la licencia por parte de Talento Humano está estrictamente condicionada a la presentación de la totalidad de los documentos que soporten el evento. La documentación varía según la naturaleza de la calamidad.</p>
+
+        <h3>3. Responsabilidad de Gestión y Consecuencias:</h3>
+        <p>La aprobación final es competencia del área de Talento Humano. Sin embargo, es responsabilidad de la persona que crea la novedad realizar el seguimiento activo hasta garantizar su aprobación en la "línea de vida" del sistema.</p>
+        <p>Consecuencia de Inacción: Si una novedad no es gestionada y aprobada a tiempo, los días se registrarán como una ausencia injustificada y serán descontados. Dicho descuento se ajustará automáticamente una vez que la novedad sea gestionada por el creador y finalmente autorizada por Talento Humano.</p>
+
+        <h2>COMO REGISTRAR LA NOVEDAD</h2>
+        <div class="img-placeholder">[Imagen: Flecha paso 1]</div>
+        <p>Para acceder a la nueva plataforma donde centralizaremos los registros (el nuevo módulo), solo tienes que entrar en el aplicativo 'SIC' y después ir a la sección 'Mis perfiles / Gestión de personal'.</p>
+        <div class="img-placeholder">[Imagen: Menú SIC Gestión Personal]</div>
+        
+        <div class="img-placeholder">[Imagen: Flecha paso 2]</div>
+        <p>Una vez ahí, haz click en el Panel de 'Registro'.</p>
+        <div class="img-placeholder">[Imagen: Panel Registro Novedad]</div>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 3]</div>
+        <p>En el panel que aparece, se debe digitar la cédula de la persona a la que se le realizara la novedad, después haz click en el botón "buscar"</p>
+        <div class="img-placeholder">[Imagen: Búsqueda de cédula]</div>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 4]</div>
+        <p>Dentro de la información de la persona que aparece, desplázate hasta la sección 'Estados' (generalmente al final) y localiza el botón 'OTROSI Y/O TRASLADO DE CECO'.</p>
+        <div class="img-placeholder">[Imagen: Botones de Estados con Calamidad Domestica resaltado]</div>
+
+        <h2>Proceso de Registro en el Sistema</h2>
+        <p>Para registrar la novedad de Calamidad Doméstica, se deben seguir los siguientes pasos de manera rigurosa:</p>
+
+        <h3>Paso 1: Acceso y Selección de Novedad</h3>
+        <p>En el campo "Tipo de Novedad", seleccionar la opción "Licencia por Grave Calamidad Doméstica".</p>
+        <div class="img-placeholder">[Imagen: Desplegable Tipo Calamidad]</div>
+
+        <h3>Paso 2: Definición de Fechas y Horario</h3>
+        <p>Diligenciar la Fecha Inicial y la Fecha Final del permiso (máximo 5 días).</p>
+        <div class="img-placeholder">[Imagen: Campos Fecha Inicio y Final]</div>
+        <p>Especificar el horario que el colaborador debía cumplir durante esas fechas.</p>
+        <div class="img-placeholder">[Imagen: Campos de Horario]</div>
+
+        <h3>Paso 3: Adjuntar Soportes y Definir Parentesco</h3>
+        <p>Hacer clic en "Adjuntos" y subir todos los documentos que acrediten la calamidad, incluyendo el formato de solicitud.</p>
+        <div class="img-placeholder">[Imagen: Botón Adjuntos]</div>
+        <p>Si aplica, seleccionar en la lista desplegable el parentesco del familiar afectado.</p>
+        <div class="img-placeholder">[Imagen: Desplegable Parentesco]</div>
+
+        <h3>Paso 4: Registrar Observaciones y Finalizar</h3>
+        <p>En el campo de "motivo", dejar un registro claro de la solicitud.</p>
+        <div class="img-placeholder">[Imagen: Campo Motivo]</div>
+        <p>Ejemplo: "Se registra licencia por calamidad doméstica debido a enfermedad grave de familiar. Se adjunta formato de solicitud y soportes médicos para revisión y aprobación de Talento Humano."</p>
+        <p>Verificar que toda la información y los documentos adjuntos son correctos y hacer clic en el botón "Guardar".</p>
+        <div class="img-placeholder">[Imagen: Botón Guardar]</div>
+
+        <h2>Documentación Requerida</h2>
+        <p>La aprobación de la licencia depende de la presentación de soportes claros y pertinentes.</p>
+        
+        <h3>1. Documento Principal (Obligatorio):</h3>
+        <p>El Formato de Solicitud de Calamidad, debidamente diligenciado.</p>
+        
+        <h3>2. Soportes Adicionales (Según el Caso):</h3>
+        <p>La documentación de soporte dependerá de la naturaleza del evento. Algunos ejemplos son:</p>
+        <ul>
+            <li>Por Enfermedad de Familiar: Certificados o epicrisis médicas, órdenes de hospitalización.</li>
+            <li>Por Siniestro en Vivienda: Certificado de bomberos, reporte de autoridades competentes.</li>
+            <li>Por Desaparición o Secuestro: Copia de la denuncia ante la Fiscalía o autoridades pertinentes.</li>
+            <li>Para Acreditar Parentesco: Registros civiles, declaraciones juramentadas de convivencia, etc.</li>
+        </ul>
+
+        <h2>Acciones Críticas del Proceso</h2>
+        <ul>
+            <li><strong>Seguimiento Activo y Obligatorio:</strong> Es imperativo que el usuario creador de la novedad monitoree el estado de la misma para asegurar que Talento Humano la apruebe y no genere un impacto negativo en la nómina del colaborador.</li>
+            <li><strong>La Calidad del Soporte es Esencial:</strong> La claridad y pertinencia de los documentos presentados son clave para una aprobación rápida. Se debe asegurar que los soportes justifiquen de manera inequívoca la necesidad de la ausencia del trabajador.</li>
+        </ul>
+
+        <button class="btn-pdf no-print" onclick="window.print()">📄 Exportar a PDF</button>
+    </div>
+</body>
+</html>

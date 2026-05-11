@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Maternidad y Paternidad | SaberBot Casalimpia</title>
+    <script>
+        (function verificarAcceso() {
+            const cedula = localStorage.getItem('saberbot_usuario_cedula');
+            const accesoSIC = localStorage.getItem('saberbot_acceso_sic');
+            if (!cedula || accesoSIC !== 'true') {
+                window.location.replace('../autocapacitacion.html');
+            }
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Roboto:wght@400;500;700&display=swap');
+        :root { --color-azul: #0085CA; --color-verde: #8DC63F; --bg: #E2E8F0; --text: #334155; --blanco: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--blanco); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--color-azul); margin-top: 20px; margin-bottom: 10px; }
+        h1 { font-size: 2rem; border-bottom: 3px solid var(--color-verde); padding-bottom: 10px; }
+        p, li { margin-bottom: 15px; font-size: 1.05rem; line-height: 1.6; }
+        ul { margin-left: 20px; margin-bottom: 15px; }
+        .img-placeholder { background: #f1f5f9; border: 2px dashed #94a3b8; color: #64748b; text-align: center; padding: 40px 20px; margin: 20px 0; border-radius: 8px; font-size: 0.9rem; }
+        .btn-volver { display: inline-block; background: var(--text); color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; margin-bottom: 20px; }
+        .btn-pdf { display: block; width: 100%; text-align: center; background: var(--color-azul); color: white; padding: 15px 20px; border: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 30px; transition: background 0.3s; }
+        .btn-pdf:hover { background: #006b9e; }
+        @media (max-width: 600px) { .container { padding: 15px; } h1 { font-size: 1.5rem; } }
+
+        /* Estilos para exportación a PDF (Tamaño Carta y Márgenes) */
+        @media print {
+            @page { size: letter; margin: 2.54cm; }
+            body { background-color: var(--blanco); padding: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            .no-print { display: none !important; }
+            .img-placeholder { border: 1px solid #000; background: #fff; color: #000; page-break-inside: avoid; padding: 20px; }
+            h1, h2, h3 { page-break-after: avoid; }
+            p, ul, li { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../autocapacitacion.html" class="btn-volver no-print">⬅ Volver al Menú</a>
+        
+        <div class="img-placeholder">[Imagen: Portada Padres y Bebé]</div>
+        <h1>Licencias de Maternidad y Paternidad</h1>
+        
+        <p>Como líder, tu gestión ágil y correcta de la licencia de maternidad o paternidad es fundamental para que el colaborador pueda enfocarse en su familia, con la tranquilidad de que sus procesos administrativos están en orden.</p>
+
+        <h2>Principios Clave para tu Gestión</h2>
+        <div class="img-placeholder">[Imagen: Icono documento]</div>
+        
+        <h3>Doble Responsabilidad: Un Proceso en Dos Vías</h3>
+        <ul>
+            <li><strong>Rol del Jefe Inmediato:</strong> su responsabilidad es registrar la novedad de ausencia en el sistema (SIC) tan pronto como se notifique el inicio de la licencia.</li>
+            <li><strong>Rol del Colaborador:</strong> su deber es radicar toda la documentación de soporte a través de los canales oficiales definidos por la compañía.</li>
+        </ul>
+
+        <div class="img-placeholder">[Imagen: Icono documento]</div>
+        <h3>Duración de la Licencia (Días Calendario)</h3>
+        <ul>
+            <li><strong>Licencia de Maternidad:</strong> Se otorgan 126 días calendario.</li>
+            <li><strong>Licencia de Paternidad:</strong> Se otorgan 14 días calendario.</li>
+        </ul>
+        <p>Se debe calcular la fecha final al momento de hacer el registro en el sistema.</p>
+
+        <h2>COMO REGISTRAR LA NOVEDAD</h2>
+        <div class="img-placeholder">[Imagen: Flecha paso 1]</div>
+        <p>Para acceder a la nueva plataforma donde centralizaremos los registros (el nuevo módulo), solo tienes que entrar en el aplicativo 'SIC' y después ir a la sección 'Mis perfiles / Gestión de personal'.</p>
+        <div class="img-placeholder">[Imagen: Menú SIC]</div>
+        
+        <div class="img-placeholder">[Imagen: Flecha paso 2]</div>
+        <p>Una vez ahí, haz click en el Panel de 'Registro'.</p>
+        <div class="img-placeholder">[Imagen: Panel Registro Novedad]</div>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 3]</div>
+        <p>En el panel que aparece, se debe digitar la cédula de la persona a la que se le realizara la novedad, después haz click en el botón "buscar"</p>
+        <div class="img-placeholder">[Imagen: Buscar Cédula]</div>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 4]</div>
+        <p>Dentro de la información de la persona que aparece, desplázate hasta la sección 'Estados' (generalmente al final) y localiza el botón 'OTROSI Y/O TRASLADO DE CECO'.</p>
+        <div class="img-placeholder">[Imagen: Botones de estado con Licencia de Maternidad resaltado]</div>
+
+        <h2>Proceso de Registro en el Sistema: Tu Paso a Paso</h2>
+        <p>Al ser notificado del inicio de una licencia de maternidad o paternidad, sigue estos pasos:</p>
+
+        <h3>Paso 1: Iniciar el Registro y Definir Fechas</h3>
+        <ul>
+            <li><strong>Fecha Inicial:</strong> El primer día de la licencia. <div class="img-placeholder">[Imagen: Fecha Inicio]</div></li>
+            <li><strong>Fecha Final:</strong> Calcula y selecciona la fecha que corresponda a los 126 días (maternidad) o 14 días (paternidad) calendario desde la fecha de inicio. <div class="img-placeholder">[Imagen: Fecha Final]</div></li>
+        </ul>
+
+        <h3>Paso 2: Verificar el Horario y Adjuntar Soportes (Opcional)</h3>
+        <p>Diligencia el horario del colaborador</p>
+        <div class="img-placeholder">[Imagen: Horario]</div>
+        <p>Si el colaborador ya te ha compartido algún documento (ej. la incapacidad inicial), puedes subirlo en "Adjuntos". Recordar que esto no es obligatorio para el registro de la novedad</p>
+        <div class="img-placeholder">[Imagen: Adjuntar Soporte]</div>
+
+        <h3>Paso 3: Añadir Observaciones Precisas y Profesionales</h3>
+        <p>Ejemplo: "Se registra inicio de licencia de maternidad para [Nombre Colaboradora]. Se le ha informado su deber de radicar la documentación completa en los canales de Casalimpia."</p>
+        <div class="img-placeholder">[Imagen: Campo Observación]</div>
+
+        <h3>Paso 4: Guardar para Formalizar la Novedad</h3>
+        <p>Revisa que toda la información sea correcta y haz clic en el botón "Guardar".</p>
+        <div class="img-placeholder">[Imagen: Botón Guardar]</div>
+
+        <div class="img-placeholder">[Imagen: Equipo trabajando en oficina]</div>
+        <h2>Buenas Prácticas para una Gestión Exitosa</h2>
+        
+        <h3>Sé un Guía para tu Colaborador</h3>
+        <p>Al momento de registrar la novedad, recuerda proactivamente al colaborador la lista de documentos que debe radicar.</p>
+        <ul>
+            <li><strong>Para la Madre:</strong> Incapacidad de la licencia. Historia clínica. Registro civil de nacimiento. Copia de su cédula.</li>
+            <li><strong>Para el Padre:</strong> Copia de la cédula de la madre. Registro civil de nacimiento. Copia de su cédula. Historia clínica de la madre. En el caso del padre, el colaborador debe radicar sus documentos antes de que se cumpla un mes desde el inicio de la licencia.</li>
+        </ul>
+
+        <h3>Refuerza la Doble Vía</h3>
+        <p>En tu comunicación, sé muy claro: "Yo ya he registrado tu ausencia en el sistema para temas de programación y nómina. Ahora, por favor, no olvides completar tu parte radicando los documentos en Casalimpia para formalizar todo con la EPS".</p>
+        
+        <h3>El Seguimiento Demuestra Apoyo</h3>
+        <p>Especialmente en la licencia de paternidad, haz un seguimiento cercano a la fecha límite para asegurarte de que tu colaborador haya radicado los papeles, evitando así cualquier inconveniente futuro.</p>
+
+        <button class="btn-pdf no-print" onclick="window.print()">📄 Exportar a PDF</button>
+    </div>
+</body>
+</html>

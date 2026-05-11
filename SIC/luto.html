@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Licencias por Luto | SaberBot Casalimpia</title>
+    <script>
+        (function verificarAcceso() {
+            const cedula = localStorage.getItem('saberbot_usuario_cedula');
+            const accesoSIC = localStorage.getItem('saberbot_acceso_sic');
+            if (!cedula || accesoSIC !== 'true') {
+                window.location.replace('../autocapacitacion.html');
+            }
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Roboto:wght@400;500;700&display=swap');
+        :root { --color-azul: #0085CA; --color-verde: #8DC63F; --bg: #E2E8F0; --text: #334155; --blanco: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--blanco); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--color-azul); margin-top: 20px; margin-bottom: 10px; }
+        h1 { font-size: 2rem; border-bottom: 3px solid var(--color-verde); padding-bottom: 10px; }
+        p, li { margin-bottom: 15px; font-size: 1.05rem; line-height: 1.6; }
+        ul { margin-left: 20px; margin-bottom: 15px; }
+        .img-placeholder { background: #f1f5f9; border: 2px dashed #94a3b8; color: #64748b; text-align: center; padding: 40px 20px; margin: 20px 0; border-radius: 8px; font-size: 0.9rem; }
+        .btn-volver { display: inline-block; background: var(--text); color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; margin-bottom: 20px; }
+        .btn-pdf { display: block; width: 100%; text-align: center; background: var(--color-azul); color: white; padding: 15px 20px; border: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 30px; transition: background 0.3s; }
+        .btn-pdf:hover { background: #006b9e; }
+        @media (max-width: 600px) { .container { padding: 15px; } h1 { font-size: 1.5rem; } }
+        
+        @media print {
+            @page { size: letter; margin: 2.54cm; }
+            body { background-color: var(--blanco); padding: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            .no-print { display: none !important; }
+            .img-placeholder { border: 1px solid #000; background: #fff; color: #000; page-break-inside: avoid; padding: 20px; }
+            h1, h2, h3 { page-break-after: avoid; }
+            p, ul, li { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../autocapacitacion.html" class="btn-volver no-print">⬅ Volver al Menú</a>
+        
+        <div class="img-placeholder">[Imagen: Portada Manos con flor blanca]</div>
+        <h1>Licencias por Luto</h1>
+        
+        <p>La gestión de una Licencia por Luto debe realizarse con la máxima sensibilidad y eficiencia, garantizando el cumplimiento de las políticas de la compañía y los requisitos legales. Este protocolo establece el procedimiento estándar para su registro y aprobación.</p>
+
+        <h2>Principios Clave de la Gestión</h2>
+        
+        <h3>1. Definición de la Licencia:</h3>
+        <p>Es un permiso remunerado de hasta cinco (5) días hábiles, otorgado por el fallecimiento de un familiar en primer grado de consanguinidad (padres, hijos), primero de afinidad (suegros), cónyuge o compañero(a) permanente, hermanos, abuelos y nietos.</p>
+        <p>Aplicación en Nómina: Únicamente se descuenta el valor del subsidio de transporte correspondiente a los días de la licencia.</p>
+
+        <h3>2. Requisito Indispensable: Documentación Completa:</h3>
+        <p>La aprobación de la licencia por parte de Talento Humano está condicionada a la presentación de la totalidad de los documentos requeridos según el parentesco. Novedades con documentación incompleta no serán aprobadas.</p>
+
+        <h3>3. Responsabilidad de Gestión y Seguimiento:</h3>
+        <p>La aprobación final es competencia del área de Talento Humano. Sin embargo, es responsabilidad de la persona que crea la novedad realizar el seguimiento activo hasta garantizar su aprobación en la "línea de vida" del sistema.</p>
+        <p>Consecuencia de Inacción: Si una novedad no es gestionada correctamente y aprobada, los días se registrarán como una ausencia injustificada y serán descontados. Dicho descuento se ajustará automáticamente una vez que la novedad sea gestionada por el creador y aprobada por Talento Humano.</p>
+
+        <h2>COMO REGISTRAR LA NOVEDAD</h2>
+        <div class="img-placeholder">[Imagen: Flecha paso 1]</div>
+        <p>Para acceder a la nueva plataforma donde centralizaremos los registros (el nuevo módulo), solo tienes que entrar en el aplicativo 'SIC' y después ir a la sección 'Mis perfiles / Gestión de personal'.</p>
+        
+        <div class="img-placeholder">[Imagen: Flecha paso 2]</div>
+        <p>Una vez ahí, haz click en el Panel de 'Registro'.</p>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 3]</div>
+        <p>En el panel que aparece, se debe digitar la cédula de la persona a la que se le realizara la novedad, después haz click en el botón "buscar"</p>
+
+        <div class="img-placeholder">[Imagen: Flecha paso 4]</div>
+        <p>Dentro de la información de la persona que aparece, desplázate hasta la sección 'Estados' (generalmente al final) y localiza el botón 'OTROSI Y/O TRASLADO DE CECO'.</p>
+        <div class="img-placeholder">[Imagen: Botones de Estados con Calamidad Domestica resaltado (Nota: verificar si debia ser Luto en el sistema)]</div>
+
+        <h2>Proceso de Registro en el Sistema</h2>
+        <p>Para registrar la novedad de Licencia por Luto, se deben seguir los siguientes pasos de manera estricta:</p>
+
+        <h3>Paso 1: Acceso y Selección de Novedad</h3>
+        <p>En el campo "Tipo de Novedad", seleccionar la opción "Solicitud Licencia de Luto".</p>
+        <div class="img-placeholder">[Imagen: Desplegable Tipo Calamidad - Licencia de Luto]</div>
+
+        <h3>Paso 2: Definición de Fechas y Horario</h3>
+        <p>Diligenciar la Fecha Inicial y la Fecha Final del permiso (máximo 5 días).</p>
+        <div class="img-placeholder">[Imagen: Campos Fecha Inicio y Final]</div>
+        <p>Especificar el horario que el colaborador debía cumplir durante esas fechas.</p>
+        <div class="img-placeholder">[Imagen: Campos de Horario]</div>
+
+        <h3>Paso 3: Selección de Parentesco y Adjuntar Documentación</h3>
+        <p>En la lista desplegable, seleccionar el parentesco del familiar fallecido.</p>
+        <div class="img-placeholder">[Imagen: Desplegable Parentesco]</div>
+        <p>Hacer clic en "Adjuntos" y subir todos los documentos requeridos (ver lista detallada abajo), incluyendo el formato de solicitud de calamidad.</p>
+        <div class="img-placeholder">[Imagen: Botón Adjuntos]</div>
+
+        <h3>Paso 4: Registrar Observaciones y Finalizar</h3>
+        <p>En el campo de "Observaciones", dejar un registro claro de la gestión.</p>
+        <div class="img-placeholder">[Imagen: Campo Motivo/Observación]</div>
+        <p>Ejemplo: "Se registra licencia por fallecimiento de padre. Documentación completa adjunta para revisión y aprobación de Talento Humano."</p>
+        <p>Verificar toda la información y hacer clic en el botón "Guardar".</p>
+        <div class="img-placeholder">[Imagen: Botón Guardar]</div>
+
+        <h2>Documentación Requerida por Parentesco</h2>
+        <p>Para que la solicitud sea aprobada, se debe adjuntar el Formato de Solicitud de Calamidad más los siguientes documentos:</p>
+        
+        <h3>PADRES</h3>
+        <ul>
+            <li>Registro Civil de Defunción (o certificado de defunción).</li>
+            <li>Registro Civil de Nacimiento del trabajador.</li>
+            <li>Fotocopia de la cédula del trabajador.</li>
+        </ul>
+
+        <h3>HERMANOS</h3>
+        <ul>
+            <li>Registro Civil de Defunción (o certificado de defunción).</li>
+            <li>Registro Civil de Nacimiento del trabajador.</li>
+            <li>Registro Civil de Nacimiento del hermano fallecido.</li>
+            <li>Fotocopia de la cédula del trabajador.</li>
+        </ul>
+
+        <h3>HIJOS</h3>
+        <ul>
+            <li>Registro Civil de Defunción (o certificado de defunción).</li>
+            <li>Registro Civil de Nacimiento del hijo fallecido.</li>
+            <li>Fotocopia de la cédula del trabajador.</li>
+        </ul>
+
+        <h3>CÓNYUGE O COMPAÑERO(A) PERMANENTE</h3>
+        <ul>
+            <li>Registro Civil de Defunción (o certificado de defunción).</li>
+            <li>Registro Civil de Matrimonio o Declaración Juramentada de convivencia por notaría.</li>
+            <li>Fotocopia de la cédula del trabajador.</li>
+        </ul>
+
+        <h3>ABUELOS</h3>
+        <ul>
+            <li>Registro Civil de Defunción (o certificado de defunción).</li>
+            <li>Registro Civil de Nacimiento del trabajador.</li>
+            <li>Registro Civil de Nacimiento del padre o madre (según corresponda la línea familiar). Alternativa: Partida de bautismo del trabajador.</li>
+            <li>Fotocopia de la cédula del trabajador.</li>
+        </ul>
+
+        <h3>NIETOS</h3>
+        <ul>
+            <li>Registro Civil de Defunción (o certificado de defunción).</li>
+            <li>Registro Civil de Nacimiento del hijo/a del trabajador (padre/madre del nieto).</li>
+            <li>Registro Civil de Nacimiento del nieto fallecido.</li>
+            <li>Fotocopia de la cédula del trabajador.</li>
+        </ul>
+
+        <h3>SUEGROS</h3>
+        <ul>
+            <li>Registro Civil de Defunción (o certificado de defunción).</li>
+            <li>Registro Civil de Matrimonio o Declaración Juramentada de convivencia del trabajador.</li>
+            <li>Registro Civil de Nacimiento del cónyuge o compañero(a).</li>
+            <li>Fotocopia de la cédula del trabajador.</li>
+        </ul>
+
+        <h2>Acciones Críticas del Proceso</h2>
+        <ul>
+            <li><strong>Seguimiento Activo y Obligatorio:</strong> Es imperativo que el usuario creador de la novedad monitoree el estado de esta para asegurar que Talento Humano la apruebe.</li>
+            <li><strong>Garantizar la Documentación Completa:</strong> Si la novedad se registra con documentos incompletos o ilegibles esto generará rechazos y retrasos, afectando directamente al colaborador.</li>
+        </ul>
+
+        <button class="btn-pdf no-print" onclick="window.print()">📄 Exportar a PDF</button>
+    </div>
+</body>
+</html>

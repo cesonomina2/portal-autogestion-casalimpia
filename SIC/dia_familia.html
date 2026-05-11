@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Día de la Familia | SaberBot Casalimpia</title>
+    <script>
+        (function verificarAcceso() {
+            const cedula = localStorage.getItem('saberbot_usuario_cedula');
+            const accesoSIC = localStorage.getItem('saberbot_acceso_sic');
+            if (!cedula || accesoSIC !== 'true') {
+                window.location.replace('../autocapacitacion.html');
+            }
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Roboto:wght@400;500;700&display=swap');
+        :root { --color-azul: #0085CA; --color-verde: #8DC63F; --bg: #E2E8F0; --text: #334155; --blanco: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--blanco); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; color: var(--color-azul); margin-top: 20px; margin-bottom: 10px; }
+        h1 { font-size: 2rem; border-bottom: 3px solid var(--color-verde); padding-bottom: 10px; }
+        p, li { margin-bottom: 15px; font-size: 1.05rem; line-height: 1.6; }
+        ul { margin-left: 20px; margin-bottom: 15px; }
+        .img-placeholder { background: #f1f5f9; border: 2px dashed #94a3b8; color: #64748b; text-align: center; padding: 40px 20px; margin: 20px 0; border-radius: 8px; font-size: 0.9rem; }
+        .btn-volver { display: inline-block; background: var(--text); color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; margin-bottom: 20px; }
+        .btn-pdf { display: block; width: 100%; text-align: center; background: var(--color-azul); color: white; padding: 15px 20px; border: none; border-radius: 8px; font-family: 'Outfit'; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 30px; transition: background 0.3s; }
+        .btn-pdf:hover { background: #006b9e; }
+        @media (max-width: 600px) { .container { padding: 15px; } h1 { font-size: 1.5rem; } }
+
+        /* Estilos para exportación a PDF (Tamaño Carta y Márgenes) */
+        @media print {
+            @page { size: letter; margin: 2.54cm; }
+            body { background-color: var(--blanco); padding: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            .no-print { display: none !important; }
+            .img-placeholder { border: 1px solid #000; background: #fff; color: #000; page-break-inside: avoid; padding: 20px; }
+            h1, h2, h3 { page-break-after: avoid; }
+            p, ul, li { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../autocapacitacion.html" class="btn-volver no-print">⬅ Volver al Menú</a>
+        
+        <div class="img-placeholder">[Imagen: Familia feliz corriendo en el parque]</div>
+        <h1>DÍA DE LA FAMILIA</h1>
+        
+        <p>El Día de la Familia es un beneficio valioso para nuestros colaboradores. Como líder, tu papel es facilitar que tu equipo pueda disfrutarlo, asegurando que el proceso se cumpla según las políticas de la compañía para una correcta programación y aplicación en nómina.</p>
+
+        <h2>Principios Clave para tu Gestión</h2>
+        
+        <h3>1. Definición y Condiciones del Beneficio:</h3>
+        <ul>
+            <li><strong>Permiso Remunerado:</strong> Es un permiso remunerado que se otorga una vez por semestre.</li>
+            <li><strong>Impacto en Nómina:</strong> Aunque el día es pago, se descuenta el valor del subsidio de transporte correspondiente a esa jornada.</li>
+            <li><strong>No es Acumulable:</strong> Este es un punto crítico. Si el colaborador no solicita su día dentro del semestre correspondiente (Semestre 1: Enero-Junio, Semestre 2: Julio-Diciembre), el beneficio se pierde. No se puede transferir al siguiente periodo.</li>
+        </ul>
+
+        <h3>2. Planificación:</h3>
+        <p><strong>Anticipación de la Solicitud:</strong> La solicitud debe programarse y registrarse en el sistema con un mínimo de 7 días de anticipación a la fecha de disfrute de lo contrario la novedad registrara en el sistema como extemporánea.</p>
+
+        <h3>3. Autorización Centralizada y Documentación:</h3>
+        <ul>
+            <li><strong>Aprobación de Talento Humano:</strong> La aprobación final de este permiso es responsabilidad exclusiva del área de Talento Humano. Tu función es iniciar y formalizar la solicitud.</li>
+            <li><strong>Formatos Oficiales:</strong> El proceso requiere generar y diligenciar dos formatos oficiales que el sistema proporciona.</li>
+        </ul>
+
+        <h2>COMO REGISTRAR LA NOVEDAD</h2>
+        <div class="img-placeholder">[Imagen: Flechas Pasos 1 al 4 repetidas]</div>
+        <p>Para acceder a la nueva plataforma donde centralizaremos los registros (el nuevo módulo), solo tienes que entrar en el aplicativo 'SIC' y después ir a la sección 'Mis perfiles / Gestión de personal'.</p>
+        <p>Una vez ahí, haz click en el Panel de 'Registro'.</p>
+        <p>En el panel que aparece, se debe digitar la cédula de la persona a la que se le realizara la novedad, después haz click en el botón "buscar"</p>
+        <p>Dentro de la información de la persona que aparece, desplázate hasta la sección 'Estados' (generalmente al final) y localiza el botón 'OTROSI Y/O TRASLADO DE CECO'.</p>
+
+        <h2>Proceso de Registro en el Sistema: Tu Paso a Paso</h2>
+        
+        <h3>Paso 1: Iniciar la Novedad y Seleccionar la Fecha</h3>
+        <p>Diligencia el "Día a Disfrutar"</p>
+        <div class="img-placeholder">[Imagen: Campo Dia a disfrutar]</div>
+        <p>Asigna el horario correspondiente al colaborador para esa fecha.</p>
+        <div class="img-placeholder">[Imagen: Campo Horario]</div>
+
+        <h3>Paso 2: Generar y Gestionar los Formatos Oficiales</h3>
+        <p>Al ingresar los datos, el sistema generará dos documentos que debes descargar y entregar al colaborador para su firma:</p>
+        <ul>
+            <li><strong>Carta de Solicitud:</strong> Documento formal donde el colaborador solicita el beneficio <div class="img-placeholder">[Imagen: Botón Formato Carta Solicitud]</div></li>
+            <li><strong>Formato Día de la Familia:</strong> Documento que formaliza la aceptación por parte de la compañía (sujeta a la aprobación final de Talento Humano). <div class="img-placeholder">[Imagen: Botón Formato Dia de la Familia]</div></li>
+        </ul>
+
+        <h3>Paso 3: Subir Documentos</h3>
+        <p>Una vez firmados, escanea y sube ambos documentos al sistema.</p>
+        <div class="img-placeholder">[Imagen: Botón Adjuntar Documento]</div>
+        <p>Acción Clave: Hacer seguimiento a la línea de vida de la novedad asegurando que la misma sea aprobada</p>
+
+        <h3>Paso 4: Añadir Observaciones y Guardar</h3>
+        <p>Utiliza el campo de "Observaciones" para dejar constancia del estado del proceso.</p>
+        <div class="img-placeholder">[Imagen: Campo Observación]</div>
+        <p>Ejemplo: "Se registra solicitud de Día de la Familia para el colaborador [Nombre] para el [Fecha].</p>
+        <p>Finaliza el proceso haciendo clic en el botón "Guardar".</p>
+        <div class="img-placeholder">[Imagen: Botón Guardar]</div>
+
+        <div class="img-placeholder">[Imagen: Equipo sonriendo en oficina]</div>
+        <h2>Buenas Prácticas para una Gestión Exitosa</h2>
+        <ul>
+            <li><strong>Fomenta la Planificación:</strong> Anima a tu equipo a revisar sus calendarios y solicitar su Día de la Familia con suficiente antelación, especialmente antes de que finalice cada semestre.</li>
+            <li><strong>Eres el Facilitador, no el Aprobador Final:</strong> Comunica claramente a tu colaborador que, si bien tú gestionas la solicitud, la aprobación definitiva depende de Talento Humano y del cumplimiento de las políticas.</li>
+            <li><strong>Acción Clave:</strong> Debes hacer seguimiento a la línea de vida de la novedad asegurando que la misma sea aprobada</li>
+        </ul>
+
+        <button class="btn-pdf no-print" onclick="window.print()">📄 Exportar a PDF</button>
+    </div>
+</body>
+</html>
