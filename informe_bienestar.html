@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Informes Operativos | SaberBot Casalimpia</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
+        
+        :root {
+            --color-azul-logo: #0085CA; --color-verde-logo: #8DC63F; 
+            --color-robot-claro: #D4F1F9; --color-gris-texto: #334155;
+            --color-blanco: #ffffff; --sombra-suave: 0 4px 20px rgba(0, 133, 202, 0.1);
+            --bg-oscuro: #E2E8F0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', sans-serif; background-color: var(--bg-oscuro);
+            color: var(--color-gris-texto); min-height: 100vh; display: flex; flex-direction: column;
+        }
+
+        /* ESCALA AL 75% EN ESCRITORIO */
+        @media (min-width: 1024px) {
+            body { zoom: 0.75; }
+        }
+
+        header {
+            background-color: var(--color-blanco); padding: 1rem 5%; display: flex;
+            justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-bottom: 4px solid var(--color-azul-logo); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 15px;
+        }
+
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .logo-img { height: 60px; width: auto; }
+        .logo-text { font-family: 'Outfit', sans-serif; font-weight: 700; display: flex; gap: 4px; align-items: center;}
+        .text-verde { color: var(--color-verde-logo); font-size: 1.6rem; }
+        .text-azul { color: var(--color-azul-logo); font-size: 1.6rem; margin-left: 6px; }
+
+        .header-right { display: flex; align-items: center; gap: 15px; }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+            background: var(--color-robot-claro); padding: 8px 15px; border-radius: 50px;
+            color: var(--color-azul-logo); font-weight: 600;
+        }
+        
+        .dashboard-container {
+            max-width: 1500px; margin: 20px auto; padding: 0 20px; width: 100%;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        .dashboard-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--color-blanco); padding: 20px; border-radius: 12px; box-shadow: var(--sombra-suave);
+            flex-wrap: wrap; gap: 15px;
+        }
+
+        .dashboard-header h1 { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); font-size: 1.8rem; }
+        
+        .live-indicator {
+            display: flex; align-items: center; gap: 8px; font-weight: 600; color: #10B981;
+            background: #D1FAE5; padding: 6px 12px; border-radius: 50px; font-size: 0.85rem;
+        }
+        .live-dot { width: 8px; height: 8px; background-color: #10B981; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
+        /* FILTROS */
+        .filtros-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;
+            background: var(--color-blanco); padding: 20px; border-radius: 12px; box-shadow: var(--sombra-suave);
+        }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 0.85rem; font-weight: 600; color: #64748B; }
+        .form-control {
+            padding: 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-family: 'Roboto', sans-serif;
+            font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+        }
+        .form-control:focus { border-color: var(--color-azul-logo); }
+
+        /* KPIS GRID - COLORES COMPLETOS */
+        .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .kpi-card {
+            padding: 20px; border-radius: 12px; box-shadow: var(--sombra-suave); 
+            display: flex; flex-direction: column; gap: 10px; position: relative; 
+            overflow: hidden; transition: transform 0.3s ease; color: white; 
+        }
+        
+        .card-total { background-color: #A855F7; }    /* Morado Claro */
+        .card-ingresos { background-color: #C25973; } /* Vinotinto Claro */
+        .card-cumple { background-color: #EAB308; }   /* Amarillo */
+        .card-5a { background-color: #0085CA; }       /* Azul */
+        .card-10a { background-color: #8DC63F; }      /* Verde */
+
+        .kpi-title { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; opacity: 0.95; }
+        .kpi-value { font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 700; }
+        
+        .update-flash { animation: flashBrightness 1s; }
+        @keyframes flashBrightness { 0% { filter: brightness(1.3); } 100% { filter: brightness(1); } }
+
+        /* TABLA Y PANELES */
+        .main-content { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+        .panel { background: var(--color-blanco); padding: 20px; border-radius: 12px; box-shadow: var(--sombra-suave); overflow: hidden;}
+        
+        .panel-header-acciones { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .panel-header-acciones h3 { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); font-size: 1.2rem; }
+        
+        .botones-exportar { display: flex; gap: 10px; }
+        .btn-export { padding: 8px 15px; border-radius: 6px; border: none; font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; color: white; transition: opacity 0.2s; display: flex; align-items: center; gap: 6px; }
+        .btn-excel { background-color: #10B981; } 
+
+        .chart-wrapper { position: relative; height: 320px; width: 100%; }
+
+        .table-responsive { overflow-x: auto; max-height: 600px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        thead { position: sticky; top: 0; background: #F8FAFC; z-index: 10; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; white-space: nowrap; }
+        th { font-weight: 600; color: #64748B; font-size: 0.8rem; text-transform: uppercase; }
+        td { font-size: 0.9rem; color: var(--color-gris-texto); }
+        tbody tr:hover { background-color: #F1F5F9; }
+
+        .badge { padding: 6px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 600; color: white; display: inline-block; }
+        .badge-nuevo { background-color: #C25973; }   
+        .badge-cumple { background-color: #EAB308; }  
+        .badge-5a { background-color: #0085CA; }      
+        .badge-10a { background-color: #8DC63F; }     
+
+        @media (max-width: 1000px) { .main-content { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
+            <div class="logo-text">
+                <span class="text-verde">SaberBot</span><span class="text-azul">Casalimpia</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="user-profile">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>JECP informe SaberBot</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Panel de Control: Notificaciones Enviadas</h1>
+            <div class="live-indicator"><div class="live-dot"></div> Tiempo Real Activo</div>
+        </div>
+
+        <div class="filtros-grid">
+            <div class="form-group"><label>Buscar Empleado</label><input type="text" id="filtro-busqueda" class="form-control" placeholder="Nombre o código..." oninput="aplicarFiltros()"></div>
+            <div class="form-group">
+                <label>Categoría</label>
+                <select id="filtro-tipo" class="form-control" onchange="aplicarFiltros()">
+                    <option value="todos">Todas las categorías</option>
+                    <option value="cumpleanos">Cumpleaños</option>
+                    <option value="nuevo_ingreso">Nuevos Ingresos</option>
+                    <option value="5_anios">Aniversario 5 Años</option>
+                    <option value="10_anios">Aniversario 10 Años</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Desde</label><input type="date" id="filtro-fecha-inicio" class="form-control" onchange="aplicarFiltros()"></div>
+            <div class="form-group"><label>Hasta</label><input type="date" id="filtro-fecha-fin" class="form-control" onchange="aplicarFiltros()"></div>
+        </div>
+
+        <div class="kpis-grid">
+            <div class="kpi-card card-total" id="card-total"><div class="kpi-title">Total General</div><div class="kpi-value" id="kpi-total">0</div></div>
+            <div class="kpi-card card-ingresos" id="card-ingresos"><div class="kpi-title">Nuevos Ingresos</div><div class="kpi-value" id="kpi-ingresos">0</div></div>
+            <div class="kpi-card card-cumple" id="card-cumple"><div class="kpi-title">Cumpleaños</div><div class="kpi-value" id="kpi-cumple">0</div></div>
+            <div class="kpi-card card-5a" id="card-5a"><div class="kpi-title">Aniv. 5 Años</div><div class="kpi-value" id="kpi-5a">0</div></div>
+            <div class="kpi-card card-10a" id="card-10a"><div class="kpi-title">Aniv. 10 Años</div><div class="kpi-value" id="kpi-10a">0</div></div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h3>Distribución por Categoría</h3>
+                <div class="chart-wrapper"><canvas id="graficoDistribucion"></canvas></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header-acciones">
+                    <h3>Detalle de Registros</h3>
+                    <div class="botones-exportar">
+                        <button class="btn-export btn-excel" onclick="exportarExcelXLSX()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Generar Excel (.xlsx)
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table id="tabla-logs">
+                        <thead>
+                            <tr>
+                                <th>Fecha Envío</th>
+                                <th>Cód. Emp</th>
+                                <th>Nombre</th>
+                                <th>Nacimiento</th>
+                                <th>Ingreso</th>
+                                <th>Tipo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-logs"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://tyhdwpdefiatmxihycae.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_LH1iVez6V1qmj8Lk_YVZFA_Y2nYwdKw';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let datosGlobales = []; 
+        let datosFiltradosActuales = []; 
+        let chartInstancia = null; 
+
+        async function inicializarDashboard() {
+            const hoy = new Date();
+            document.getElementById('filtro-fecha-inicio').value = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString().split('T')[0];
+            document.getElementById('filtro-fecha-fin').value = hoy.toISOString().split('T')[0];
+            await cargarDatosBase();
+            inicializarRealTime();
+        }
+
+        async function cargarDatosBase() {
+            const { data, error } = await supabaseClient.from('3-log_notificaciones').select('*').order('fecha_envio', { ascending: false }).limit(1000);
+            if (data) { datosGlobales = data; aplicarFiltros(); }
+        }
+
+        function inicializarRealTime() {
+            supabaseClient.channel('realtime-logs').on('postgres_changes', { event: 'INSERT', schema: 'public', table: '3-log_notificaciones' }, payload => {
+                datosGlobales.unshift(payload.new); animarTarjetas(); aplicarFiltros();
+            }).subscribe();
+        }
+
+        function aplicarFiltros() {
+            const busqueda = document.getElementById('filtro-busqueda').value.toLowerCase();
+            const tipo = document.getElementById('filtro-tipo').value;
+            const fechaIni = document.getElementById('filtro-fecha-inicio').value;
+            const fechaFin = document.getElementById('filtro-fecha-fin').value;
+
+            datosFiltradosActuales = datosGlobales.filter(row => {
+                const matchTexto = (row.nomEmp || "").toLowerCase().includes(busqueda) || (row.codEmp || "").toLowerCase().includes(busqueda);
+                const matchTipo = (tipo === 'todos') || (row.tipo_notificacion === tipo);
+                let matchFecha = true;
+                if(row.fecha_envio) {
+                    const f = row.fecha_envio.split('T')[0]; 
+                    if(fechaIni && f < fechaIni) matchFecha = false;
+                    if(fechaFin && f > fechaFin) matchFecha = false;
+                }
+                return matchTexto && matchTipo && matchFecha;
+            });
+            actualizarVista(datosFiltradosActuales);
+        }
+
+        function actualizarVista(datos) {
+            let counts = { total: datos.length, ingresos: 0, cumple: 0, a5: 0, a10: 0 };
+            const tbody = document.getElementById('tbody-logs');
+            tbody.innerHTML = '';
+
+            datos.forEach(row => {
+                if(row.tipo_notificacion === 'nuevo_ingreso') counts.ingresos++;
+                else if(row.tipo_notificacion === 'cumpleanos') counts.cumple++;
+                else if(row.tipo_notificacion === '5_anios') counts.a5++;
+                else if(row.tipo_notificacion === '10_anios') counts.a10++;
+
+                const d = new Date(row.fecha_envio);
+                const fStr = d.toLocaleString('es-CO', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+                const fNac = row.fecNac ? row.fecNac.split('T')[0] : 'N/A';
+                const fIng = row.fecIng ? row.fecIng.split('T')[0] : 'N/A';
+
+                let bCls = 'badge-default', label = row.tipo_notificacion;
+                if(row.tipo_notificacion === 'cumpleanos') { bCls = 'badge-cumple'; label = 'Cumpleaños'; }
+                if(row.tipo_notificacion === 'nuevo_ingreso') { bCls = 'badge-nuevo'; label = 'Ingreso'; }
+                if(row.tipo_notificacion === '5_anios') { bCls = 'badge-5a'; label = '5 Años'; }
+                if(row.tipo_notificacion === '10_anios') { bCls = 'badge-10a'; label = '10 Años'; }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${fStr}</td><td><strong>${row.codEmp}</strong></td><td>${row.nomEmp}</td><td>${fNac}</td><td>${fIng}</td><td><span class="badge ${bCls}">${label}</span></td>`;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('kpi-total').innerText = counts.total;
+            document.getElementById('kpi-ingresos').innerText = counts.ingresos;
+            document.getElementById('kpi-cumple').innerText = counts.cumple;
+            document.getElementById('kpi-5a').innerText = counts.a5;
+            document.getElementById('kpi-10a').innerText = counts.a10;
+
+            const ctx = document.getElementById('graficoDistribucion').getContext('2d');
+            if (chartInstancia) chartInstancia.destroy();
+            chartInstancia = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ingresos', 'Cumpleaños', '5 Años', '10 Años'],
+                    datasets: [{
+                        data: [counts.ingresos, counts.cumple, counts.a5, counts.a10],
+                        backgroundColor: ['#C25973', '#EAB308', '#0085CA', '#8DC63F'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '65%' }
+            });
+        }
+
+        function animarTarjetas() {
+            document.querySelectorAll('.kpi-card').forEach(c => {
+                c.classList.remove('update-flash'); void c.offsetWidth; c.classList.add('update-flash');
+            });
+        }
+
+        // --- EXPORTAR A .XLSX (Usando SheetJS) ---
+        function exportarExcelXLSX() {
+            if (datosFiltradosActuales.length === 0) return alert("No hay datos en pantalla para exportar.");
+            
+            // Preparamos los datos limpios para Excel
+            const rows = datosFiltradosActuales.map(d => ({
+                "Fecha Envío": new Date(d.fecha_envio).toLocaleString('es-CO'),
+                "Código Empleado": d.codEmp,
+                "Nombre Completo": d.nomEmp,
+                "Fecha Nacimiento": d.fecNac ? d.fecNac.split('T')[0] : '',
+                "Fecha Ingreso": d.fecIng ? d.fecIng.split('T')[0] : '',
+                "Tipo Notificación": d.tipo_notificacion
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(rows);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Notificaciones_Enviadas");
+            XLSX.writeFile(workbook, "Reporte_SaberBot_Casalimpia.xlsx");
+        }
+
+        inicializarDashboard();
+    </script>
+</body>
+</html>
