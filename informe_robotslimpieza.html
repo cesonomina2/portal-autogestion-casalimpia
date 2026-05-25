@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard CC1 | Casalimpia</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
+        
+        :root {
+            --color-azul-logo: #0085CA; --color-verde-logo: #8DC63F; 
+            --color-blanco: #ffffff; --color-gris-bg: #F1F5F9;
+            --color-texto: #334155; --sombra: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --borde: 1px solid #E2E8F0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--color-gris-bg); color: var(--color-texto); }
+
+        /* HEADER */
+        header { background-color: var(--color-blanco); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--sombra); border-bottom: 4px solid var(--color-azul-logo); flex-wrap: wrap; gap: 15px; position: sticky; top: 0; z-index: 100; }
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .logo-img { height: 50px; width: auto; }
+        .logo-text { font-family: 'Outfit', sans-serif; font-weight: 700; display: flex; align-items: center; }
+        .text-verde { color: var(--color-verde-logo); font-size: 1.6rem; }
+        .text-azul { color: var(--color-azul-logo); font-size: 1.6rem; margin-left: 2px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 600; color: #64748B; background: #E2E8F0; padding: 5px 15px; border-radius: 50px; }
+
+        /* TABS */
+        .tabs-container { background: white; border-bottom: 1px solid #CBD5E1; display: flex; justify-content: center; gap: 15px; padding-top: 10px; flex-wrap: wrap;}
+        .tab-btn { background: none; border: none; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 600; color: #64748B; padding: 10px 15px; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .tab-btn:hover { color: var(--color-azul-logo); }
+        .tab-btn.active { color: var(--color-azul-logo); border-bottom: 3px solid var(--color-azul-logo); }
+        .tab-content { display: none; padding: 20px 0; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 0 15px; display: flex; flex-direction: column; gap: 20px; }
+
+        /* CARGA MANUAL */
+        #zona-carga-manual { background-color: #FEF3C7; border: 1px dashed #D97706; color: #92400E; padding: 15px; border-radius: 8px; text-align: center; display: none; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px;}
+        #zona-carga-manual input[type="file"] { background: white; padding: 10px; border-radius: 5px; border: 1px solid #D97706; cursor: pointer; }
+
+        /* FILTROS GLOBALES */
+        .filtros-banner { background-color: var(--color-azul-logo); border-radius: 10px; padding: 15px 20px; display: flex; align-items: flex-start; flex-wrap: wrap; gap: 15px; color: white; box-shadow: var(--sombra); margin-top: 20px; }
+        .filtros-banner h2 { font-family: 'Outfit', sans-serif; margin-right: 10px; font-size: 1.4rem; margin-top: 2px;}
+        .input-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 180px; }
+        .input-group label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #E0F2FE; }
+        .input-group input[type="date"] { padding: 8px 12px; border-radius: 5px; border: none; outline: none; font-family: 'Roboto', sans-serif; color: var(--color-texto); width: 100%; height: 38px; }
+        
+        /* ESTILOS CORREGIDOS PARA CHOICES.JS EN EL BANNER */
+        .choices { margin-bottom: 0; width: 100%; }
+        .choices__inner { 
+            min-height: 38px; 
+            max-height: 85px; /* Evita que crezca infinitamente hacia abajo */
+            overflow-y: auto; /* Agrega scroll si hay muchos seleccionados */
+            padding: 2px 8px; 
+            border-radius: 5px; 
+            background-color: white; 
+            border: none; 
+            font-family: 'Roboto', sans-serif; 
+            font-size: 0.9rem; 
+        }
+        /* Color de las letras al buscar y desplegar la lista */
+        .choices__input { color: #334155 !important; background-color: transparent !important; margin-bottom: 0; }
+        .choices__list--dropdown .choices__item { color: #334155; font-size: 0.9rem; }
+        
+        /* Diseño de los elementos seleccionados (Píldoras) */
+        .choices__list--multiple .choices__item { 
+            background-color: var(--color-azul-logo); 
+            border: 1px solid #005f9e; 
+            border-radius: 20px; /* Bordes redondeados */
+            color: white; 
+            padding: 3px 10px;
+            margin: 2px 4px 2px 0;
+            font-size: 0.75rem;
+            display: inline-block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Pone "..." si el texto es muy largo */
+            vertical-align: middle;
+        }
+        .choices__list--multiple .choices__item[data-deletable] { padding-right: 25px; }
+
+        .btn-limpiar { background-color: transparent; border: 1px solid white; color: white; padding: 8px 15px; border-radius: 50px; cursor: pointer; font-weight: 600; transition: 0.3s; align-self: flex-start; margin-top: 20px; }
+        .btn-limpiar:hover { background-color: white; color: var(--color-azul-logo); }
+
+        /* KPIs CARDS */
+        .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .kpi-card { padding: 20px; border-radius: 8px; box-shadow: var(--sombra); text-align: center; border: none; }
+        .kpi-card.area { background-color: #0085CA; }
+        .kpi-card.tareas { background-color: #C25973; }
+        .kpi-card.robots { background-color: #64748B; }
+        .kpi-card.energia { background-color: #F59E0B; }
+        .kpi-card.duracion { background-color: #8DC63F; }
+        .kpi-card .kpi-title { font-size: 0.8rem; color: rgba(255, 255, 255, 0.9); text-transform: uppercase; font-weight: 700; margin-bottom: 10px; }
+        .kpi-card .kpi-value { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 700; color: #ffffff; }
+
+        /* GRÁFICOS */
+        .charts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .chart-card { background: var(--color-blanco); padding: 15px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); display: flex; flex-direction: column; cursor: pointer; transition: transform 0.2s; position: relative;}
+        .chart-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .chart-card h3 { font-size: 0.9rem; color: var(--color-texto); text-align: center; margin-bottom: 10px; font-family: 'Outfit', sans-serif; }
+        .chart-container { position: relative; height: 220px; width: 100%; pointer-events: none; } 
+        .expand-icon { position: absolute; top: 10px; right: 10px; background: #E2E8F0; padding: 4px; border-radius: 4px; font-size: 12px; color: #64748B;}
+
+        /* MODAL DE GRÁFICO */
+        #modal-grafico { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 1200px; height: 80vh; display: flex; flex-direction: column; position: relative; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .modal-header h2 { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); font-size: 1.5rem; }
+        .btn-cerrar { background: #EF4444; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .modal-body { flex: 1; position: relative; width: 100%; height: 100%; }
+
+        /* PESTAÑA 2: INFORMES DETALLADOS */
+        .seccion-titulo { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); border-bottom: 2px solid var(--color-verde-logo); padding-bottom: 5px; margin: 20px 0 10px 0; }
+        .grid-alertas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); }
+        .lista-alertas { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        
+        .alerta-item { padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+        .alerta-roja { background: #FEE2E2; border: 1px solid #FCA5A5; color: #991B1B; }
+        .alerta-amarilla { background: #FEF9C3; border: 1px solid #FDE047; color: #A16207; }
+        .alerta-verde { background: #DCFCE7; border: 1px solid #86EFAC; color: #166534; }
+        .alerta-neutral { background: #F8FAFC; border: 1px solid #E2E8F0; color: #475569; }
+        .status-dot { font-size: 1.1rem; margin-left: 6px; }
+        
+        .ficha-tecnica-grid { display: grid; grid-template-columns: 1fr 3fr; gap: 20px; align-items: start;}
+        .info-robot { background: #F8FAFC; padding: 15px; border-radius: 8px; border: 1px solid #E2E8F0; }
+        .info-robot p { margin-bottom: 8px; font-size: 0.9rem; }
+        .info-robot strong { color: var(--color-azul-logo); }
+
+        .table-responsive { overflow-x: auto; max-height: 500px; border: 1px solid #E2E8F0; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        thead { position: sticky; top: 0; background: #F1F5F9; z-index: 10; }
+        th, td { padding: 10px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; white-space: nowrap; font-size: 0.85rem;}
+        th { font-weight: 700; color: #475569; text-transform: uppercase; }
+        tbody tr:hover { background-color: #F8FAFC; }
+
+        .herramientas-tabla { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;}
+        .buscador { padding: 10px; border: 1px solid #CBD5E1; border-radius: 6px; width: 100%; max-width: 400px; font-family: 'Roboto'; outline: none;}
+        .btn-excel { background: #10B981; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: 0.2s;}
+        .btn-excel:hover { background: #059669; }
+
+        /* PESTAÑA 3: RESUMEN EJECUTIVO Y PDF */
+        .btn-pdf { background: #EF4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; transition: 0.2s;}
+        .btn-pdf:hover { background: #DC2626; }
+        
+        #informe-a-pdf { background: white; padding: 30px; border-radius: 8px; display: flex; flex-direction: column; gap: 20px; }
+        .tarjeta-ia { border-left: 5px solid; padding: 15px; background: #F8FAFC; border-radius: 0 8px 8px 0; }
+        .tarjeta-ia.estrella { border-left-color: #8DC63F; }
+        .tarjeta-ia.critico { border-left-color: #EF4444; }
+        .tarjeta-ia.brecha { border-left-color: #F59E0B; }
+
+        /* CLASES ESPECIALES APLICADAS DURANTE LA GENERACIÓN DEL PDF PARA EVITAR CORTES */
+        .pdf-export-mode .table-responsive { max-height: none !important; overflow: visible !important; border: none !important; }
+        .pdf-export-mode tr { page-break-inside: avoid !important; }
+        .pdf-export-mode { padding: 10px !important; }
+
+        @media (max-width: 1200px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } .ficha-tecnica-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .charts-grid { grid-template-columns: 1fr; }
+            .header-title { display: none; }
+            .tabs-container { flex-direction: column; gap: 5px; padding: 10px; }
+            .modal-content { height: 90vh; }
+            .grid-alertas { grid-template-columns: 1fr; }
+            .filtros-banner { flex-direction: column; align-items: stretch; }
+            .btn-limpiar { align-self: stretch; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
+            <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Casalimpia</span></div>
+        </div>
+        <div class="header-title">Informe de Operación CC1</div>
+    </header>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="cambiarPestana('dashboard', this)">Dashboard General</button>
+        <button class="tab-btn" onclick="cambiarPestana('detalles', this)">Informes Detallados</button>
+        <button class="tab-btn" onclick="cambiarPestana('resumen', this)">Resumen Ejecutivo</button>
+    </div>
+
+    <div class="container">
+        
+        <div id="zona-carga-manual">
+            <h3>⚠️ No se pudo conectar a Google Sheets (Bloqueo de red detectado)</h3>
+            <p>Por favor, selecciona el archivo <b>.csv</b> para ver tu informe.</p>
+            <input type="file" id="csvFileInput" accept=".csv">
+        </div>
+
+        <div class="filtros-banner">
+            <h2>Filtros</h2>
+            <div class="input-group" style="min-width: 140px;">
+                <label>Desde</label>
+                <input type="date" id="fecha-desde">
+            </div>
+            <div class="input-group" style="min-width: 140px;">
+                <label>Hasta</label>
+                <input type="date" id="fecha-hasta">
+            </div>
+            <div class="input-group">
+                <label>Tiendas</label>
+                <select id="filtro-tienda" multiple></select>
+            </div>
+            <div class="input-group">
+                <label>Robots</label>
+                <select id="filtro-robot" multiple></select>
+            </div>
+            <button class="btn-limpiar" onclick="resetFilters()">Limpiar</button>
+        </div>
+
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="kpis-grid">
+                <div class="kpi-card area"><div class="kpi-title">Área limpiada (m²)</div><div class="kpi-value" id="kpi-area">0</div></div>
+                <div class="kpi-card tareas"><div class="kpi-title">Número de tareas</div><div class="kpi-value" id="kpi-tareas">0</div></div>
+                <div class="kpi-card robots"><div class="kpi-title">Robots Activos</div><div class="kpi-value" id="kpi-robots">0</div></div>
+                <div class="kpi-card energia"><div class="kpi-title">Consumo (kw*h)</div><div class="kpi-value" id="kpi-energia">0</div></div>
+                <div class="kpi-card duracion"><div class="kpi-title">Duración total (h)</div><div class="kpi-value" id="kpi-duracion">0</div></div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card" onclick="abrirModalGrafico('chartAreaRobot', 'bar', '#0085CA', 'Área limpiada por Robot (m²)')">
+                    <span class="expand-icon">🔍 Ampliar</span>
+                    <h3>Área limpiada por Robot (m²)</h3><div class="chart-container"><canvas id="chartAreaRobot"></canvas></div>
+                </div>
+                <div class="chart-card" onclick="abrirModalGrafico('chartDuracionRobot', 'bar', '#8DC63F', 'Duración por Robot (h)')">
+                    <span class="expand-icon">🔍 Ampliar</span>
+                    <h3>Duración por Robot (h)</h3><div class="chart-container"><canvas id="chartDuracionRobot"></canvas></div>
+                </div>
+                <div class="chart-card" onclick="abrirModalGrafico('chartEnergiaRobot', 'bar', '#F59E0B', 'Consumo eléctrico por Robot')">
+                    <span class="expand-icon">🔍 Ampliar</span>
+                    <h3>Consumo eléctrico por Robot</h3><div class="chart-container"><canvas id="chartEnergiaRobot"></canvas></div>
+                </div>
+                <div class="chart-card" onclick="abrirModalGrafico('chartTareasRobot', 'bar', '#C25973', 'Tareas por Robot')">
+                    <span class="expand-icon">🔍 Ampliar</span>
+                    <h3>Tareas por Robot</h3><div class="chart-container"><canvas id="chartTareasRobot"></canvas></div>
+                </div>
+
+                <div class="chart-card" onclick="abrirModalGrafico('chartAreaTiempo', 'line', '#0085CA', 'Tendencia de Área limpiada')">
+                    <span class="expand-icon">🔍 Ampliar</span>
+                    <h3>Tendencia de Área limpiada</h3><div class="chart-container"><canvas id="chartAreaTiempo"></canvas></div>
+                </div>
+                <div class="chart-card" onclick="abrirModalGrafico('chartDuracionTiempo', 'line', '#8DC63F', 'Tendencia de Duración (h)')">
+                    <span class="expand-icon">🔍 Ampliar</span>
+                    <h3>Tendencia de Duración (h)</h3><div class="chart-container"><canvas id="chartDuracionTiempo"></canvas></div>
+                </div>
+                <div class="chart-card" onclick="abrirModalGrafico('chartEnergiaTiempo', 'line', '#F59E0B', 'Tendencia de Consumo')">
+                    <span class="expand-icon">🔍 Ampliar</span>
+                    <h3>Tendencia de Consumo</h3><div class="chart-container"><canvas id="chartEnergiaTiempo"></canvas></div>
+                </div>
+                <div class="chart-card" onclick="abrirModalGrafico('chartTareasTiempo', 'line', '#C25973', 'Tendencia de Tareas')">
+                    <span class="expand-icon">🔍 Ampliar</span>
+                    <h3>Tendencia de Tareas</h3><div class="chart-container"><canvas id="chartTareasTiempo"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-detalles" class="tab-content">
+            <h2 class="seccion-titulo">1. Alertas Operativas y Eficiencia</h2>
+            <div class="grid-alertas">
+                <div class="panel">
+                    <h3>Cumplimiento por Robot</h3>
+                    <p style="font-size: 0.8rem; color: #64748B; margin-bottom: 10px;">Semáforo de cumplimiento: Verde (≥95%), Amarillo (80-94%), Rojo (<80%).</p>
+                    <div class="lista-alertas" id="lista-criticos"></div>
+                </div>
+                <div class="panel">
+                    <h3>Consumo Energético (kw*h / m²)</h3>
+                    <p style="font-size: 0.8rem; color: #64748B; margin-bottom: 10px;">Indica cuánta electricidad gasta el robot para limpiar 1 m².</p>
+                    <div class="lista-alertas" id="lista-eficiencia"></div>
+                </div>
+            </div>
+
+            <h2 class="seccion-titulo">2. Ficha Técnica e Historial por Robot</h2>
+            <div class="panel ficha-tecnica-grid">
+                <div class="info-robot">
+                    <label style="font-size: 0.8rem; font-weight: bold;">Selecciona un Robot individual:</label>
+                    <select id="select-ficha-robot" class="buscador" style="margin-bottom: 15px;" onchange="actualizarFichaTecnica()"></select>
+                    <div id="ficha-datos"></div>
+                </div>
+                <div class="table-responsive" style="max-height: 250px;">
+                    <table id="tabla-historial-robot">
+                        <thead><tr><th>Fecha</th><th>Tienda</th><th>Real (m²)</th><th>Planificado (m²)</th><th>Cumplimiento</th><th>Tareas</th><th>Duración</th><th>Consumo (kw*h)</th></tr></thead>
+                        <tbody id="tbody-historial"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <h2 class="seccion-titulo">3. Tabla Maestra de Datos</h2>
+            <div class="panel">
+                <div class="herramientas-tabla">
+                    <input type="text" id="buscador-tabla" class="buscador" placeholder="Buscar (ej. Tienda, Robot, Estado)..." oninput="renderTable()">
+                    <button class="btn-excel" onclick="exportarExcel()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Exportar a Excel
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table id="tabla-maestra">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th><th>Tienda</th><th>Robot</th><th>Estado Envío</th>
+                                <th>Real (m²)</th><th>Plan. (m²)</th><th>Dif. (m²)</th>
+                                <th>Cumplimiento</th><th>Duración</th><th>Consumo (kw*h)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-maestra"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-resumen" class="tab-content">
+            <div class="herramientas-tabla">
+                <h2 class="seccion-titulo" style="margin: 0;">Informe General Consolidado</h2>
+                <button class="btn-pdf" onclick="generarPDF()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Descargar en PDF
+                </button>
+            </div>
+            
+            <div id="informe-a-pdf">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--color-azul-logo); padding-bottom: 10px;">
+                    <h2 style="font-family: 'Outfit'; color: var(--color-azul-logo); font-size: 1.8rem; margin:0;">INFORME DE GESTIÓN OPERATIVA</h2>
+                    <h4 id="pdf-rango-fechas" style="color: #64748B; margin:0;">Período</h4>
+                </div>
+
+                <h3 class="seccion-titulo" style="font-size: 1.1rem; margin-top: 15px;">1. Métricas Globales de Flota</h3>
+                <div class="kpis-grid" id="kpis-globales-resumen">
+                    </div>
+
+                <h3 class="seccion-titulo" style="font-size: 1.1rem; margin-top: 15px;">2. Diagnóstico Operativo</h3>
+                <div class="grid-alertas" id="tarjetas-ia-resumen">
+                    </div>
+
+                <h3 class="seccion-titulo" style="font-size: 1.1rem; margin-top: 15px;">3. Rendimiento Cronológico Diario</h3>
+                <div class="panel" style="padding: 0; box-shadow: none;">
+                    <div class="table-responsive">
+                        <table id="tabla-cronologica">
+                            <thead><tr><th>Fecha</th><th>Meta Planificada (m²)</th><th>Realizado Total (m²)</th><th>Cumplimiento Promedio</th></tr></thead>
+                            <tbody id="tbody-cronologica"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <div id="modal-grafico">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-titulo">Título del Gráfico</h2>
+                <button class="btn-cerrar" onclick="cerrarModalGrafico()">X Cerrar</button>
+            </div>
+            <div class="modal-body"><canvas id="canvas-modal"></canvas></div>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRsX3N7PJMeGrYmQ9HLQjixN8w5kuY2lTyTCpEX2hvm6d794iGXwFWQRsi8WQx4jEQ3BMv5FAtm2dg2/pub?gid=1959632094&single=true&output=csv"; 
+        
+        let datosGlobales = [];
+        let datosFiltradosActuales = []; 
+        let graficosInstancias = {};
+        let dataGraficosBase = {}; 
+        let chartModalInstancia = null;
+
+        // Variables para los selectores de Choices.js
+        let tiendaChoices, robotChoices;
+
+        function formatHorasMinutos(horasDecimales) {
+            if (!horasDecimales || isNaN(horasDecimales)) return "0h 0m";
+            const h = Math.floor(horasDecimales);
+            const m = Math.round((horasDecimales - h) * 60);
+            return `${h}h ${m}m`;
+        }
+
+        function cambiarPestana(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btnElement.classList.add('active');
+            
+            if (tabId === 'detalles') actualizarPestanaDetalles();
+            if (tabId === 'resumen') actualizarPestanaResumen();
+        }
+
+        // --- INICIALIZACIÓN ---
+        function inicializarDashboard() {
+            inicializarChoicesJS();
+
+            Papa.parse(GOOGLE_SHEET_CSV_URL, {
+                download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
+                complete: function(results) {
+                    if(results.data && results.data.length > 0 && results.data[0]['Apodo del robot']) {
+                        procesarDatos(results.data);
+                    } else { mostrarCargaManual(); }
+                },
+                error: function() { mostrarCargaManual(); }
+            });
+
+            document.getElementById('fecha-desde').addEventListener('change', aplicarFiltros);
+            document.getElementById('fecha-hasta').addEventListener('change', aplicarFiltros);
+        }
+
+        function inicializarChoicesJS() {
+            tiendaChoices = new Choices('#filtro-tienda', {
+                removeItemButton: true, searchEnabled: true,
+                searchPlaceholderValue: 'Buscar tienda...', placeholderValue: 'Todas las Tiendas', noResultsText: 'No se encontraron tiendas'
+            });
+
+            robotChoices = new Choices('#filtro-robot', {
+                removeItemButton: true, searchEnabled: true,
+                searchPlaceholderValue: 'Buscar robot...', placeholderValue: 'Todos los Robots', noResultsText: 'No se encontraron robots'
+            });
+
+            document.getElementById('filtro-tienda').addEventListener('change', () => {
+                actualizarDropdownRobots();
+                aplicarFiltros();
+            });
+            document.getElementById('filtro-robot').addEventListener('change', aplicarFiltros);
+        }
+
+        function mostrarCargaManual() {
+            document.getElementById("zona-carga-manual").style.display = "flex";
+            document.getElementById("csvFileInput").addEventListener("change", function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                Papa.parse(file, {
+                    header: true, dynamicTyping: true, skipEmptyLines: true,
+                    complete: function(results) {
+                        procesarDatos(results.data);
+                        document.getElementById("zona-carga-manual").style.display = "none";
+                    }
+                });
+            });
+        }
+
+        function procesarDatos(data) {
+            datosGlobales = data.filter(row => row['Apodo del robot']); 
+            const fechas = datosGlobales.map(d => d['Tiempo']).filter(Boolean).sort();
+            if(fechas.length > 0) {
+                document.getElementById('fecha-desde').value = fechas[0];
+                document.getElementById('fecha-hasta').value = fechas[fechas.length - 1];
+            }
+            poblarFiltrosIniciales();
+            aplicarFiltros(); 
+        }
+
+        // --- FILTROS GLOBALES ---
+        function poblarFiltrosIniciales() {
+            const tiendas = [...new Set(datosGlobales.map(d => d['Nombre de la tienda']))].filter(Boolean).sort();
+            const tiendasOptions = tiendas.map(t => ({ value: t, label: t }));
+            tiendaChoices.setChoices(tiendasOptions, 'value', 'label', true);
+            
+            actualizarDropdownRobots();
+        }
+
+        function actualizarDropdownRobots() {
+            const selectedTiendas = tiendaChoices.getValue(true); 
+            
+            let robots = selectedTiendas.length === 0 ? 
+                [...new Set(datosGlobales.map(d => d['Apodo del robot']))].filter(Boolean).sort() :
+                [...new Set(datosGlobales.filter(d => selectedTiendas.includes(d['Nombre de la tienda'])).map(d => d['Apodo del robot']))].filter(Boolean).sort();
+            
+            const selectedRobots = robotChoices.getValue(true);
+            const robotsOptions = robots.map(r => ({ value: r, label: r, selected: selectedRobots.includes(r) }));
+            
+            robotChoices.setChoices(robotsOptions, 'value', 'label', true);
+        }
+
+        function aplicarFiltros() {
+            const selectedTiendas = tiendaChoices.getValue(true);
+            const selectedRobots = robotChoices.getValue(true);
+            const fDesde = document.getElementById('fecha-desde').value;
+            const fHasta = document.getElementById('fecha-hasta').value;
+
+            datosFiltradosActuales = datosGlobales.filter(d => {
+                let matchTienda = selectedTiendas.length === 0 || selectedTiendas.includes(d['Nombre de la tienda']);
+                let matchRobot = selectedRobots.length === 0 || selectedRobots.includes(d['Apodo del robot']);
+                let matchFecha = true;
+                if (fDesde && d['Tiempo'] < fDesde) matchFecha = false;
+                if (fHasta && d['Tiempo'] > fHasta) matchFecha = false;
+                return matchTienda && matchRobot && matchFecha;
+            });
+            
+            actualizarDashboard(datosFiltradosActuales);
+            if (document.getElementById('tab-detalles').classList.contains('active')) actualizarPestanaDetalles();
+            if (document.getElementById('tab-resumen').classList.contains('active')) actualizarPestanaResumen();
+        }
+
+        function resetFilters() {
+            tiendaChoices.removeActiveItems();
+            robotChoices.removeActiveItems();
+            
+            const fechas = datosGlobales.map(d => d['Tiempo']).filter(Boolean).sort();
+            if(fechas.length > 0) {
+                document.getElementById('fecha-desde').value = fechas[0];
+                document.getElementById('fecha-hasta').value = fechas[fechas.length - 1];
+            }
+            actualizarDropdownRobots();
+            aplicarFiltros();
+        }
+
+        function actualizarDashboard(datos) {
+            let sumArea = 0, sumTareas = 0, sumEnergia = 0, sumDuracion = 0;
+            let robotsUnicos = new Set();
+
+            datos.forEach(d => {
+                sumArea += parseFloat(d['Área total limpiada (m²)']) || 0;
+                sumTareas += parseInt(d['Número de tareas']) || 0;
+                sumEnergia += parseFloat(d['Consumo de electricidad (kw*h)']) || 0;
+                sumDuracion += parseFloat(d['Duración total de la limpieza (h)']) || 0;
+                if(d['Apodo del robot']) robotsUnicos.add(d['Apodo del robot']);
+            });
+
+            document.getElementById('kpi-area').innerText = sumArea.toLocaleString('es-CO', {maximumFractionDigits: 2});
+            document.getElementById('kpi-tareas').innerText = sumTareas.toLocaleString('es-CO');
+            document.getElementById('kpi-robots').innerText = robotsUnicos.size;
+            document.getElementById('kpi-energia').innerText = sumEnergia.toLocaleString('es-CO', {maximumFractionDigits: 2});
+            document.getElementById('kpi-duracion').innerText = sumDuracion.toLocaleString('es-CO', {maximumFractionDigits: 2});
+
+            const agruparPor = (data, clave, sumador) => {
+                return data.reduce((acc, curr) => {
+                    const key = curr[clave] || 'N/A';
+                    acc[key] = (acc[key] || 0) + (parseFloat(curr[sumador]) || 0);
+                    return acc;
+                }, {});
+            };
+
+            const porRobot_Area = agruparPor(datos, 'Apodo del robot', 'Área total limpiada (m²)');
+            const porRobot_Duracion = agruparPor(datos, 'Apodo del robot', 'Duración total de la limpieza (h)');
+            const porRobot_Energia = agruparPor(datos, 'Apodo del robot', 'Consumo de electricidad (kw*h)');
+            const porRobot_Tareas = agruparPor(datos, 'Apodo del robot', 'Número de tareas');
+
+            const datosOrdenados = [...datos].sort((a, b) => new Date(a['Tiempo']) - new Date(b['Tiempo']));
+            const porTiempo_Area = agruparPor(datosOrdenados, 'Tiempo', 'Área total limpiada (m²)');
+            const porTiempo_Duracion = agruparPor(datosOrdenados, 'Tiempo', 'Duración total de la limpieza (h)');
+            const porTiempo_Energia = agruparPor(datosOrdenados, 'Tiempo', 'Consumo de electricidad (kw*h)');
+            const porTiempo_Tareas = agruparPor(datosOrdenados, 'Tiempo', 'Número de tareas');
+
+            dibujarGrafico('chartAreaRobot', 'bar', porRobot_Area, '#0085CA');
+            dibujarGrafico('chartDuracionRobot', 'bar', porRobot_Duracion, '#8DC63F');
+            dibujarGrafico('chartEnergiaRobot', 'bar', porRobot_Energia, '#F59E0B');
+            dibujarGrafico('chartTareasRobot', 'bar', porRobot_Tareas, '#C25973');
+
+            dibujarGrafico('chartAreaTiempo', 'line', porTiempo_Area, '#0085CA');
+            dibujarGrafico('chartDuracionTiempo', 'line', porTiempo_Duracion, '#8DC63F');
+            dibujarGrafico('chartEnergiaTiempo', 'line', porTiempo_Energia, '#F59E0B');
+            dibujarGrafico('chartTareasTiempo', 'line', porTiempo_Tareas, '#C25973');
+        }
+
+        function dibujarGrafico(idCanvas, tipo, dataObj, color) {
+            dataGraficosBase[idCanvas] = dataObj; 
+            const ctx = document.getElementById(idCanvas).getContext('2d');
+            if(graficosInstancias[idCanvas]) graficosInstancias[idCanvas].destroy(); 
+
+            graficosInstancias[idCanvas] = new Chart(ctx, {
+                type: tipo,
+                data: { labels: Object.keys(dataObj), datasets: [{ label: 'Total', data: Object.values(dataObj), backgroundColor: color, borderColor: color, borderWidth: 2, fill: tipo === 'line' ? false : true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 } } }, y: { beginAtZero: true } } }
+            });
+        }
+
+        function abrirModalGrafico(idCanvasOriginal, tipo, color, titulo) {
+            document.getElementById('modal-titulo').innerText = titulo;
+            document.getElementById('modal-grafico').style.display = 'flex';
+            const dataObj = dataGraficosBase[idCanvasOriginal];
+            const ctx = document.getElementById('canvas-modal').getContext('2d');
+            if(chartModalInstancia) chartModalInstancia.destroy();
+
+            chartModalInstancia = new Chart(ctx, {
+                type: tipo,
+                data: { labels: Object.keys(dataObj), datasets: [{ label: titulo, data: Object.values(dataObj), backgroundColor: color, borderColor: color, borderWidth: 2, fill: tipo === 'line' ? false : true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            });
+        }
+        function cerrarModalGrafico() { document.getElementById('modal-grafico').style.display = 'none'; }
+
+
+        // --- PESTAÑA 2: INFORMES DETALLADOS ---
+        function actualizarPestanaDetalles() {
+            calcularAlertas();
+            llenarFichaRobots();
+            renderTable();
+        }
+
+        function calcularAlertas() {
+            let robotStats = {};
+            datosFiltradosActuales.forEach(d => {
+                let r = d['Apodo del robot'];
+                if(!robotStats[r]) robotStats[r] = { real: 0, plan: 0, energia: 0 };
+                robotStats[r].real += parseFloat(d['Área total limpiada (m²)']) || 0;
+                robotStats[r].plan += parseFloat(d['Área de limpieza planificada (m²)']) || 0;
+                robotStats[r].energia += parseFloat(d['Consumo de electricidad (kw*h)']) || 0;
+            });
+
+            let htmlCriticos = "", htmlEficiencia = "";
+            let eficiencias = [], cumplimientos = [];
+
+            for (const [robot, stats] of Object.entries(robotStats)) {
+                let porc = stats.plan > 0 ? (stats.real / stats.plan) * 100 : 0;
+                cumplimientos.push({robot, porc});
+                let efi = stats.real > 0 ? (stats.energia / stats.real) : 0;
+                if(stats.real > 0) eficiencias.push({robot, efi});
+            }
+
+            cumplimientos.sort((a, b) => a.porc - b.porc);
+            cumplimientos.forEach(c => {
+                let claseAlerta = "alerta-verde"; 
+                if (c.porc < 80) claseAlerta = "alerta-roja";
+                else if (c.porc >= 80 && c.porc < 95) claseAlerta = "alerta-amarilla";
+                htmlCriticos += `<div class="alerta-item ${claseAlerta}"><strong>${c.robot}</strong> <span>${c.porc.toFixed(1)}% Cumplimiento</span></div>`;
+            });
+
+            eficiencias.sort((a, b) => b.efi - a.efi);
+            eficiencias.forEach(e => {
+                htmlEficiencia += `<div class="alerta-item alerta-neutral"><strong>${e.robot}</strong> <span>${e.efi.toFixed(4)} kw*h / m²</span></div>`;
+            });
+
+            document.getElementById('lista-criticos').innerHTML = htmlCriticos || "<p>No hay datos.</p>";
+            document.getElementById('lista-eficiencia').innerHTML = htmlEficiencia || "<p>No hay datos.</p>";
+        }
+
+        function llenarFichaRobots() {
+            const robots = [...new Set(datosFiltradosActuales.map(d => d['Apodo del robot']))].filter(Boolean).sort();
+            const select = document.getElementById('select-ficha-robot');
+            select.innerHTML = "";
+            robots.forEach(r => select.innerHTML += `<option value="${r}">${r}</option>`);
+            actualizarFichaTecnica(); 
+        }
+
+        function actualizarFichaTecnica() {
+            const robot = document.getElementById('select-ficha-robot').value;
+            const filaRobot = datosGlobales.find(d => d['Apodo del robot'] === robot);
+            if(!filaRobot) return;
+
+            document.getElementById('ficha-datos').innerHTML = `
+                <p><strong>Serie:</strong> ${filaRobot['SN(PID)'] || 'N/A'}</p>
+                <p><strong>MAC:</strong> ${filaRobot['MAC del robot'] || 'N/A'}</p>
+                <p><strong>Instalación:</strong> ${filaRobot['Hora de instalación de la tienda'] || 'N/A'}</p>
+            `;
+
+            const historial = datosFiltradosActuales.filter(d => d['Apodo del robot'] === robot).sort((a,b) => new Date(b['Tiempo']) - new Date(a['Tiempo']));
+            let tbody = "";
+            historial.forEach(h => {
+                const real = parseFloat(h['Área total limpiada (m²)']) || 0;
+                const plan = parseFloat(h['Área de limpieza planificada (m²)']) || 0;
+                const porc = plan > 0 ? (real / plan) * 100 : 0;
+                const consumo = parseFloat(h['Consumo de electricidad (kw*h)']) || 0;
+                const dur = parseFloat(h['Duración total de la limpieza (h)']) || 0;
+
+                let dot = '🟢';
+                if (porc < 80) dot = '🔴';
+                else if (porc < 95) dot = '🟡';
+
+                tbody += `<tr>
+                    <td>${h['Tiempo']}</td>
+                    <td>${h['Nombre de la tienda']}</td>
+                    <td>${real.toFixed(2)}</td>
+                    <td>${plan.toFixed(2)}</td>
+                    <td>${porc.toFixed(1)}% <span class="status-dot">${dot}</span></td>
+                    <td>${h['Número de tareas']||0}</td>
+                    <td>${formatHorasMinutos(dur)}</td>
+                    <td>${consumo.toFixed(2)}</td>
+                </tr>`;
+            });
+            document.getElementById('tbody-historial').innerHTML = tbody || "<tr><td colspan='8'>No hay tareas.</td></tr>";
+        }
+
+        function renderTable() {
+            const query = document.getElementById('buscador-tabla').value.toLowerCase();
+            let tbody = ""; let procesados = 0;
+            
+            for(let i = 0; i < datosFiltradosActuales.length; i++) {
+                let d = datosFiltradosActuales[i];
+                if (Object.values(d).join(" ").toLowerCase().includes(query)) {
+                    const real = parseFloat(d['Área total limpiada (m²)']) || 0;
+                    const plan = parseFloat(d['Área de limpieza planificada (m²)']) || 0;
+                    const dif = real - plan;
+                    const porc = plan > 0 ? (real / plan) * 100 : 0;
+                    const dur = parseFloat(d['Duración total de la limpieza (h)']) || 0;
+                    const consumo = parseFloat(d['Consumo de electricidad (kw*h)']) || 0;
+
+                    tbody += `<tr>
+                        <td>${d['Tiempo'] || ''}</td>
+                        <td>${d['Nombre de la tienda'] || ''}</td>
+                        <td>${d['Apodo del robot'] || ''}</td>
+                        <td>${d['Estado Envío'] || ''}</td>
+                        <td>${real.toFixed(2)}</td>
+                        <td>${plan.toFixed(2)}</td>
+                        <td>${dif > 0 ? '+' : ''}${dif.toFixed(2)}</td>
+                        <td>${porc.toFixed(1)}%</td>
+                        <td>${formatHorasMinutos(dur)}</td>
+                        <td>${consumo.toFixed(2)}</td>
+                    </tr>`;
+                    procesados++;
+                }
+                if (procesados >= 200) break;
+            }
+            document.getElementById('tbody-maestra').innerHTML = tbody || "<tr><td colspan='10'>No hay datos.</td></tr>";
+        }
+
+        function exportarExcel() {
+            const query = document.getElementById('buscador-tabla').value.toLowerCase();
+            let dataAExportar = datosFiltradosActuales.filter(d => Object.values(d).join(" ").toLowerCase().includes(query));
+            let datosLimpios = dataAExportar.map(d => {
+                const real = parseFloat(d['Área total limpiada (m²)']) || 0;
+                const plan = parseFloat(d['Área de limpieza planificada (m²)']) || 0;
+                return {
+                    "Fecha": d['Tiempo'], "Tienda": d['Nombre de la tienda'], "Robot": d['Apodo del robot'],
+                    "Real (m²)": real, "Plan (m²)": plan, "Diferencia": real - plan,
+                    "Cumplimiento": (plan > 0 ? (real / plan) * 100 : 0).toFixed(1) + "%",
+                    "Duración": formatHorasMinutos(parseFloat(d['Duración total de la limpieza (h)']) || 0),
+                    "Consumo (kw*h)": d['Consumo de electricidad (kw*h)']
+                };
+            });
+            const worksheet = XLSX.utils.json_to_sheet(datosLimpios);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Datos");
+            XLSX.writeFile(workbook, "Tabla_Maestra_Casalimpia.xlsx");
+        }
+
+
+        // --- PESTAÑA 3: RESUMEN EJECUTIVO PARA PDF ---
+        function actualizarPestanaResumen() {
+            if(datosFiltradosActuales.length === 0) return;
+
+            let statsGlobales = { plan:0, real:0, duracion:0, robots: new Set() };
+            let robotStats = {};
+            let cronoStats = {}; 
+
+            datosFiltradosActuales.forEach(d => {
+                const real = parseFloat(d['Área total limpiada (m²)']) || 0;
+                const plan = parseFloat(d['Área de limpieza planificada (m²)']) || 0;
+                const dur = parseFloat(d['Duración total de la limpieza (h)']) || 0;
+                const robot = d['Apodo del robot'];
+                const fecha = d['Tiempo'];
+
+                statsGlobales.plan += plan;
+                statsGlobales.real += real;
+                statsGlobales.duracion += dur;
+                statsGlobales.robots.add(robot);
+
+                if(!robotStats[robot]) robotStats[robot] = { real:0, plan:0 };
+                robotStats[robot].real += real;
+                robotStats[robot].plan += plan;
+
+                if(!cronoStats[fecha]) cronoStats[fecha] = { real:0, plan:0 };
+                cronoStats[fecha].real += real;
+                cronoStats[fecha].plan += plan;
+            });
+
+            let arrRobots = [];
+            for (const [r, stats] of Object.entries(robotStats)) {
+                let porc = stats.plan > 0 ? (stats.real / stats.plan) * 100 : 0;
+                arrRobots.push({robot: r, porc: porc, real: stats.real});
+            }
+
+            arrRobots.sort((a,b) => b.porc - a.porc); 
+            let robotEstrella = arrRobots[0];
+            let robotCritico = arrRobots[arrRobots.length - 1];
+            let brecha = statsGlobales.plan - statsGlobales.real;
+            let cumplimientoGlobal = statsGlobales.plan > 0 ? (statsGlobales.real / statsGlobales.plan) * 100 : 0;
+
+            let fDesde = document.getElementById('fecha-desde').value || "Inicio";
+            let fHasta = document.getElementById('fecha-hasta').value || "Fin";
+            document.getElementById('pdf-rango-fechas').innerText = `Período: ${fDesde} al ${fHasta}`;
+
+            document.getElementById('kpis-globales-resumen').innerHTML = `
+                <div class="kpi-card area"><div class="kpi-title">Meta Planificada</div><div class="kpi-value">${statsGlobales.plan.toLocaleString('es-CO', {maximumFractionDigits: 2})} m²</div></div>
+                <div class="kpi-card tareas"><div class="kpi-title">Área Limpiada</div><div class="kpi-value">${statsGlobales.real.toLocaleString('es-CO', {maximumFractionDigits: 2})} m²</div></div>
+                <div class="kpi-card robots"><div class="kpi-title">Robots en Flota</div><div class="kpi-value">${statsGlobales.robots.size}</div></div>
+                <div class="kpi-card energia"><div class="kpi-title">Cumplimiento</div><div class="kpi-value">${cumplimientoGlobal.toFixed(2)}%</div></div>
+                <div class="kpi-card duracion"><div class="kpi-title">Tiempo Total</div><div class="kpi-value">${formatHorasMinutos(statsGlobales.duracion)}</div></div>
+            `;
+
+            document.getElementById('tarjetas-ia-resumen').innerHTML = `
+                <div class="tarjeta-ia estrella">
+                    <h4 style="color:#64748B; font-size:0.8rem; margin:0;">ROBOT ESTRELLA DEL PERÍODO 🌟</h4>
+                    <p style="font-size:1.2rem; font-weight:bold; color:var(--color-texto); margin:5px 0;">${robotEstrella.robot}</p>
+                    <span style="color:#166534; font-weight:bold;">${robotEstrella.porc.toFixed(1)}% Cumplimiento (${robotEstrella.real.toFixed(2)} m²)</span>
+                </div>
+                <div class="tarjeta-ia critico">
+                    <h4 style="color:#64748B; font-size:0.8rem; margin:0;">ROBOT BAJO RENDIMIENTO ⚠️</h4>
+                    <p style="font-size:1.2rem; font-weight:bold; color:var(--color-texto); margin:5px 0;">${robotCritico.robot}</p>
+                    <span style="color:#991B1B; font-weight:bold;">${robotCritico.porc.toFixed(1)}% Cumplimiento (${robotCritico.real.toFixed(2)} m²)</span>
+                </div>
+                <div class="tarjeta-ia brecha">
+                    <h4 style="color:#64748B; font-size:0.8rem; margin:0;">BRECHA OPERATIVA 🎯</h4>
+                    <p style="font-size:1.2rem; font-weight:bold; color:var(--color-texto); margin:5px 0;">${brecha > 0 ? brecha.toLocaleString('es-CO', {maximumFractionDigits:2}) + ' m² Faltantes' : 'Meta cumplida al 100% 🎉'}</p>
+                    <span style="color:#A16207; font-weight:bold;">Para alcanzar el plan establecido.</span>
+                </div>
+            `;
+
+            let tbodyCrono = "";
+            let fechasArray = Object.keys(cronoStats).sort();
+            fechasArray.forEach(f => {
+                let st = cronoStats[f];
+                let cPorc = st.plan > 0 ? (st.real / st.plan) * 100 : 0;
+                let cDot = '🟢';
+                if (cPorc < 80) cDot = '🔴';
+                else if (cPorc < 95) cDot = '🟡';
+
+                tbodyCrono += `<tr>
+                    <td>${f}</td>
+                    <td>${st.plan.toLocaleString('es-CO', {maximumFractionDigits:2})}</td>
+                    <td>${st.real.toLocaleString('es-CO', {maximumFractionDigits:2})}</td>
+                    <td><strong>${cPorc.toFixed(1)}%</strong> <span class="status-dot">${cDot}</span></td>
+                </tr>`;
+            });
+            document.getElementById('tbody-cronologica').innerHTML = tbodyCrono;
+        }
+
+        // --- EXPORTAR PDF (Solución a paginación y cortes) ---
+        function generarPDF() {
+            const elemento = document.getElementById('informe-a-pdf');
+            
+            // Añadimos clase que quita los scrollbars para que html2canvas pinte la tabla completa
+            elemento.classList.add('pdf-export-mode');
+
+            const opciones = {
+                margin:       15,
+                filename:     'Reporte_Ejecutivo_SaberBot.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }, // Carta y Vertical
+                pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr' } // Evita cortar filas de tabla a la mitad
+            };
+
+            html2pdf().set(opciones).from(elemento).save().then(() => {
+                // Removemos la clase para que vuelva a la normalidad en pantalla
+                elemento.classList.remove('pdf-export-mode');
+            });
+        }
+
+        window.onload = inicializarDashboard;
+    </script>
+</body>
+</html>
