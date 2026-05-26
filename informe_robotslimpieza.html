@@ -55,41 +55,13 @@
         .input-group label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #E0F2FE; }
         .input-group input[type="date"] { padding: 8px 12px; border-radius: 5px; border: none; outline: none; font-family: 'Roboto', sans-serif; color: var(--color-texto); width: 100%; height: 38px; }
         
-        /* ESTILOS CORREGIDOS PARA CHOICES.JS EN EL BANNER */
+        /* CHOICES.JS ESTILOS */
         .choices { margin-bottom: 0; width: 100%; }
-        .choices__inner { 
-            min-height: 38px; 
-            max-height: 85px; /* Evita que crezca infinitamente hacia abajo */
-            overflow-y: auto; /* Agrega scroll si hay muchos seleccionados */
-            padding: 2px 8px; 
-            border-radius: 5px; 
-            background-color: white; 
-            border: none; 
-            font-family: 'Roboto', sans-serif; 
-            font-size: 0.9rem; 
-        }
-        /* Color de las letras al buscar y desplegar la lista */
+        .choices__inner { min-height: 38px; max-height: 85px; overflow-y: auto; padding: 2px 8px; border-radius: 5px; background-color: white; border: none; font-family: 'Roboto', sans-serif; font-size: 0.9rem; }
         .choices__input { color: #334155 !important; background-color: transparent !important; margin-bottom: 0; }
         .choices__list--dropdown .choices__item { color: #334155; font-size: 0.9rem; }
-        
-        /* Diseño de los elementos seleccionados (Píldoras) */
-        .choices__list--multiple .choices__item { 
-            background-color: var(--color-azul-logo); 
-            border: 1px solid #005f9e; 
-            border-radius: 20px; /* Bordes redondeados */
-            color: white; 
-            padding: 3px 10px;
-            margin: 2px 4px 2px 0;
-            font-size: 0.75rem;
-            display: inline-block;
-            max-width: 100%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis; /* Pone "..." si el texto es muy largo */
-            vertical-align: middle;
-        }
+        .choices__list--multiple .choices__item { background-color: var(--color-azul-logo); border: 1px solid #005f9e; border-radius: 20px; color: white; padding: 3px 10px; margin: 2px 4px 2px 0; font-size: 0.75rem; display: inline-block; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
         .choices__list--multiple .choices__item[data-deletable] { padding-right: 25px; }
-
         .btn-limpiar { background-color: transparent; border: 1px solid white; color: white; padding: 8px 15px; border-radius: 50px; cursor: pointer; font-weight: 600; transition: 0.3s; align-self: flex-start; margin-top: 20px; }
         .btn-limpiar:hover { background-color: white; color: var(--color-azul-logo); }
 
@@ -120,7 +92,7 @@
         .btn-cerrar { background: #EF4444; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .modal-body { flex: 1; position: relative; width: 100%; height: 100%; }
 
-        /* PESTAÑA 2: INFORMES DETALLADOS */
+        /* PESTAÑA 2 & 3: INFORMES DETALLADOS Y RESUMEN */
         .seccion-titulo { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); border-bottom: 2px solid var(--color-verde-logo); padding-bottom: 5px; margin: 20px 0 10px 0; }
         .grid-alertas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
         .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); }
@@ -160,10 +132,21 @@
         .tarjeta-ia.critico { border-left-color: #EF4444; }
         .tarjeta-ia.brecha { border-left-color: #F59E0B; }
 
-        /* CLASES ESPECIALES APLICADAS DURANTE LA GENERACIÓN DEL PDF PARA EVITAR CORTES */
+        /* AJUSTES EXACTOS PARA QUE EL PDF SE EXPORTE PERFECTAMENTE SIN CORTARSE */
+        .pdf-export-mode { padding: 10px !important; background: white !important; }
         .pdf-export-mode .table-responsive { max-height: none !important; overflow: visible !important; border: none !important; }
+        
+        /* LA CLAVE: Forzamos min-width a 0 para quitar los 900px artificiales */
+        .pdf-export-mode table { min-width: 0 !important; width: 100% !important; table-layout: auto !important; }
         .pdf-export-mode tr { page-break-inside: avoid !important; }
-        .pdf-export-mode { padding: 10px !important; }
+        
+        /* Reducimos ligeramente el espacio interno de las celdas para que se ajusten al texto */
+        .pdf-export-mode th, .pdf-export-mode td { 
+            white-space: normal !important; 
+            word-wrap: break-word !important; 
+            padding: 6px 4px !important; 
+            font-size: 11px !important; 
+        }
 
         @media (max-width: 1200px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } .ficha-tecnica-grid { grid-template-columns: 1fr; } }
         @media (max-width: 768px) {
@@ -281,6 +264,11 @@
                     <p style="font-size: 0.8rem; color: #64748B; margin-bottom: 10px;">Indica cuánta electricidad gasta el robot para limpiar 1 m².</p>
                     <div class="lista-alertas" id="lista-eficiencia"></div>
                 </div>
+                <div class="panel">
+                    <h3>Robots Inactivos (Ausencias)</h3>
+                    <p style="font-size: 0.8rem; color: #64748B; margin-bottom: 10px;">Fechas en las que los robots no reportaron limpieza.</p>
+                    <div class="lista-alertas" id="lista-inactivos"></div>
+                </div>
             </div>
 
             <h2 class="seccion-titulo">2. Ficha Técnica e Historial por Robot</h2>
@@ -338,15 +326,18 @@
                 </div>
 
                 <h3 class="seccion-titulo" style="font-size: 1.1rem; margin-top: 15px;">1. Métricas Globales de Flota</h3>
-                <div class="kpis-grid" id="kpis-globales-resumen">
-                    </div>
+                <div class="kpis-grid" id="kpis-globales-resumen"></div>
 
                 <h3 class="seccion-titulo" style="font-size: 1.1rem; margin-top: 15px;">2. Diagnóstico Operativo</h3>
-                <div class="grid-alertas" id="tarjetas-ia-resumen">
-                    </div>
+                <div class="grid-alertas" id="tarjetas-ia-resumen"></div>
 
-                <h3 class="seccion-titulo" style="font-size: 1.1rem; margin-top: 15px;">3. Rendimiento Cronológico Diario</h3>
-                <div class="panel" style="padding: 0; box-shadow: none;">
+                <h3 class="seccion-titulo" style="font-size: 1.1rem; margin-top: 15px;">3. Reporte de Inactividades Diarias</h3>
+                <div class="panel" style="padding: 15px; box-shadow: none; border: 1px solid #E2E8F0;">
+                    <div class="lista-alertas" id="lista-inactivos-resumen" style="max-height: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;"></div>
+                </div>
+
+                <h3 class="seccion-titulo" style="font-size: 1.1rem; margin-top: 15px;">4. Rendimiento Cronológico Diario</h3>
+                <div class="panel" style="padding: 0; box-shadow: none; border: none;">
                     <div class="table-responsive">
                         <table id="tabla-cronologica">
                             <thead><tr><th>Fecha</th><th>Meta Planificada (m²)</th><th>Realizado Total (m²)</th><th>Cumplimiento Promedio</th></tr></thead>
@@ -357,7 +348,9 @@
             </div>
         </div>
 
-    </div> <div id="modal-grafico">
+    </div>
+
+    <div id="modal-grafico">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modal-titulo">Título del Gráfico</h2>
@@ -376,7 +369,6 @@
         let dataGraficosBase = {}; 
         let chartModalInstancia = null;
 
-        // Variables para los selectores de Choices.js
         let tiendaChoices, robotChoices;
 
         function formatHorasMinutos(horasDecimales) {
@@ -396,10 +388,8 @@
             if (tabId === 'resumen') actualizarPestanaResumen();
         }
 
-        // --- INICIALIZACIÓN ---
         function inicializarDashboard() {
             inicializarChoicesJS();
-
             Papa.parse(GOOGLE_SHEET_CSV_URL, {
                 download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
@@ -458,25 +448,21 @@
             aplicarFiltros(); 
         }
 
-        // --- FILTROS GLOBALES ---
         function poblarFiltrosIniciales() {
             const tiendas = [...new Set(datosGlobales.map(d => d['Nombre de la tienda']))].filter(Boolean).sort();
             const tiendasOptions = tiendas.map(t => ({ value: t, label: t }));
             tiendaChoices.setChoices(tiendasOptions, 'value', 'label', true);
-            
             actualizarDropdownRobots();
         }
 
         function actualizarDropdownRobots() {
             const selectedTiendas = tiendaChoices.getValue(true); 
-            
             let robots = selectedTiendas.length === 0 ? 
                 [...new Set(datosGlobales.map(d => d['Apodo del robot']))].filter(Boolean).sort() :
                 [...new Set(datosGlobales.filter(d => selectedTiendas.includes(d['Nombre de la tienda'])).map(d => d['Apodo del robot']))].filter(Boolean).sort();
             
             const selectedRobots = robotChoices.getValue(true);
             const robotsOptions = robots.map(r => ({ value: r, label: r, selected: selectedRobots.includes(r) }));
-            
             robotChoices.setChoices(robotsOptions, 'value', 'label', true);
         }
 
@@ -588,10 +574,62 @@
         }
         function cerrarModalGrafico() { document.getElementById('modal-grafico').style.display = 'none'; }
 
+        // --- CÁLCULO INACTIVOS ---
+        function calcularInactivos(esResumen = false) {
+            let fechasActivas = [...new Set(datosFiltradosActuales.map(d => d['Tiempo']))].filter(Boolean).sort();
+            
+            const selectedTiendas = tiendaChoices.getValue(true);
+            const selectedRobots = robotChoices.getValue(true);
+            
+            let robotsAComprobar = [];
+            if (selectedRobots.length > 0) {
+                robotsAComprobar = selectedRobots;
+            } else if (selectedTiendas.length > 0) {
+                robotsAComprobar = [...new Set(datosGlobales.filter(d => selectedTiendas.includes(d['Nombre de la tienda'])).map(d => d['Apodo del robot']))];
+            } else {
+                robotsAComprobar = [...new Set(datosGlobales.map(d => d['Apodo del robot']))];
+            }
+
+            let diasTrabajados = {};
+            robotsAComprobar.forEach(r => diasTrabajados[r] = new Set());
+            datosFiltradosActuales.forEach(d => {
+                if (diasTrabajados[d['Apodo del robot']]) diasTrabajados[d['Apodo del robot']].add(d['Tiempo']);
+            });
+
+            let html = "";
+            let inactivosCount = 0;
+
+            robotsAComprobar.forEach(r => {
+                let faltan = [];
+                fechasActivas.forEach(f => {
+                    if (!diasTrabajados[r].has(f)) faltan.push(f);
+                });
+
+                if (faltan.length > 0) {
+                    inactivosCount++;
+                    let txtFechas = faltan.length > 5 
+                        ? faltan.slice(0, 5).join(', ') + ` ... (+${faltan.length - 5} días)` 
+                        : faltan.join(', ');
+                    
+                    html += `<div class="alerta-item alerta-roja" style="flex-direction: column; align-items: flex-start; gap: 5px;">
+                        <strong>${r}</strong> 
+                        <span style="font-size: 0.8rem;">❌ Ausencias: ${txtFechas}</span>
+                    </div>`;
+                }
+            });
+
+            if (inactivosCount === 0) {
+                html = "<div class='alerta-item alerta-verde'>✅ Todos los robots operaron sin interrupción.</div>";
+            }
+
+            if(esResumen) document.getElementById('lista-inactivos-resumen').innerHTML = html;
+            else document.getElementById('lista-inactivos').innerHTML = html;
+        }
 
         // --- PESTAÑA 2: INFORMES DETALLADOS ---
         function actualizarPestanaDetalles() {
             calcularAlertas();
+            calcularInactivos(false);
             llenarFichaRobots();
             renderTable();
         }
@@ -804,6 +842,8 @@
                 </div>
             `;
 
+            calcularInactivos(true);
+
             let tbodyCrono = "";
             let fechasArray = Object.keys(cronoStats).sort();
             fechasArray.forEach(f => {
@@ -823,11 +863,11 @@
             document.getElementById('tbody-cronologica').innerHTML = tbodyCrono;
         }
 
-        // --- EXPORTAR PDF (Solución a paginación y cortes) ---
+        // --- EXPORTAR PDF ---
         function generarPDF() {
             const elemento = document.getElementById('informe-a-pdf');
             
-            // Añadimos clase que quita los scrollbars para que html2canvas pinte la tabla completa
+            // Añadimos clase que quita los scrollbars para que html2canvas pinte la tabla completa y comprima las columnas
             elemento.classList.add('pdf-export-mode');
 
             const opciones = {
@@ -835,8 +875,8 @@
                 filename:     'Reporte_Ejecutivo_SaberBot.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }, // Carta y Vertical
-                pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr' } // Evita cortar filas de tabla a la mitad
+                jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }, 
+                pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr' } 
             };
 
             html2pdf().set(opciones).from(elemento).save().then(() => {
