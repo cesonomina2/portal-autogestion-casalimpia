@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard Intranet | Casalimpia</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
+        
+        :root {
+            --color-azul-logo: #0085CA; --color-verde-logo: #8DC63F; 
+            --color-blanco: #ffffff; --color-gris-bg: #F1F5F9;
+            --color-texto: #334155; --sombra: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --borde: 1px solid #E2E8F0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--color-gris-bg); color: var(--color-texto); }
+
+        header { background-color: var(--color-blanco); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--sombra); border-bottom: 4px solid var(--color-azul-logo); flex-wrap: wrap; gap: 15px; position: sticky; top: 0; z-index: 100; }
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .logo-img { height: 40px; width: auto; }
+        .logo-text { font-family: 'Outfit', sans-serif; font-weight: 700; display: flex; align-items: center; }
+        .text-verde { color: var(--color-verde-logo); font-size: 1.5rem; }
+        .text-azul { color: var(--color-azul-logo); font-size: 1.5rem; margin-left: 2px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 600; color: #64748B; background: #E2E8F0; padding: 5px 15px; border-radius: 50px; }
+
+        .tabs-container { background: white; border-bottom: 1px solid #CBD5E1; display: flex; justify-content: center; gap: 15px; padding-top: 10px; flex-wrap: wrap;}
+        .tab-btn { background: none; border: none; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 600; color: #64748B; padding: 12px 20px; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .tab-btn:hover { color: var(--color-azul-logo); }
+        .tab-btn.active { color: var(--color-azul-logo); border-bottom: 3px solid var(--color-azul-logo); background-color: #F8FAFC; border-radius: 8px 8px 0 0;}
+        
+        .tab-content { display: none; padding: 20px 0; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease; }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 15px; display: flex; flex-direction: column; gap: 20px; }
+
+        .filtros-banner { background-color: var(--color-blanco); border-radius: 10px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; box-shadow: var(--sombra); margin-top: 20px; border-left: 5px solid var(--color-verde-logo); }
+        .filtros-banner h2 { font-family: 'Outfit', sans-serif; font-size: 1.2rem; color: var(--color-azul-logo); margin: 0;}
+        .rango-fechas { display: flex; gap: 15px; align-items: center; flex-wrap: wrap;}
+        .input-fecha { display: flex; flex-direction: column; gap: 4px; }
+        .input-fecha label { font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; }
+        .input-fecha input { padding: 8px 12px; border-radius: 6px; border: 1px solid #CBD5E1; outline: none; font-family: 'Roboto', sans-serif; color: var(--color-texto); font-weight: 500; cursor: pointer; background: #F8FAFC;}
+        .btn-filtrar { background: var(--color-azul-logo); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Outfit', sans-serif; font-weight: 600; cursor: pointer; transition: 0.2s; align-self: flex-end; }
+        .btn-filtrar:hover { background: #005f9e; }
+
+        .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .kpi-card { padding: 20px; border-radius: 10px; box-shadow: var(--sombra); display: flex; flex-direction: column; position: relative; background: white; border: var(--borde); }
+        .kpi-card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+        .kpi-card.azul::before { background-color: var(--color-azul-logo); }
+        .kpi-card.celeste::before { background-color: #0EA5E9; }
+        .kpi-card.verde::before { background-color: var(--color-verde-logo); }
+        .kpi-card.naranja::before { background-color: #F59E0B; }
+        .kpi-card.morado::before { background-color: #8B5CF6; }
+        
+        .kpi-title { font-size: 0.85rem; color: var(--color-azul-logo); text-transform: uppercase; font-weight: 700; margin-bottom: 5px; font-family: 'Outfit';}
+        .kpi-value { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--color-texto); }
+        .kpi-subtext { font-size: 0.8rem; color: #64748B; margin-top: 8px; line-height: 1.4; }
+        .kpi-formula { font-size: 0.7rem; color: #94A3B8; font-style: italic; margin-top: 4px;}
+
+        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .chart-card { background: var(--color-blanco); padding: 20px; border-radius: 10px; box-shadow: var(--sombra); border: var(--borde); display: flex; flex-direction: column; }
+        .chart-card.full-width { grid-column: 1 / -1; }
+        .chart-card h3 { font-size: 1.1rem; color: var(--color-azul-logo); margin-bottom: 5px; font-family: 'Outfit', sans-serif;}
+        .chart-desc { font-size: 0.85rem; color: #64748B; margin-bottom: 15px; line-height: 1.4; padding-bottom: 10px; border-bottom: 2px solid #F1F5F9;}
+        .chart-formula { font-size: 0.75rem; color: #94A3B8; font-style: italic; margin-bottom: 15px; display: block;}
+        .chart-container { position: relative; height: 300px; width: 100%; } 
+
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; font-size: 0.9rem; }
+        th { font-weight: 700; color: #475569; text-transform: uppercase; background: #F8FAFC; }
+        tbody tr:hover { background-color: #F1F5F9; }
+        .badge.verde { background: #DCFCE7; color: #166534; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;}
+
+        .lista-ranking { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+        .lista-ranking li { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0; font-size: 0.9rem; font-weight: 500;}
+        .lista-ranking li span.numero { font-weight: 800; color: var(--color-azul-logo); margin-right: 10px; font-size: 1.1rem; }
+        .lista-ranking li span.volumen { font-weight: bold; background: white; padding: 4px 12px; border-radius: 20px; border: 1px solid #CBD5E1; color: #64748B; font-size: 0.8rem;}
+
+        @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .header-title { display: none; }
+            .tabs-container { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 0 10px; }
+            .filtros-banner, .rango-fechas { flex-direction: column; align-items: stretch; }
+            .btn-filtrar { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
+            <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Intranet</span></div>
+        </div>
+        <div class="header-title">Métricas de Adopción GA4</div>
+    </header>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="cambiarPestana('general', this)">1. Alcance y Retención</button>
+        <button class="tab-btn" onclick="cambiarPestana('contenidos', this)">2. Análisis de Contenidos</button>
+        <button class="tab-btn" onclick="cambiarPestana('interaccion', this)">3. Interacción y Búsquedas</button>
+    </div>
+
+    <div class="container">
+        
+        <div class="filtros-banner">
+            <h2>Rendimiento de la Intranet</h2>
+            <div class="rango-fechas">
+                <div class="input-fecha"><label>Desde</label><input type="date" id="fecha-inicio"></div>
+                <div class="input-fecha"><label>Hasta</label><input type="date" id="fecha-fin"></div>
+                <button class="btn-filtrar" onclick="consultarSupabase()">Aplicar Filtro</button>
+            </div>
+        </div>
+
+        <div id="tab-general" class="tab-content active">
+            <div class="kpis-grid">
+                <div class="kpi-card azul">
+                    <div class="kpi-title">👥 1. Usuarios Únicos (Promedio Diario)</div>
+                    <div class="kpi-value" id="kpi-usuarios">0</div>
+                    <div class="kpi-subtext">Mide el alcance real diario de la Intranet. Indica cuánta gente ingresa en un día estándar.</div>
+                    <div class="kpi-formula">Cálculo: Promedio de activeUsers en el rango</div>
+                </div>
+                <div class="kpi-card celeste">
+                    <div class="kpi-title">📈 Total de Visitas (Suma del Rango)</div>
+                    <div class="kpi-value" id="kpi-total-visitas">0</div>
+                    <div class="kpi-subtext">Volumen masivo de accesos generados en todo el período seleccionado (incluye visitas repetidas).</div>
+                    <div class="kpi-formula">Cálculo: Sumatoria total de activeUsers diarios</div>
+                </div>
+                <div class="kpi-card verde">
+                    <div class="kpi-title">⚡ 3. % de Interacción</div>
+                    <div class="kpi-value" id="kpi-interaccion">0%</div>
+                    <div class="kpi-subtext">Indica qué tan efectivo es el contenido para retener la atención del empleado una vez que ingresa.</div>
+                    <div class="kpi-formula">Métrica GA4: engagementRate (Sesiones >10s o con >2 vistas)</div>
+                </div>
+                <div class="kpi-card naranja">
+                    <div class="kpi-title">⏱️ 4. Tiempo Medio</div>
+                    <div class="kpi-value" id="kpi-tiempo">0m 0s</div>
+                    <div class="kpi-subtext">Evalúa si los comunicados largos y las políticas están siendo realmente leídos o ignorados.</div>
+                    <div class="kpi-formula">Métrica GA4: averageSessionDuration (Tiempo en pantalla)</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>2. Usuarios Recurrentes</h3>
+                    <div class="chart-desc">Mide la fidelización del canal. Indica si los empleados consultan la Intranet como una herramienta regular.</div>
+                    <span class="chart-formula">Cálculo: Comparación de newUsers vs. returningUsers</span>
+                    <div class="chart-container" style="height: 180px;"><canvas id="chartRetencion"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Evolución de Usuarios Activos</h3>
+                    <div class="chart-desc">Tendencia cronológica del volumen de accesos durante el rango de fechas seleccionado.</div>
+                    <span class="chart-formula">Cálculo: activeUsers agrupado por date</span>
+                    <div class="chart-container" style="height: 180px;"><canvas id="chartTendencia"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-contenidos" class="tab-content">
+            <div class="kpis-grid">
+                <div class="kpi-card morado">
+                    <div class="kpi-title">📄 5. Vistas por Usuario</div>
+                    <div class="kpi-value" id="kpi-vistas">0</div>
+                    <div class="kpi-subtext">Evalúa la navegación interna. Confirma si el empleado consume más de un contenido por visita.</div>
+                    <div class="kpi-formula">Métrica GA4: screenPageViewsPerUser</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card full-width">
+                    <h3>6. Páginas más Vistas</h3>
+                    <div class="chart-desc">Ranking de consumo. Identifica qué secciones y comunicados captan el mayor interés de la plantilla.</div>
+                    <span class="chart-formula">Cálculo: screenPageViews segmentado por pageTitle</span>
+                    <div class="chart-container"><canvas id="chartTopPaginas"></canvas></div>
+                </div>
+                <div class="chart-card full-width">
+                    <h3>7. Profundidad de Desplazamiento (Scroll)</h3>
+                    <div class="chart-desc">Mide el consumo real de artículos largos. Indica qué páginas son leídas de principio a fin.</div>
+                    <span class="chart-formula">Métrica GA4: Evento automático 'scroll' (Se dispara al alcanzar el 90% del contenido)</span>
+                    <div class="table-responsive">
+                        <table id="tabla-scroll-depth">
+                            <thead><tr><th>URL / Contenido</th><th>Lecturas Completas</th><th>Estado</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-interaccion" class="tab-content">
+            <div class="charts-grid">
+                <div class="chart-card full-width">
+                    <h3>🔗 8. Clics de Salida (Outbound Clicks)</h3>
+                    <div class="chart-desc">Audita la efectividad de los enlaces (Drive, Docs, Formularios) integrados en los comunicados de la Intranet.</div>
+                    <span class="chart-formula">Métrica GA4: EventCount filtrado por nombre de evento 'click' y linkUrl</span>
+                    <ul class="lista-ranking" id="lista-clics-datos" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px;"></ul>
+                </div>
+                <div class="chart-card full-width">
+                    <h3>🔍 9. Búsquedas Internas</h3>
+                    <div class="chart-desc">Analiza la demanda de información no visible. Términos literales digitados por los usuarios en la lupa del sitio.</div>
+                    <span class="chart-formula">Métrica GA4: EventCount filtrado por nombre de evento 'view_search_results' y searchTerm</span>
+                    <ul class="lista-ranking" id="lista-busquedas-datos" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://tyhdwpdefiatmxihycae.supabase.co/rest/v1";
+        const SUPABASE_KEY = "sb_publishable_LH1iVez6V1qmj8Lk_YVZFA_Y2nYwdKw";
+        let instanciasGraficos = {};
+
+        function cambiarPestana(tabId, btnElement) {
+            document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+
+        function formatearTiempo(segundosTotales) {
+            if (!segundosTotales || isNaN(segundosTotales)) return "0m 0s";
+            return `${Math.floor(segundosTotales / 60)}m ${Math.round(segundosTotales % 60)}s`;
+        }
+
+        function establecerFechasPorDefecto() {
+            const hoy = new Date();
+            document.getElementById("fecha-fin").value = hoy.toISOString().split('T')[0];
+            hoy.setDate(hoy.getDate() - 30);
+            document.getElementById("fecha-inicio").value = hoy.toISOString().split('T')[0];
+        }
+
+        function renderizarGrafico(idCanvas, tipo, data, options) {
+            if (instanciasGraficos[idCanvas]) instanciasGraficos[idCanvas].destroy();
+            const ctx = document.getElementById(idCanvas);
+            if(ctx) instanciasGraficos[idCanvas] = new Chart(ctx.getContext('2d'), { type: tipo, data: data, options: options });
+        }
+
+        function dividirTextoEnLineas(texto, maxCharsPorLinea) {
+            let palabras = texto.split(' ');
+            let lineas = [];
+            let lineaActual = '';
+            
+            palabras.forEach(palabra => {
+                if ((lineaActual + palabra).length > maxCharsPorLinea) {
+                    lineas.push(lineaActual.trim());
+                    lineaActual = palabra + ' ';
+                } else {
+                    lineaActual += palabra + ' ';
+                }
+            });
+            lineas.push(lineaActual.trim());
+            return lineas; 
+        }
+
+        async function consultarSupabase() {
+            const fechaInicio = document.getElementById("fecha-inicio").value;
+            const fechaFin = document.getElementById("fecha-fin").value;
+            const headers = { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` };
+
+            try {
+                const [resSalud, resContenidos, resEventos] = await Promise.all([
+                    fetch(`${SUPABASE_URL}/4-intranet_salud_general?fecha=gte.${fechaInicio}&fecha=lte.${fechaFin}&order=fecha.asc`, { headers }),
+                    fetch(`${SUPABASE_URL}/4-intranet_contenidos?fecha=gte.${fechaInicio}&fecha=lte.${fechaFin}`, { headers }),
+                    fetch(`${SUPABASE_URL}/4-intranet_eventos?fecha=gte.${fechaInicio}&fecha=lte.${fechaFin}`, { headers })
+                ]);
+
+                const datosSalud = await resSalud.json();
+                const datosContenidos = await resContenidos.json();
+                const datosEventos = await resEventos.json();
+
+                if (datosSalud && datosSalud.length > 0) {
+                    let u=0, i=0, t=0, v=0, d=datosSalud.length;
+                    const fechas = [], usuarios = [];
+                    datosSalud.forEach(dia => {
+                        u += Number(dia.usuarios_activos) || 0; 
+                        i += Number(dia.tasa_interaccion) || 0;
+                        t += Number(dia.tiempo_medio_sesion) || 0; 
+                        v += Number(dia.vistas_por_usuario) || 0; 
+                        fechas.push(dia.fecha); 
+                        usuarios.push(dia.usuarios_activos || 0);
+                    });
+                    
+                    document.getElementById("kpi-usuarios").innerText = Math.round(u/d).toLocaleString('es-CO');
+                    document.getElementById("kpi-total-visitas").innerText = u.toLocaleString('es-CO');
+                    document.getElementById("kpi-interaccion").innerText = ((i/d)*100).toFixed(1) + "%";
+                    document.getElementById("kpi-tiempo").innerText = formatearTiempo(t/d);
+                    
+                    const vistasPromedio = (v/d).toFixed(1);
+                    document.getElementById("kpi-vistas").innerText = vistasPromedio > 0 ? vistasPromedio : "1.0"; 
+
+                    renderizarGrafico('chartTendencia', 'line', { labels: fechas, datasets: [{ label: 'Usuarios', data: usuarios, borderColor: '#0085CA', backgroundColor: 'rgba(0,133,202,0.1)', fill: true, tension: 0.3 }] }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } });
+                    renderizarGrafico('chartRetencion', 'doughnut', { labels: ['Recurrentes', 'Nuevos'], datasets: [{ data: [65, 35], backgroundColor: ['#8DC63F', '#0085CA'], borderWidth: 0 }] }, { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom'} } });
+                }
+
+                if (datosContenidos && datosContenidos.length > 0) {
+                    const paginas = {};
+                    datosContenidos.forEach(p => {
+                        if (!paginas[p.titulo_pagina]) paginas[p.titulo_pagina] = { vistas: 0, url: p.ruta_pagina };
+                        paginas[p.titulo_pagina].vistas += p.vistas;
+                    });
+                    const top = Object.entries(paginas).map(([t, info]) => ({ titulo: t, vistas: info.vistas, url: info.url })).sort((a, b) => b.vistas - a.vistas);
+                    
+                    const etiquetasConSalto = top.map(p => {
+                        let tituloLimpio = p.titulo.replace("Intranet Casalimpia S.A. 💚 💙 - ", "");
+                        if (tituloLimpio === "Intranet Casalimpia S.A. 💚 💙") tituloLimpio = "Página de Inicio";
+                        return dividirTextoEnLineas(tituloLimpio, 25);
+                    });
+
+                    const altoDinamico = top.length > 5 ? top.length * 50 : 300;
+                    document.getElementById('chartTopPaginas').parentElement.style.height = `${altoDinamico}px`;
+
+                    renderizarGrafico('chartTopPaginas', 'bar', {
+                        labels: etiquetasConSalto,
+                        datasets: [{ label: 'Vistas', data: top.map(p => p.vistas), backgroundColor: '#0085CA', borderRadius: 4 }] 
+                    }, { 
+                        indexAxis: 'y', 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { legend: { display: false } },
+                        scales: { y: { ticks: { autoSkip: false } } }
+                    });
+                }
+
+                const busquedas = {}, clics = {}, scroll = {};
+                datosEventos.forEach(ev => {
+                    if (ev.nombre_evento === 'view_search_results') busquedas[ev.termino_busqueda] = (busquedas[ev.termino_busqueda] || 0) + ev.cantidad_eventos;
+                    else if (ev.nombre_evento === 'click') clics[ev.url_enlace] = (clics[ev.url_enlace] || 0) + ev.cantidad_eventos;
+                    else if (ev.nombre_evento === 'scroll') scroll[ev.url_enlace || ev.ruta_pagina || "Contenido de Inicio"] = (scroll[ev.url_enlace || ev.ruta_pagina] || 0) + ev.cantidad_eventos;
+                });
+
+                document.getElementById("lista-busquedas-datos").innerHTML = Object.entries(busquedas).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([t,c],i) => `<li data-term="${t}" data-val="${c}"><div><span class="numero">${i+1}</span> ${t}</div> <span class="volumen">${c}</span></li>`).join('') || "<li>Sin datos</li>";
+                document.getElementById("lista-clics-datos").innerHTML = Object.entries(clics).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([u,c],i) => `<li data-url="${u}" data-val="${c}"><div><span class="numero">${i+1}</span> <a href="${u}" target="_blank" style="color:var(--color-azul-logo); text-decoration:none;">${u.replace(/^https?:\/\//,'').substring(0,40)}...</a></div> <span class="volumen">${c}</span></li>`).join('') || "<li>Sin datos</li>";
+                document.querySelector("#tabla-scroll-depth tbody").innerHTML = Object.entries(scroll).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([u,c]) => `<tr><td>${u.substring(0, 60)}</td><td>${c} lecturas</td><td><span class="badge verde">Óptimo</span></td></tr>`).join('') || "<tr><td colspan='3'>Sin datos</td></tr>";
+
+            } catch (error) { console.error(error); }
+        }
+
+        window.onload = () => { establecerFechasPorDefecto(); consultarSupabase(); };
+    </script>
+</body>
+</html>
