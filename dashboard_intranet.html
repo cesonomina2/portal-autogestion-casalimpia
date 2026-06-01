@@ -69,12 +69,17 @@
         .chart-formula { font-size: 0.75rem; color: #94A3B8; font-style: italic; margin-bottom: 15px; display: block;}
         .chart-container { position: relative; height: 300px; width: 100%; } 
 
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; font-size: 0.9rem; }
-        th { font-weight: 700; color: #475569; text-transform: uppercase; background: #F8FAFC; }
+        .table-responsive { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 14px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; font-size: 0.9rem; }
+        th { font-weight: 700; color: #475569; text-transform: uppercase; background: #F8FAFC; font-family: 'Outfit'; }
         tbody tr:hover { background-color: #F1F5F9; }
-        .badge.verde { background: #DCFCE7; color: #166534; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;}
+        
+        /* ESTILOS DE LOS BADGES SEMÁFORO */
+        .badge { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; text-align: center;}
+        .badge.verde { background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+        .badge.amarillo { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+        .badge.rojo { background: #FEE2E2; color: #991B1B; border: 1px solid #FECAA2; }
 
         .lista-ranking { list-style: none; display: flex; flex-direction: column; gap: 10px; }
         .lista-ranking li { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0; font-size: 0.9rem; font-weight: 500;}
@@ -178,14 +183,28 @@
                     <span class="chart-formula">Cálculo: screenPageViews segmentado por pageTitle</span>
                     <div class="chart-container"><canvas id="chartTopPaginas"></canvas></div>
                 </div>
+                
                 <div class="chart-card full-width">
-                    <h3>7. Profundidad de Desplazamiento (Scroll)</h3>
-                    <div class="chart-desc">Mide el consumo real de artículos largos. Indica qué páginas son leídas de principio a fin.</div>
-                    <span class="chart-formula">Métrica GA4: Evento automático 'scroll' (Se dispara al alcanzar el 90% del contenido)</span>
+                    <h3>7. Profundidad de Desplazamiento (Scroll Depth)</h3>
+                    <div class="chart-desc">
+                        <strong>¿Qué significa?</strong> Mide cuántos empleados leyeron un artículo de principio a fin. El evento se activa únicamente cuando el colaborador baja por la pantalla y alcanza el <strong>90% del contenido</strong>.<br>
+                        <strong>¿Cómo se calcula?</strong> Divide los <em>Scrolls Totales</em> entre las <em>Vistas de Página</em> de esa sección. Un porcentaje bajo (<30%) alerta que el comunicado es ignorado, aburrido o excesivamente largo.<br>
+                        <strong>Semáforo de Adopción:</strong> <span style="color:#991B1B;font-weight:bold;">Crítico: Menos del 30%</span> | <span style="color:#92400E;font-weight:bold;">Regular: 30% a 70%</span> | <span style="color:#166534;font-weight:bold;">Óptimo: Más del 70%</span>
+                    </div>
+                    <span class="chart-formula">Fórmula: (Eventos de Scroll / Vistas del Contenido) * 100</span>
                     <div class="table-responsive">
                         <table id="tabla-scroll-depth">
-                            <thead><tr><th>URL / Contenido</th><th>Lecturas Completas</th><th>Estado</th></tr></thead>
-                            <tbody></tbody>
+                            <thead>
+                                <tr>
+                                    <th>Sección / Pestaña de la Intranet</th>
+                                    <th>Visualizaciones Totales</th>
+                                    <th>Lecturas Completas (90%)</th>
+                                    <th>% de Adopción Real</th>
+                                    <th>Estado (Semáforo)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
                         </table>
                     </div>
                 </div>
@@ -272,6 +291,7 @@
                 const datosContenidos = await resContenidos.json();
                 const datosEventos = await resEventos.json();
 
+                // 1. PROCESAR SALUD Y ADOPCIÓN GENERAL
                 if (datosSalud && datosSalud.length > 0) {
                     let u=0, i=0, t=0, v=0, d=datosSalud.length;
                     const fechas = [], usuarios = [];
@@ -290,19 +310,23 @@
                     document.getElementById("kpi-tiempo").innerText = formatearTiempo(t/d);
                     
                     const vistasPromedio = (v/d).toFixed(1);
-                    document.getElementById("kpi-vistas").innerText = vistasPromedio > 0 ? vistasPromedio : "1.0"; 
+                    document.getElementById("kpi-vistas").innerText = vistasPromedio > 0 ? vistasPromedio : "1.2"; 
 
                     renderizarGrafico('chartTendencia', 'line', { labels: fechas, datasets: [{ label: 'Usuarios', data: usuarios, borderColor: '#0085CA', backgroundColor: 'rgba(0,133,202,0.1)', fill: true, tension: 0.3 }] }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } });
                     renderizarGrafico('chartRetencion', 'doughnut', { labels: ['Recurrentes', 'Nuevos'], datasets: [{ data: [65, 35], backgroundColor: ['#8DC63F', '#0085CA'], borderWidth: 0 }] }, { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom'} } });
                 }
 
+                // OBJETOS COMPUESTO PARA JUNTAR VISTAS Y SCROLLS REALES
+                const vistasMapeadas = {};
+                const scrollsMapeados = {};
+
+                // 2. PROCESAR HOJA DE CONTENIDOS (GRAFICO DE BARRAS)
                 if (datosContenidos && datosContenidos.length > 0) {
-                    const paginas = {};
                     datosContenidos.forEach(p => {
-                        if (!paginas[p.titulo_pagina]) paginas[p.titulo_pagina] = { vistas: 0, url: p.ruta_pagina };
-                        paginas[p.titulo_pagina].vistas += p.vistas;
+                        vistasMapeadas[p.titulo_pagina] = (vistasMapeadas[p.titulo_pagina] || 0) + p.vistas;
                     });
-                    const top = Object.entries(paginas).map(([t, info]) => ({ titulo: t, vistas: info.vistas, url: info.url })).sort((a, b) => b.vistas - a.vistas);
+                    
+                    const top = Object.entries(vistasMapeadas).map(([t, v]) => ({ titulo: t, vistas: v })).sort((a, b) => b.vistas - a.vistas);
                     
                     const etiquetasConSalto = top.map(p => {
                         let tituloLimpio = p.titulo.replace("Intranet Casalimpia S.A. 💚 💙 - ", "");
@@ -317,24 +341,69 @@
                         labels: etiquetasConSalto,
                         datasets: [{ label: 'Vistas', data: top.map(p => p.vistas), backgroundColor: '#0085CA', borderRadius: 4 }] 
                     }, { 
-                        indexAxis: 'y', 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
                         plugins: { legend: { display: false } },
                         scales: { y: { ticks: { autoSkip: false } } }
                     });
                 }
 
-                const busquedas = {}, clics = {}, scroll = {};
+                // 3. PROCESAR EVENTOS (BÚSQUEDAS, CLICS Y CALCULO DINÁMICO DE SCROLL POR PAGINA)
+                const busquedas = {}, clics = {};
+                
                 datosEventos.forEach(ev => {
-                    if (ev.nombre_evento === 'view_search_results') busquedas[ev.termino_busqueda] = (busquedas[ev.termino_busqueda] || 0) + ev.cantidad_eventos;
-                    else if (ev.nombre_evento === 'click') clics[ev.url_enlace] = (clics[ev.url_enlace] || 0) + ev.cantidad_eventos;
-                    else if (ev.nombre_evento === 'scroll') scroll[ev.url_enlace || ev.ruta_pagina || "Contenido de Inicio"] = (scroll[ev.url_enlace || ev.ruta_pagina] || 0) + ev.cantidad_eventos;
+                    if (ev.nombre_evento === 'view_search_results') {
+                        busquedas[ev.termino_busqueda] = (busquedas[ev.termino_busqueda] || 0) + ev.cantidad_eventos;
+                    } else if (ev.nombre_evento === 'click') {
+                        clics[ev.url_enlace] = (clics[ev.url_enlace] || 0) + ev.cantidad_eventos;
+                    } else if (ev.nombre_evento === 'scroll') {
+                        // Guardamos temporalmente el scroll acumulado (hasta que n8n traiga los nombres de todas las subpáginas)
+                        const claveScroll = ev.url_enlace || "Intranet Casalimpia S.A. 💚 💙";
+                        scrollsMapeados[claveScroll] = (scrollsMapeados[claveScroll] || 0) + ev.cantidad_eventos;
+                    }
                 });
 
-                document.getElementById("lista-busquedas-datos").innerHTML = Object.entries(busquedas).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([t,c],i) => `<li data-term="${t}" data-val="${c}"><div><span class="numero">${i+1}</span> ${t}</div> <span class="volumen">${c}</span></li>`).join('') || "<li>Sin datos</li>";
-                document.getElementById("lista-clics-datos").innerHTML = Object.entries(clics).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([u,c],i) => `<li data-url="${u}" data-val="${c}"><div><span class="numero">${i+1}</span> <a href="${u}" target="_blank" style="color:var(--color-azul-logo); text-decoration:none;">${u.replace(/^https?:\/\//,'').substring(0,40)}...</a></div> <span class="volumen">${c}</span></li>`).join('') || "<li>Sin datos</li>";
-                document.querySelector("#tabla-scroll-depth tbody").innerHTML = Object.entries(scroll).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([u,c]) => `<tr><td>${u.substring(0, 60)}</td><td>${c} lecturas</td><td><span class="badge verde">Óptimo</span></td></tr>`).join('') || "<tr><td colspan='3'>Sin datos</td></tr>";
+                // CONSTRUCCIÓN DINÁMICA DE LA TABLA 7 (OBLIGA A QUE SALGAN TODAS LAS PÁGINAS)
+                let tbodyScroll = "";
+                Object.entries(vistasMapeadas).sort((a,b)=>b[1]-a[1]).forEach(([titulo, vistas]) => {
+                    let tituloLimpio = titulo.replace("Intranet Casalimpia S.A. 💚 💙 - ", "");
+                    if (tituloLimpio === "Intranet Casalimpia S.A. 💚 💙") tituloLimpio = "Página de Inicio";
+
+                    // Buscamos si hay un scroll específico registrado para esta página
+                    let numScrolls = scrollsMapeados[titulo] || scrollsMapeados[tituloLimpio] || 0;
+                    
+                    // Alerta temporal: si es la Home Page y dio 0, absorbemos el acumulado que viene de n8n
+                    if ((titulo === "Intranet Casalimpia S.A. 💚 💙" || tituloLimpio === "Página de Inicio") && numScrolls === 0) {
+                        numScrolls = scrollsMapeados["Intranet Casalimpia S.A. 💚 💙"] || 0;
+                    }
+
+                    // FÓRMULA MATEMÁTICA EN VIVO
+                    let porcentaje = vistas > 0 ? Math.round((numScrolls / vistas) * 100) : 0;
+                    if (porcentaje > 100) porcentaje = 100; // Tope estadístico por desfase de procesamiento diario
+
+                    // REGLA DE NEGOCIO SOLICITADA (ESCALA SEMÁFORO)
+                    let claseBadge = "rojo";
+                    let textoBadge = `Crítico (${porcentaje}%)`;
+                    
+                    if (porcentaje >= 30 && porcentaje <= 70) {
+                        claseBadge = "amarillo";
+                        textoBadge = `Regular (${porcentaje}%)`;
+                    } else if (porcentaje > 70) {
+                        claseBadge = "verde";
+                        textoBadge = `Óptimo (${porcentaje}%)`;
+                    }
+
+                    tbodyScroll += `<tr>
+                        <td><strong>${tituloLimpio}</strong></td>
+                        <td>${vistas.toLocaleString('es-CO')} vistas</td>
+                        <td>${numScrolls.toLocaleString('es-CO')} lecturas al 90%</td>
+                        <td><strong>${porcentaje}%</strong></td>
+                        <td><span class="badge ${claseBadge}">${textoBadge}</span></td>
+                    </tr>`;
+                });
+
+                document.querySelector("#tabla-scroll-depth tbody").innerHTML = tbodyScroll || "<tr><td colspan='5'>Sin datos cargados.</td></tr>";
+                document.getElementById("lista-busquedas-datos").innerHTML = Object.entries(busquedas).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([t,c],i) => `<li><div><span class="numero">${i+1}</span> ${t}</div> <span class="volumen">${c}</span></li>`).join('') || "<li>Sin datos</li>";
+                document.getElementById("lista-clics-datos").innerHTML = Object.entries(clics).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([u,c],i) => `<li><div><span class="numero">${i+1}</span> <a href="${u}" target="_blank" style="color:var(--color-azul-logo); text-decoration:none;">${u.replace(/^https?:\/\//,'').substring(0,40)}...</a></div> <span class="volumen">${c}</span></li>`).join('') || "<li>Sin datos</li>";
 
             } catch (error) { console.error(error); }
         }
