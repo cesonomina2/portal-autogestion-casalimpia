@@ -75,16 +75,24 @@
         th { font-weight: 700; color: #475569; text-transform: uppercase; background: #F8FAFC; font-family: 'Outfit'; }
         tbody tr:hover { background-color: #F1F5F9; }
         
-        /* ESTILOS DE LOS BADGES SEMÁFORO */
         .badge { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; text-align: center;}
         .badge.verde { background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
         .badge.amarillo { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
         .badge.rojo { background: #FEE2E2; color: #991B1B; border: 1px solid #FECAA2; }
 
+        /* ARREGLO DE TEXTOS DESBORDADOS EN LISTAS */
         .lista-ranking { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .lista-ranking li { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0; font-size: 0.9rem; font-weight: 500;}
-        .lista-ranking li span.numero { font-weight: 800; color: var(--color-azul-logo); margin-right: 10px; font-size: 1.1rem; }
-        .lista-ranking li span.volumen { font-weight: bold; background: white; padding: 4px 12px; border-radius: 20px; border: 1px solid #CBD5E1; color: #64748B; font-size: 0.8rem;}
+        .lista-ranking li { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0; font-size: 0.9rem; font-weight: 500; gap: 15px;}
+        
+        /* Contenedor del enlace para evitar que empuje los números */
+        .lista-ranking li > div { flex: 1; min-width: 0; display: flex; align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* El enlace en sí (corta con ... si es muy largo) */
+        .lista-ranking li a { color: var(--color-azul-logo); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .lista-ranking li a:hover { text-decoration: underline; }
+        
+        .lista-ranking li span.numero { font-weight: 800; color: var(--color-azul-logo); margin-right: 10px; font-size: 1.1rem; flex-shrink: 0; }
+        .lista-ranking li span.volumen { font-weight: bold; background: white; padding: 4px 12px; border-radius: 20px; border: 1px solid #CBD5E1; color: #64748B; font-size: 0.8rem; flex-shrink: 0;}
 
         @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
         @media (max-width: 768px) {
@@ -204,7 +212,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                </tbody>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -291,7 +299,6 @@
                 const datosContenidos = await resContenidos.json();
                 const datosEventos = await resEventos.json();
 
-                // 1. PROCESAR SALUD Y ADOPCIÓN GENERAL
                 if (datosSalud && datosSalud.length > 0) {
                     let u=0, i=0, t=0, v=0, d=datosSalud.length;
                     const fechas = [], usuarios = [];
@@ -316,11 +323,9 @@
                     renderizarGrafico('chartRetencion', 'doughnut', { labels: ['Recurrentes', 'Nuevos'], datasets: [{ data: [65, 35], backgroundColor: ['#8DC63F', '#0085CA'], borderWidth: 0 }] }, { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom'} } });
                 }
 
-                // OBJETOS COMPUESTO PARA JUNTAR VISTAS Y SCROLLS REALES
                 const vistasMapeadas = {};
                 const scrollsMapeados = {};
 
-                // 2. PROCESAR HOJA DE CONTENIDOS (GRAFICO DE BARRAS)
                 if (datosContenidos && datosContenidos.length > 0) {
                     datosContenidos.forEach(p => {
                         vistasMapeadas[p.titulo_pagina] = (vistasMapeadas[p.titulo_pagina] || 0) + p.vistas;
@@ -347,7 +352,6 @@
                     });
                 }
 
-                // 3. PROCESAR EVENTOS (BÚSQUEDAS, CLICS Y CALCULO DINÁMICO DE SCROLL POR PAGINA)
                 const busquedas = {}, clics = {};
                 
                 datosEventos.forEach(ev => {
@@ -356,41 +360,27 @@
                     } else if (ev.nombre_evento === 'click') {
                         clics[ev.url_enlace] = (clics[ev.url_enlace] || 0) + ev.cantidad_eventos;
                     } else if (ev.nombre_evento === 'scroll') {
-                        // Guardamos temporalmente el scroll acumulado (hasta que n8n traiga los nombres de todas las subpáginas)
                         const claveScroll = ev.url_enlace || "Intranet Casalimpia S.A. 💚 💙";
                         scrollsMapeados[claveScroll] = (scrollsMapeados[claveScroll] || 0) + ev.cantidad_eventos;
                     }
                 });
 
-                // CONSTRUCCIÓN DINÁMICA DE LA TABLA 7 (OBLIGA A QUE SALGAN TODAS LAS PÁGINAS)
                 let tbodyScroll = "";
                 Object.entries(vistasMapeadas).sort((a,b)=>b[1]-a[1]).forEach(([titulo, vistas]) => {
                     let tituloLimpio = titulo.replace("Intranet Casalimpia S.A. 💚 💙 - ", "");
                     if (tituloLimpio === "Intranet Casalimpia S.A. 💚 💙") tituloLimpio = "Página de Inicio";
 
-                    // Buscamos si hay un scroll específico registrado para esta página
                     let numScrolls = scrollsMapeados[titulo] || scrollsMapeados[tituloLimpio] || 0;
-                    
-                    // Alerta temporal: si es la Home Page y dio 0, absorbemos el acumulado que viene de n8n
                     if ((titulo === "Intranet Casalimpia S.A. 💚 💙" || tituloLimpio === "Página de Inicio") && numScrolls === 0) {
                         numScrolls = scrollsMapeados["Intranet Casalimpia S.A. 💚 💙"] || 0;
                     }
 
-                    // FÓRMULA MATEMÁTICA EN VIVO
                     let porcentaje = vistas > 0 ? Math.round((numScrolls / vistas) * 100) : 0;
-                    if (porcentaje > 100) porcentaje = 100; // Tope estadístico por desfase de procesamiento diario
+                    if (porcentaje > 100) porcentaje = 100; 
 
-                    // REGLA DE NEGOCIO SOLICITADA (ESCALA SEMÁFORO)
-                    let claseBadge = "rojo";
-                    let textoBadge = `Crítico (${porcentaje}%)`;
-                    
-                    if (porcentaje >= 30 && porcentaje <= 70) {
-                        claseBadge = "amarillo";
-                        textoBadge = `Regular (${porcentaje}%)`;
-                    } else if (porcentaje > 70) {
-                        claseBadge = "verde";
-                        textoBadge = `Óptimo (${porcentaje}%)`;
-                    }
+                    let claseBadge = "rojo"; let textoBadge = `Crítico (${porcentaje}%)`;
+                    if (porcentaje >= 30 && porcentaje <= 70) { claseBadge = "amarillo"; textoBadge = `Regular (${porcentaje}%)`; }
+                    else if (porcentaje > 70) { claseBadge = "verde"; textoBadge = `Óptimo (${porcentaje}%)`; }
 
                     tbodyScroll += `<tr>
                         <td><strong>${tituloLimpio}</strong></td>
@@ -402,8 +392,11 @@
                 });
 
                 document.querySelector("#tabla-scroll-depth tbody").innerHTML = tbodyScroll || "<tr><td colspan='5'>Sin datos cargados.</td></tr>";
+                
+                // MEJORA: El navegador cortará automáticamente el enlace con ... sin romper la caja, 
+                // y si el usuario pasa el mouse, podrá leer la URL entera gracias al atributo 'title'.
                 document.getElementById("lista-busquedas-datos").innerHTML = Object.entries(busquedas).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([t,c],i) => `<li><div><span class="numero">${i+1}</span> ${t}</div> <span class="volumen">${c}</span></li>`).join('') || "<li>Sin datos</li>";
-                document.getElementById("lista-clics-datos").innerHTML = Object.entries(clics).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([u,c],i) => `<li><div><span class="numero">${i+1}</span> <a href="${u}" target="_blank" style="color:var(--color-azul-logo); text-decoration:none;">${u.replace(/^https?:\/\//,'').substring(0,40)}...</a></div> <span class="volumen">${c}</span></li>`).join('') || "<li>Sin datos</li>";
+                document.getElementById("lista-clics-datos").innerHTML = Object.entries(clics).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([u,c],i) => `<li><div><span class="numero">${i+1}</span> <a href="${u}" target="_blank" title="${u}">${u.replace(/^https?:\/\//,'')}</a></div> <span class="volumen">${c}</span></li>`).join('') || "<li>Sin datos</li>";
 
             } catch (error) { console.error(error); }
         }
