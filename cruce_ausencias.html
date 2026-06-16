@@ -193,31 +193,25 @@
                 let hallazgos = [];
                 let cedulasUnicas = new Set();
 
-                // Procesar SIC
+                // 2.1 Crear un "Diccionario" de SIC (Solo para consultar, NO genera alertas directas)
                 let ausentismosSIC = [];
                 dataSic.forEach(row => {
                     let proceso = row["Proceso"] || row["B"] || ""; 
                     let estado = row["Estado"] || row["AG"] || "";
                     let cedula = row["Cedula"] || row["J"] || "";
-                    let nombre = row["Nombre"] || row["K"] || "";
                     let fechaInicio = row["Fecha inicio ausencia"] || row["E"] || "";
                     let fechaFin = row["Fecha final ausencia"] || row["F"] || "";
 
                     if (procesosValidosSIC.includes(proceso)) {
-                        if (estado === "ANULADO" || estado === "falta adjunto") {
-                            hallazgos.push({ Origen: "SIC", Cedula: cedula, Nombre: nombre, FechaTurno: fechaInicio, Entrada: "--", Salida: "--", EstadoSIC: `${proceso} - ${estado}`, Alerta: "Ausentismo Inválido" });
-                            if(cedula) cedulasUnicas.add(cedula.toString());
-                        } else {
-                            ausentismosSIC.push({ cedula, fechaInicio, fechaFin, estado: proceso });
-                        }
+                        ausentismosSIC.push({ cedula, fechaInicio, fechaFin, estado: proceso, estadoAprobacion: estado });
                     }
                 });
 
-                function tieneAusentismoValido(cedula, fecha) {
+                function obtenerAusentismo(cedula, fecha) {
                     return ausentismosSIC.find(a => a.cedula == cedula && a.fechaInicio <= fecha && a.fechaFin >= fecha);
                 }
 
-                // Procesar Geovictoria
+                // 2.2 Procesar Geovictoria (El origen de la verdad de los turnos)
                 dataGeo.forEach(row => {
                     let cedula = row["Cedula"] || row["C"] || ""; 
                     let fecha = row["Fecha"] || row["E"] || ""; 
@@ -228,9 +222,18 @@
 
                     if (permisosIgnorarGeo.includes(permiso)) return;
 
-                    let ausentismoSIC = tieneAusentismoValido(cedula, fecha);
-                    let tieneEntrada = entrada !== ""; let tieneSalida = salida !== "";
+                    let ausentismoSIC = obtenerAusentismo(cedula, fecha);
+                    let tieneEntrada = entrada !== ""; 
+                    let tieneSalida = salida !== "";
 
+                    // CASO ESPECIAL: Si la persona fue programada, tiene un registro en SIC, pero está ANULADO
+                    if (ausentismoSIC && (ausentismoSIC.estadoAprobacion === "ANULADO" || ausentismoSIC.estadoAprobacion === "falta adjunto")) {
+                        hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
+                        if(cedula) cedulasUnicas.add(cedula.toString());
+                        return; // Si ya es inválido, saltamos al siguiente empleado
+                    }
+
+                    // Lógicas normales de inasistencia o marcación
                     if (!tieneEntrada && !tieneSalida) {
                         if (!ausentismoSIC) {
                             hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
@@ -246,7 +249,7 @@
                     }
                 });
 
-                // Procesar Ramonapp
+                // 2.3 Procesar Ramonapp
                 dataRamon.forEach(row => {
                     let cedula = row["Cedula"] || row["D"] || ""; 
                     let fecha = row["Fecha"] || row["H"] || ""; 
@@ -257,8 +260,16 @@
 
                     if (novedad === "Descanso programado") return;
 
-                    let ausentismoSIC = tieneAusentismoValido(cedula, fecha);
-                    let tieneEntrada = entrada !== ""; let tieneSalida = salida !== "";
+                    let ausentismoSIC = obtenerAusentismo(cedula, fecha);
+                    let tieneEntrada = entrada !== ""; 
+                    let tieneSalida = salida !== "";
+
+                    // CASO ESPECIAL: Si la persona fue programada, tiene un registro en SIC, pero está ANULADO
+                    if (ausentismoSIC && (ausentismoSIC.estadoAprobacion === "ANULADO" || ausentismoSIC.estadoAprobacion === "falta adjunto")) {
+                        hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
+                        if(cedula) cedulasUnicas.add(cedula.toString());
+                        return;
+                    }
 
                     if (!tieneEntrada && !tieneSalida) {
                         if (!ausentismoSIC) {
@@ -276,7 +287,7 @@
                 });
 
                 // ==========================================
-                // 3. ENVIAR A n8n ÚNICAMENTE EL RESULTADO LIGERO
+                // 3. ENVIAR A n8n ÚNICAMENTE EL RESULTADO (¡Pesa poquísimo!)
                 // ==========================================
                 const payloadDinamico = {
                     listaCedulasSQL: Array.from(cedulasUnicas).map(c => `'${c}'`).join(',') || "''",
