@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Auditoría de Asistencias | Casalimpia</title>
     
+    <!-- Librería para extraer datos de Excel sin saturar el servidor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
         
@@ -28,7 +31,6 @@
 
         .container { max-width: 1400px; margin: 0 auto; padding: 20px 15px; display: flex; flex-direction: column; gap: 20px; }
 
-        /* Panel de Carga de Archivos */
         .upload-banner { background-color: var(--color-blanco); border-radius: 10px; padding: 20px; box-shadow: var(--sombra); border-left: 5px solid var(--color-verde-logo); }
         .upload-banner h2 { font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: var(--color-azul-logo); margin-bottom: 15px;}
         .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; align-items: end; }
@@ -39,7 +41,6 @@
         .btn-procesar:hover { background: #005f9e; }
         .btn-procesar:disabled { background: #94A3B8; cursor: not-allowed; }
 
-        /* Tarjetas de KPIs */
         .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 10px; }
         .kpi-card { padding: 20px; border-radius: 10px; box-shadow: var(--sombra); display: flex; flex-direction: column; position: relative; background: white; border: var(--borde); }
         .kpi-card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 10px 0 0 10px; }
@@ -51,7 +52,6 @@
         .kpi-title { font-size: 0.85rem; color: #64748B; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; font-family: 'Outfit';}
         .kpi-value { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--color-texto); }
 
-        /* Estilos de la Tabla */
         .card-tabla { background: var(--color-blanco); padding: 20px; border-radius: 10px; box-shadow: var(--sombra); border: var(--borde); display: flex; flex-direction: column; }
         .card-tabla h3 { font-size: 1.2rem; color: var(--color-azul-logo); margin-bottom: 15px; font-family: 'Outfit', sans-serif;}
         
@@ -68,15 +68,11 @@
         .badge.gris { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
         .badge.morado { background: #EDE9FE; color: #5B21B6; border: 1px solid #C4B5FD; }
 
-        /* Loader */
         #loader { display: none; text-align: center; padding: 30px; font-family: 'Outfit'; font-weight: bold; color: var(--color-azul-logo); font-size: 1.2rem;}
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--color-verde-logo); animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @media (max-width: 768px) {
-            .header-title { display: none; }
-            .btn-procesar { width: 100%; margin-top: 10px; }
-        }
+        @media (max-width: 768px) { .header-title { display: none; } .btn-procesar { width: 100%; margin-top: 10px; } }
     </style>
 </head>
 <body>
@@ -90,7 +86,6 @@
     </header>
 
     <div class="container">
-        
         <div class="upload-banner">
             <h2>Carga de Reportes Diarios</h2>
             <form id="uploadForm" class="upload-grid">
@@ -112,28 +107,15 @@
 
         <div id="loader">
             <div class="spinner"></div>
-            Cruzando información con SIC y Supabase. Esto puede tomar unos segundos...
+            Extrayendo datos y cruzando con Supabase. Esto puede tomar unos segundos...
         </div>
 
         <div id="resultados-container" style="display: none; flex-direction: column; gap: 20px;">
-            
             <div class="kpis-grid">
-                <div class="kpi-card azul">
-                    <div class="kpi-title">Total Alertas Detectadas</div>
-                    <div class="kpi-value" id="kpi-total">0</div>
-                </div>
-                <div class="kpi-card rojo">
-                    <div class="kpi-title">Requieren Ausentismo (Caso A)</div>
-                    <div class="kpi-value" id="kpi-ausentismos">0</div>
-                </div>
-                <div class="kpi-card amarillo">
-                    <div class="kpi-title">Marcaciones Incompletas (Caso B)</div>
-                    <div class="kpi-value" id="kpi-incompletas">0</div>
-                </div>
-                <div class="kpi-card morado">
-                    <div class="kpi-title">Falso Ausentismo en SIC (Caso C)</div>
-                    <div class="kpi-value" id="kpi-graves">0</div>
-                </div>
+                <div class="kpi-card azul"><div class="kpi-title">Total Alertas Detectadas</div><div class="kpi-value" id="kpi-total">0</div></div>
+                <div class="kpi-card rojo"><div class="kpi-title">Requieren Ausentismo (Caso A)</div><div class="kpi-value" id="kpi-ausentismos">0</div></div>
+                <div class="kpi-card amarillo"><div class="kpi-title">Marcaciones Incompletas (Caso B)</div><div class="kpi-value" id="kpi-incompletas">0</div></div>
+                <div class="kpi-card morado"><div class="kpi-title">Falso Ausentismo en SIC (Caso C)</div><div class="kpi-value" id="kpi-graves">0</div></div>
             </div>
 
             <div class="card-tabla">
@@ -154,23 +136,37 @@
                                 <th>Alerta a Gestionar</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
+        // Función para transformar el Excel binario a texto JSON súper liviano
+        async function leerExcel(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.SheetNames[0];
+                    // defval: "" asegura que las celdas vacías no se omitan, sino que se envíen vacías
+                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], {defval: ""});
+                    resolve(jsonData);
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
         async function procesarArchivos() {
             const btn = document.querySelector('.btn-procesar');
             const loader = document.getElementById('loader');
             const resultados = document.getElementById('resultados-container');
             const tbody = document.querySelector('#tabla-resultados tbody');
             
-            // 1. Validar archivos
             const geo = document.getElementById('fileGeovictoria').files[0];
             const ram = document.getElementById('fileRamonapp').files[0];
             const sic = document.getElementById('fileSic').files[0];
@@ -180,36 +176,36 @@
                 return;
             }
 
-            // 2. Preparar UI
             btn.disabled = true;
             resultados.style.display = 'none';
             loader.style.display = 'block';
-
-            // 3. Construir paquete de datos
-            const formData = new FormData();
-            formData.append('geovictoria', geo);
-            formData.append('ramonapp', ram);
-            formData.append('sic', sic);
             
             try {
-                // 4. Enviar a n8n (Webhook de Producción)
+                // 1. EXTRAER LA DATA (Transforma 8MB en unos pocos KB de texto)
+                const geoData = await leerExcel(geo);
+                const ramData = await leerExcel(ram);
+                const sicData = await leerExcel(sic);
+
+                // 2. EMPAQUETAR Y ENVIAR COMO JSON
+                const payloadDinamico = {
+                    geovictoria: geoData,
+                    ramonapp: ramData,
+                    sic: sicData
+                };
+
                 const response = await fetch('https://n8n.casalimpia.com/webhook/AUSENTISMOS', {
                     method: 'POST',
-                    body: formData
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payloadDinamico)
                 });
 
-                if (!response.ok) throw new Error("Error en la respuesta del servidor n8n");
+                if (!response.ok) throw new Error("Error en la respuesta de n8n");
 
                 const data = await response.json();
-                
-                // Asegurarnos de que n8n devolvió un arreglo de datos (los hallazgos)
                 const hallazgos = Array.isArray(data) ? data : (data.data || []);
 
-                // 5. Calcular KPIs dinámicamente
-                let reqAusentismo = 0;
-                let marcIncompleta = 0;
-                let falsoAusentismo = 0;
-
+                // 3. CALCULAR KPIs
+                let reqAusentismo = 0; let marcIncompleta = 0; let falsoAusentismo = 0;
                 hallazgos.forEach(h => {
                     if(h.Alerta === "Requiere grabar ausentismo") reqAusentismo++;
                     if(h.Alerta === "Marcación Incompleta") marcIncompleta++;
@@ -221,22 +217,20 @@
                 document.getElementById('kpi-incompletas').innerText = marcIncompleta;
                 document.getElementById('kpi-graves').innerText = falsoAusentismo;
 
-                // 6. Llenar la tabla dinámicamente
-                tbody.innerHTML = ""; // Limpiar tabla
-                
+                // 4. LLENAR TABLA DINÁMICA
+                tbody.innerHTML = ""; 
                 if (hallazgos.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;"><strong>✅ ¡Todo perfecto! No se encontraron inconsistencias en este cruce.</strong></td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;"><strong>✅ ¡Todo perfecto! No se encontraron inconsistencias.</strong></td></tr>`;
                 } else {
                     hallazgos.forEach(h => {
-                        // Estilos de los badges según la alerta
                         let alertaBadge = "gris";
                         if(h.Alerta === "Requiere grabar ausentismo") alertaBadge = "rojo";
                         if(h.Alerta === "Marcación Incompleta") alertaBadge = "amarillo";
-                        if(h.Alerta === "Falso Ausentismo en SIC") alertaBadge = "morado";
+                        if(h.Alerta === "Falso Ausentismo en SIC" || h.Alerta === "Ausentismo Inválido") alertaBadge = "morado";
 
                         let origenBadge = h.Origen === "Geovictoria" ? "azul" : "gris";
 
-                        const fila = `
+                        tbody.innerHTML += `
                             <tr>
                                 <td><span class="badge ${origenBadge}">${h.Origen || "--"}</span></td>
                                 <td><strong>${h.Cedula || "--"}</strong></td>
@@ -250,17 +244,15 @@
                                 <td><span class="badge ${alertaBadge}">${h.Alerta || "--"}</span></td>
                             </tr>
                         `;
-                        tbody.innerHTML += fila;
                     });
                 }
 
-                // Mostrar resultados
                 loader.style.display = 'none';
                 resultados.style.display = 'flex';
 
             } catch (error) {
-                console.error("Error conectando con n8n:", error);
-                alert("Ocurrió un error al procesar los archivos. Verifica tu conexión o revisa el flujo en n8n.");
+                console.error("Error:", error);
+                alert("Ocurrió un error. Revisa la consola o confirma que tu flujo n8n devuelve el JSON correctamente.");
                 loader.style.display = 'none';
             } finally {
                 btn.disabled = false;
