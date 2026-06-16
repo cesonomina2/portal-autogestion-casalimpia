@@ -18,7 +18,9 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Roboto', sans-serif; background-color: var(--color-gris-bg); color: var(--color-texto); }
+        
+        /* Se aplicó el zoom al 80% para toda la página */
+        body { font-family: 'Roboto', sans-serif; background-color: var(--color-gris-bg); color: var(--color-texto); zoom: 0.8; -moz-transform: scale(0.8); -moz-transform-origin: 0 0;}
 
         header { background-color: var(--color-blanco); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--sombra); border-bottom: 4px solid var(--color-azul-logo); flex-wrap: wrap; gap: 15px; position: sticky; top: 0; z-index: 100; }
         .logo-container { display: flex; align-items: center; gap: 15px; }
@@ -28,7 +30,7 @@
         .text-azul { color: var(--color-azul-logo); font-size: 1.5rem; margin-left: 2px; }
         .header-title { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 600; color: #64748B; background: #E2E8F0; padding: 5px 15px; border-radius: 50px; }
 
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px 15px; display: flex; flex-direction: column; gap: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px 15px; display: flex; flex-direction: column; gap: 20px; }
 
         .upload-banner { background-color: var(--color-blanco); border-radius: 10px; padding: 20px; box-shadow: var(--sombra); border-left: 5px solid var(--color-verde-logo); }
         .upload-banner h2 { font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: var(--color-azul-logo); margin-bottom: 15px;}
@@ -44,15 +46,18 @@
         .btn-excel { background: var(--color-verde-logo); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-left: 15px;}
         .btn-excel:hover { background: #7ab32e; }
 
-        .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 10px; }
-        .kpi-card { padding: 20px; border-radius: 10px; box-shadow: var(--sombra); display: flex; flex-direction: column; position: relative; background: white; border: var(--borde); }
+        /* Cuadrícula forzada a 6 columnas para que nunca quede una tarjeta volando */
+        .kpis-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; margin-top: 10px; }
+        .kpi-card { padding: 20px; border-radius: 10px; box-shadow: var(--sombra); display: flex; flex-direction: column; position: relative; background: white; border: var(--borde); min-width: 0; }
         .kpi-card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 10px 0 0 10px; }
+        .kpi-card.gris-oscuro::before { background-color: #475569; }
+        .kpi-card.verde::before { background-color: var(--color-verde-logo); }
         .kpi-card.azul::before { background-color: var(--color-azul-logo); }
         .kpi-card.rojo::before { background-color: #EF4444; }
         .kpi-card.amarillo::before { background-color: #F59E0B; }
         .kpi-card.morado::before { background-color: #8B5CF6; }
         
-        .kpi-title { font-size: 0.85rem; color: #64748B; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; font-family: 'Outfit';}
+        .kpi-title { font-size: 0.8rem; color: #64748B; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; font-family: 'Outfit'; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .kpi-value { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--color-texto); }
 
         .card-tabla { background: var(--color-blanco); padding: 20px; border-radius: 10px; box-shadow: var(--sombra); border: var(--borde); display: flex; flex-direction: column; }
@@ -83,6 +88,16 @@
         #loader { display: none; text-align: center; padding: 30px; font-family: 'Outfit'; font-weight: bold; color: var(--color-azul-logo); font-size: 1.2rem;}
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--color-verde-logo); animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Diseño Responsivo para pantallas pequeñas */
+        @media (max-width: 1200px) {
+            .kpis-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 768px) { 
+            .header-title { display: none; } 
+            .btn-procesar { width: 100%; margin-top: 10px; } 
+            .kpis-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -90,7 +105,7 @@
     <header>
         <div class="logo-container">
             <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
-            <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Auditoría</span></div>
+            <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Auditoría Ausentismos</span></div>
         </div>
         <div class="header-title">Cruce de Asistencias vs SIC</div>
     </header>
@@ -122,10 +137,12 @@
 
         <div id="resultados-container" style="display: none; flex-direction: column; gap: 20px;">
             <div class="kpis-grid">
+                <div class="kpi-card gris-oscuro"><div class="kpi-title">Turnos Procesados</div><div class="kpi-value" id="kpi-procesados">0</div></div>
+                <div class="kpi-card verde"><div class="kpi-title">Turnos OK (En regla)</div><div class="kpi-value" id="kpi-ok">0</div></div>
                 <div class="kpi-card azul"><div class="kpi-title">Alertas Visibles</div><div class="kpi-value" id="kpi-total">0</div></div>
-                <div class="kpi-card rojo"><div class="kpi-title">Requieren Ausentismo (Caso A)</div><div class="kpi-value" id="kpi-ausentismos">0</div></div>
-                <div class="kpi-card amarillo"><div class="kpi-title">Marcaciones Incompletas (Caso B)</div><div class="kpi-value" id="kpi-incompletas">0</div></div>
-                <div class="kpi-card morado"><div class="kpi-title">Falso Ausentismo en SIC (Caso C)</div><div class="kpi-value" id="kpi-graves">0</div></div>
+                <div class="kpi-card rojo"><div class="kpi-title">Requieren Ausentismo</div><div class="kpi-value" id="kpi-ausentismos">0</div></div>
+                <div class="kpi-card amarillo"><div class="kpi-title">Marc. Incompletas</div><div class="kpi-value" id="kpi-incompletas">0</div></div>
+                <div class="kpi-card morado"><div class="kpi-title">Falso / Inválido SIC</div><div class="kpi-value" id="kpi-graves">0</div></div>
             </div>
 
             <div class="card-tabla">
@@ -172,9 +189,9 @@
     </div>
 
     <script>
-        // Variables globales de memoria (Data Lake Local)
         let resultadosGlobales = []; 
         let datosParaExcel = [];
+        let totalTurnosGlobal = 0; 
 
         async function leerExcel(file) {
             return new Promise((resolve, reject) => {
@@ -232,7 +249,6 @@
             return fechaTexto;
         }
 
-        // Sumar días de forma segura (para la regla de renuncia y retiros definitivos)
         function sumarDias(fechaStr, dias) {
             if (!fechaStr) return "";
             let d = new Date(fechaStr + "T00:00:00"); 
@@ -240,7 +256,6 @@
             return d.toISOString().split("T")[0];
         }
 
-        // Escáner Inteligente de Marcaciones (Todas las columnas)
         function extraerMarcaciones(row) {
             let entradas = [];
             let salidas = [];
@@ -289,7 +304,6 @@
                     const dataRamon = await leerExcel(ram);
                     const dataSic = await leerExcel(sic);
 
-                    // AGREGADO LOS PROCESOS ADICIONALES DE RETIROS DEFINITIVOS
                     const procesosValidosSIC = [
                         "Incapacidad", "Suspension", "DiaFamilia", "Vacaciones", "PermisoNoRemunerado", 
                         "FaltaSinJustificar", "CalamidadDomestica", "LicenciaMaternidad", "AbandonoPuesto", "SegSocial", 
@@ -307,6 +321,7 @@
                     let hallazgos = [];
                     let cedulasUnicas = new Set();
                     let nombresExcel = {}; 
+                    totalTurnosGlobal = 0; 
 
                     // 1. PROCESAR DICCIONARIO SIC
                     let diccionarioSIC = {};
@@ -318,12 +333,11 @@
                         let fechaInicio = "";
                         let fechaFin = "";
 
-                        // REGLA MATEMÁTICA DE RETIROS DEFINITIVOS (ESCUDO DE 30 DÍAS)
                         if (retirosDefinitivos.includes(proceso.toLowerCase())) {
                             let udl = normalizarFecha(row["Ultimo Dia Laborado"] || row["Ultimo dia laborado"] || row["Ultimo Día Laborado"] || row["I"] || "");
                             if (udl) {
-                                fechaInicio = sumarDias(udl, 1); // El escudo arranca al día siguiente
-                                fechaFin = sumarDias(udl, 31);   // Y dura 30 días
+                                fechaInicio = sumarDias(udl, 1); 
+                                fechaFin = sumarDias(udl, 31);   
                             }
                         } else {
                             fechaInicio = normalizarFecha(row["Fecha inicio ausencia"] || row["Fecha Inicio"] || "");
@@ -338,10 +352,23 @@
                         }
                     });
 
+                    // BÚSQUEDA INTELIGENTE CON PRIORIDAD DE DESEMPATE
                     function obtenerAusentismo(cedula, fechaBusqueda) {
                         let registros = diccionarioSIC[cedula];
                         if (!registros) return null;
-                        return registros.find(a => a.fechaInicio <= fechaBusqueda && a.fechaFin >= fechaBusqueda);
+
+                        // Buscar todas las novedades que coincidan en esa fecha
+                        let coincidencias = registros.filter(a => a.fechaInicio <= fechaBusqueda && a.fechaFin >= fechaBusqueda);
+                        if (coincidencias.length === 0) return null;
+
+                        // Prioridad: Buscar si existe al menos una novedad VÁLIDA en la lista
+                        let valida = coincidencias.find(a => {
+                            let est = (a.estadoAprobacion || "").toLowerCase();
+                            return est !== "anulado" && est !== "falta adjunto";
+                        });
+
+                        // Si hay una válida (así haya anuladas), retorna la válida. Si no, retorna la anulada.
+                        return valida ? valida : coincidencias[0];
                     }
 
                     // 2. PROCESAR GEOVICTORIA
@@ -362,28 +389,32 @@
                         if (nombre) nombresExcel[cedula] = nombre;
                         if (permisosIgnorarGeo.includes(permiso) || permiso === "Descanso programado") return;
 
+                        totalTurnosGlobal++;
+
                         let ausentismoSIC = obtenerAusentismo(cedula, fecha);
                         let tieneEntrada = entrada !== ""; 
                         let tieneSalida = salida !== "";
+                        
+                        let esInvalido = ausentismoSIC && ausentismoSIC.estadoAprobacion && 
+                            (ausentismoSIC.estadoAprobacion.toLowerCase() === "anulado" || ausentismoSIC.estadoAprobacion.toLowerCase() === "falta adjunto");
 
-                        if (ausentismoSIC && (ausentismoSIC.estadoAprobacion.toLowerCase() === "anulado" || ausentismoSIC.estadoAprobacion.toLowerCase() === "falta adjunto")) {
-                            hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
-                            cedulasUnicas.add(cedula);
-                            return;
-                        }
-
-                        if (!tieneEntrada && !tieneSalida) {
-                            if (!ausentismoSIC) {
-                                hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
+                        if (tieneEntrada && tieneSalida) {
+                            if (ausentismoSIC && !esInvalido) {
+                                hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
                                 cedulasUnicas.add(cedula);
                             }
                         } else if ((tieneEntrada && !tieneSalida) || (!tieneEntrada && tieneSalida)) {
                             let alertaSic = ausentismoSIC ? `Tiene SIC (${ausentismoSIC.estado})` : "Sin registro";
                             hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: alertaSic, Alerta: "Marcación Incompleta" });
                             cedulasUnicas.add(cedula);
-                        } else if (tieneEntrada && tieneSalida && ausentismoSIC) {
-                            hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
-                            cedulasUnicas.add(cedula);
+                        } else if (!tieneEntrada && !tieneSalida) {
+                            if (esInvalido) {
+                                hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
+                                cedulasUnicas.add(cedula);
+                            } else if (!ausentismoSIC) {
+                                hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
+                                cedulasUnicas.add(cedula);
+                            }
                         }
                     });
 
@@ -403,28 +434,32 @@
                         if (nombre) nombresExcel[cedula] = nombre;
                         if (novedad === "Descanso programado" || novedad === "Descanso compensatorio") return;
 
+                        totalTurnosGlobal++;
+
                         let ausentismoSIC = obtenerAusentismo(cedula, fecha);
                         let tieneEntrada = entrada !== ""; 
                         let tieneSalida = salida !== "";
 
-                        if (ausentismoSIC && (ausentismoSIC.estadoAprobacion.toLowerCase() === "anulado" || ausentismoSIC.estadoAprobacion.toLowerCase() === "falta adjunto")) {
-                            hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
-                            cedulasUnicas.add(cedula);
-                            return;
-                        }
+                        let esInvalido = ausentismoSIC && ausentismoSIC.estadoAprobacion && 
+                            (ausentismoSIC.estadoAprobacion.toLowerCase() === "anulado" || ausentismoSIC.estadoAprobacion.toLowerCase() === "falta adjunto");
 
-                        if (!tieneEntrada && !tieneSalida) {
-                            if (!ausentismoSIC) {
-                                hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
+                        if (tieneEntrada && tieneSalida) {
+                            if (ausentismoSIC && !esInvalido) {
+                                hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
                                 cedulasUnicas.add(cedula);
                             }
                         } else if ((tieneEntrada && !tieneSalida) || (!tieneEntrada && tieneSalida)) {
                             let alertaSic = ausentismoSIC ? `Tiene SIC (${ausentismoSIC.estado})` : "Sin registro";
                             hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: alertaSic, Alerta: "Marcación Incompleta" });
                             cedulasUnicas.add(cedula);
-                        } else if (tieneEntrada && tieneSalida && ausentismoSIC) {
-                            hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
-                            cedulasUnicas.add(cedula);
+                        } else if (!tieneEntrada && !tieneSalida) {
+                            if (esInvalido) {
+                                hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
+                                cedulasUnicas.add(cedula);
+                            } else if (!ausentismoSIC) {
+                                hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
+                                cedulasUnicas.add(cedula);
+                            }
                         }
                     });
 
@@ -446,7 +481,6 @@
                     const infoEmpleados = {};
                     arrayBD.forEach(emp => { infoEmpleados[String(emp.codEmp)] = emp; });
 
-                    // Guardamos la matriz principal en memoria global
                     resultadosGlobales = hallazgos.map(h => {
                         const bd = infoEmpleados[String(h.Cedula)] || {};
                         let nomFinal = bd.nomEmp || h.NombreEmpleado || h.Nombre || nombresExcel[h.Cedula] || "--";
@@ -467,7 +501,6 @@
                         };
                     });
 
-                    // Llamamos al motor de renderizado que aplica los filtros
                     renderTabla();
                     
                     loader.style.display = 'none';
@@ -483,17 +516,12 @@
             }, 100); 
         }
 
-        // ==========================================
-        // MOTOR DE FILTRADO Y RENDERIZADO VISUAL
-        // ==========================================
         function renderTabla() {
             const tbody = document.querySelector('#tabla-resultados tbody');
             
-            // 1. Obtener valores de los Filtros Globales
             const filtroOrigen = document.getElementById("filtroOrigen").value.toLowerCase();
             const filtroAlerta = document.getElementById("filtroAlerta").value.toLowerCase();
             
-            // 2. Obtener valores de los Filtros de Columna
             const colOrigen = document.getElementById("colOrigen").value.toLowerCase();
             const colCedula = document.getElementById("colCedula").value.toLowerCase();
             const colNombre = document.getElementById("colNombre").value.toLowerCase();
@@ -503,13 +531,10 @@
             const colFecha = document.getElementById("colFecha").value.toLowerCase();
             const colSic = document.getElementById("colSic").value.toLowerCase();
 
-            // 3. Aplicar Filtros a la matriz de datos
             let datosFiltrados = resultadosGlobales.filter(r => {
-                // Filtros Globales
                 if (filtroOrigen && r.Origen.toLowerCase() !== filtroOrigen) return false;
                 if (filtroAlerta && r.Alerta.toLowerCase() !== filtroAlerta) return false;
 
-                // Filtros de Columna (Búsqueda parcial "includes")
                 if (colOrigen && !r.Origen.toLowerCase().includes(colOrigen)) return false;
                 if (colCedula && !r.Cedula.toLowerCase().includes(colCedula)) return false;
                 if (colNombre && !r.NombreEmpleado.toLowerCase().includes(colNombre)) return false;
@@ -522,7 +547,6 @@
                 return true;
             });
 
-            // 4. Preparar Datos para Exportación (Solo exporta lo filtrado)
             datosParaExcel = datosFiltrados.map(r => ({
                 "Origen": r.Origen, "Cédula": r.Cedula, "Nombre Empleado": r.NombreEmpleado, 
                 "Centro Costos": r.CentroCostos, "Sitio Trabajo": r.SitioTrabajo, "Jefatura": r.Jefatura,
@@ -530,7 +554,6 @@
                 "Entrada": r.Entrada, "Salida": r.Salida, "Estado en SIC": r.EstadoSIC, "Alerta": r.Alerta
             }));
 
-            // 5. Recalcular KPIs en base a lo filtrado
             let reqAusentismo = 0; let marcIncompleta = 0; let falsoAusentismo = 0;
             let htmlRows = "";
 
@@ -565,6 +588,10 @@
                 });
             }
 
+            let turnosOK = totalTurnosGlobal - resultadosGlobales.length; 
+            
+            document.getElementById('kpi-procesados').innerText = totalTurnosGlobal;
+            document.getElementById('kpi-ok').innerText = turnosOK;
             document.getElementById('kpi-total').innerText = datosFiltrados.length;
             document.getElementById('kpi-ausentismos').innerText = reqAusentismo;
             document.getElementById('kpi-incompletas').innerText = marcIncompleta;
