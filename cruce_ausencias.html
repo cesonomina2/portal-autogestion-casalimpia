@@ -36,9 +36,13 @@
         .input-file-group { display: flex; flex-direction: column; gap: 6px; }
         .input-file-group label { font-size: 0.8rem; font-weight: 700; color: #64748B; text-transform: uppercase; font-family: 'Outfit'; }
         .input-file-group input[type="file"] { padding: 10px; border-radius: 6px; border: 1px dashed #CBD5E1; background: #F8FAFC; cursor: pointer; font-size: 0.85rem; color: var(--color-texto); }
+        
         .btn-procesar { background: var(--color-azul-logo); color: white; border: none; padding: 12px 20px; border-radius: 6px; font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; height: 100%; min-height: 45px;}
         .btn-procesar:hover { background: #005f9e; }
         .btn-procesar:disabled { background: #94A3B8; cursor: not-allowed; }
+
+        .btn-excel { background: var(--color-verde-logo); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-left: 15px;}
+        .btn-excel:hover { background: #7ab32e; }
 
         .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 10px; }
         .kpi-card { padding: 20px; border-radius: 10px; box-shadow: var(--sombra); display: flex; flex-direction: column; position: relative; background: white; border: var(--borde); }
@@ -52,12 +56,21 @@
         .kpi-value { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--color-texto); }
 
         .card-tabla { background: var(--color-blanco); padding: 20px; border-radius: 10px; box-shadow: var(--sombra); border: var(--borde); display: flex; flex-direction: column; }
-        .card-tabla h3 { font-size: 1.2rem; color: var(--color-azul-logo); margin-bottom: 15px; font-family: 'Outfit', sans-serif;}
         
+        /* Controles de Filtros Globales */
+        .header-filtros { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;}
+        .header-filtros h3 { font-size: 1.2rem; color: var(--color-azul-logo); font-family: 'Outfit', sans-serif; margin: 0;}
+        .filtros-globales { display: flex; gap: 10px; flex-wrap: wrap;}
+        .filtro-select { padding: 8px 15px; border-radius: 6px; border: 1px solid #CBD5E1; font-family: 'Outfit'; font-size: 0.9rem; outline: none; background: #F8FAFC; color: var(--color-texto);}
+        
+        /* Inputs para Filtros de Columna */
+        .col-filter { width: 100%; padding: 6px; font-size: 0.75rem; border: 1px solid #CBD5E1; border-radius: 4px; margin-top: 8px; box-sizing: border-box; font-family: 'Roboto'; outline: none; background: #ffffff;}
+        .col-filter:focus { border-color: var(--color-azul-logo); }
+
         .table-responsive { overflow-x: auto; max-height: 600px;}
         table { width: 100%; border-collapse: collapse; min-width: 1000px; }
         th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #E2E8F0; font-size: 0.85rem; }
-        th { font-weight: 700; color: #475569; text-transform: uppercase; background: #F8FAFC; font-family: 'Outfit'; font-size: 0.8rem; position: sticky; top: 0;}
+        th { font-weight: 700; color: #475569; text-transform: uppercase; background: #F8FAFC; font-family: 'Outfit'; font-size: 0.8rem; position: sticky; top: 0; vertical-align: top;}
         tbody tr:hover { background-color: #F1F5F9; }
         
         .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; display: inline-block; text-align: center;}
@@ -70,8 +83,6 @@
         #loader { display: none; text-align: center; padding: 30px; font-family: 'Outfit'; font-weight: bold; color: var(--color-azul-logo); font-size: 1.2rem;}
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--color-verde-logo); animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        @media (max-width: 768px) { .header-title { display: none; } .btn-procesar { width: 100%; margin-top: 10px; } }
     </style>
 </head>
 <body>
@@ -106,32 +117,50 @@
 
         <div id="loader">
             <div class="spinner"></div>
-            Cruzando datos localmente y consultando base de datos. Esto puede tomar unos segundos...
+            Cruzando datos y consultando Supabase. Por favor espera...
         </div>
 
         <div id="resultados-container" style="display: none; flex-direction: column; gap: 20px;">
             <div class="kpis-grid">
-                <div class="kpi-card azul"><div class="kpi-title">Total Alertas Detectadas</div><div class="kpi-value" id="kpi-total">0</div></div>
+                <div class="kpi-card azul"><div class="kpi-title">Alertas Visibles</div><div class="kpi-value" id="kpi-total">0</div></div>
                 <div class="kpi-card rojo"><div class="kpi-title">Requieren Ausentismo (Caso A)</div><div class="kpi-value" id="kpi-ausentismos">0</div></div>
                 <div class="kpi-card amarillo"><div class="kpi-title">Marcaciones Incompletas (Caso B)</div><div class="kpi-value" id="kpi-incompletas">0</div></div>
                 <div class="kpi-card morado"><div class="kpi-title">Falso Ausentismo en SIC (Caso C)</div><div class="kpi-value" id="kpi-graves">0</div></div>
             </div>
 
             <div class="card-tabla">
-                <h3>Detalle de Inconsistencias</h3>
+                <div class="header-filtros">
+                    <h3>Detalle de Inconsistencias</h3>
+                    <div class="filtros-globales">
+                        <select id="filtroOrigen" class="filtro-select" onchange="renderTabla()">
+                            <option value="">Todos los Orígenes</option>
+                            <option value="Geovictoria">Geovictoria</option>
+                            <option value="Ramonapp">Ramonapp</option>
+                        </select>
+                        <select id="filtroAlerta" class="filtro-select" onchange="renderTabla()">
+                            <option value="">Todas las Alertas</option>
+                            <option value="Requiere grabar ausentismo">Requiere grabar ausentismo</option>
+                            <option value="Marcación Incompleta">Marcación Incompleta</option>
+                            <option value="Falso Ausentismo en SIC">Falso Ausentismo en SIC</option>
+                            <option value="Ausentismo Inválido">Ausentismo Inválido</option>
+                        </select>
+                        <button class="btn-excel" onclick="descargarExcelFinal()">📥 Descargar Vista</button>
+                    </div>
+                </div>
+                
                 <div class="table-responsive">
                     <table id="tabla-resultados">
                         <thead>
                             <tr>
-                                <th>Origen</th>
-                                <th>Cédula</th>
-                                <th>Nombre</th>
-                                <th>Centro Costos / Sitio</th>
-                                <th>Jefatura</th>
-                                <th>Estado Emp.</th>
-                                <th>Fecha Turno</th>
+                                <th>Origen <br><input type="text" id="colOrigen" class="col-filter" onkeyup="renderTabla()" placeholder="Filtrar..."></th>
+                                <th>Cédula <br><input type="text" id="colCedula" class="col-filter" onkeyup="renderTabla()" placeholder="Filtrar..."></th>
+                                <th>Nombre <br><input type="text" id="colNombre" class="col-filter" onkeyup="renderTabla()" placeholder="Filtrar..."></th>
+                                <th>Centro Costos / Sitio <br><input type="text" id="colSitio" class="col-filter" onkeyup="renderTabla()" placeholder="Filtrar..."></th>
+                                <th>Jefatura <br><input type="text" id="colJefatura" class="col-filter" onkeyup="renderTabla()" placeholder="Filtrar..."></th>
+                                <th>Estado Emp. <br><input type="text" id="colEstado" class="col-filter" onkeyup="renderTabla()" placeholder="Filtrar..."></th>
+                                <th>Fecha Turno <br><input type="text" id="colFecha" class="col-filter" onkeyup="renderTabla()" placeholder="Filtrar..."></th>
                                 <th>Entrada - Salida</th>
-                                <th>Estado SIC</th>
+                                <th>Estado SIC <br><input type="text" id="colSic" class="col-filter" onkeyup="renderTabla()" placeholder="Filtrar..."></th>
                                 <th>Alerta a Gestionar</th>
                             </tr>
                         </thead>
@@ -143,15 +172,30 @@
     </div>
 
     <script>
-        // Función para extraer datos del Excel usando el navegador
+        // Variables globales de memoria (Data Lake Local)
+        let resultadosGlobales = []; 
+        let datosParaExcel = [];
+
         async function leerExcel(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheet = workbook.SheetNames[0];
-                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], {defval: ""});
+                    const workbook = XLSX.read(data, {type: 'array', cellDates: false});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    
+                    const jsonArr = XLSX.utils.sheet_to_json(firstSheet, {header: 1, defval: ""});
+                    
+                    let filaEncabezado = 0;
+                    for (let i = 0; i < Math.min(jsonArr.length, 10); i++) {
+                        let textoFila = jsonArr[i].join(" ").toLowerCase();
+                        if (textoFila.includes("cedula") || textoFila.includes("cédula") || textoFila.includes("identificador")) {
+                            filaEncabezado = i;
+                            break;
+                        }
+                    }
+
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { range: filaEncabezado, defval: "" });
                     resolve(jsonData);
                 };
                 reader.onerror = reject;
@@ -159,11 +203,72 @@
             });
         }
 
+        function limpiarCedula(val) {
+            if (!val) return "";
+            let c = String(val).trim();
+            if (c.endsWith(".0")) c = c.slice(0, -2);
+            return c;
+        }
+
+        function normalizarFecha(fechaValor) {
+            if (!fechaValor) return "";
+            if (typeof fechaValor === 'number') {
+                let date = new Date((fechaValor - (25567 + 2)) * 86400 * 1000);
+                return date.toISOString().split("T")[0]; 
+            }
+            
+            let texto = fechaValor.toString().trim(); 
+            let partesEspacio = texto.split(" ");
+            let fechaTexto = partesEspacio.find(p => p.includes("-") || p.includes("/")) || partesEspacio[0];
+            
+            if (fechaTexto.includes("/")) {
+                let p = fechaTexto.split("/");
+                if (p[0].length <= 2 && p[2].length === 4) return `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+            }
+            if (fechaTexto.includes("-")) {
+                let p = fechaTexto.split("-");
+                if (p[0].length <= 2 && p[2].length === 4) return `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+            }
+            return fechaTexto;
+        }
+
+        // Sumar días de forma segura (para la regla de renuncia y retiros definitivos)
+        function sumarDias(fechaStr, dias) {
+            if (!fechaStr) return "";
+            let d = new Date(fechaStr + "T00:00:00"); 
+            d.setDate(d.getDate() + dias);
+            return d.toISOString().split("T")[0];
+        }
+
+        // Escáner Inteligente de Marcaciones (Todas las columnas)
+        function extraerMarcaciones(row) {
+            let entradas = [];
+            let salidas = [];
+            
+            for (let key in row) {
+                let k = key.toLowerCase().trim();
+                let val = String(row[key]).trim();
+                
+                if (val && val !== "--" && val.toLowerCase() !== "sin registro") {
+                    if ((k.startsWith("entr") || k.startsWith("entro") || k.startsWith("entrada")) && !k.includes("observa") && !k.includes("fecha")) {
+                        entradas.push(val);
+                    }
+                    if ((k.startsWith("sal") || k.startsWith("salio") || k.startsWith("salida")) && !k.includes("observa") && !k.includes("fecha")) {
+                        salidas.push(val);
+                    }
+                }
+            }
+
+            return {
+                entrada: entradas.length > 0 ? entradas[0] : "",
+                salida: salidas.length > 0 ? salidas[salidas.length - 1] : ""
+            };
+        }
+
         async function procesarArchivos() {
             const btn = document.querySelector('.btn-procesar');
             const loader = document.getElementById('loader');
             const resultados = document.getElementById('resultados-container');
-            const tbody = document.querySelector('#tabla-resultados tbody');
             
             const geo = document.getElementById('fileGeovictoria').files[0];
             const ram = document.getElementById('fileRamonapp').files[0];
@@ -178,187 +283,305 @@
             resultados.style.display = 'none';
             loader.style.display = 'block';
             
-            try {
-                // 1. LEER LOS ARCHIVOS LOCALMENTE
-                const dataGeo = await leerExcel(geo);
-                const dataRamon = await leerExcel(ram);
-                const dataSic = await leerExcel(sic);
+            setTimeout(async () => {
+                try {
+                    const dataGeo = await leerExcel(geo);
+                    const dataRamon = await leerExcel(ram);
+                    const dataSic = await leerExcel(sic);
 
-                // ==========================================
-                // 2. EL CEREBRO AHORA ESTÁ EN EL NAVEGADOR
-                // ==========================================
-                const procesosValidosSIC = ["Incapacidad", "Suspension", "DiaFamilia", "Vacaciones", "PermisoNoRemunerado", "FaltaSinJustificar", "CalamidadDomestica", "LicenciaMaternidad", "AbandonoPuesto", "SegSocial"];
-                const permisosIgnorarGeo = ["Descanso compensatorio", "Descanso", "Festivo compensatorio", "Remunerada"];
+                    // AGREGADO LOS PROCESOS ADICIONALES DE RETIROS DEFINITIVOS
+                    const procesosValidosSIC = [
+                        "Incapacidad", "Suspension", "DiaFamilia", "Vacaciones", "PermisoNoRemunerado", 
+                        "FaltaSinJustificar", "CalamidadDomestica", "LicenciaMaternidad", "AbandonoPuesto", "SegSocial", 
+                        "Renuncia", "TerminacionContratoFijo", "TerminacionPeriodoPruebas", "TerminacionObraLabor", 
+                        "TerminacionPension", "TerminacionSinJustaCausa", "ReporteDisciplinario", "TerminacionCausalFallecimiento"
+                    ];
+                    
+                    const retirosDefinitivos = [
+                        "renuncia", "terminacioncontratofijo", "terminacionperiodopruebas", "terminacionobralabor", 
+                        "terminacionpension", "terminacionsinjustacausa", "reportedisciplinario", "terminacioncausalfallecimiento"
+                    ];
+                    
+                    const permisosIgnorarGeo = ["Descanso compensatorio", "Descanso", "Festivo compensatorio", "Remunerada"];
 
-                let hallazgos = [];
-                let cedulasUnicas = new Set();
+                    let hallazgos = [];
+                    let cedulasUnicas = new Set();
+                    let nombresExcel = {}; 
 
-                // 2.1 Crear un "Diccionario" de SIC (Solo para consultar, NO genera alertas directas)
-                let ausentismosSIC = [];
-                dataSic.forEach(row => {
-                    let proceso = row["Proceso"] || row["B"] || ""; 
-                    let estado = row["Estado"] || row["AG"] || "";
-                    let cedula = row["Cedula"] || row["J"] || "";
-                    let fechaInicio = row["Fecha inicio ausencia"] || row["E"] || "";
-                    let fechaFin = row["Fecha final ausencia"] || row["F"] || "";
+                    // 1. PROCESAR DICCIONARIO SIC
+                    let diccionarioSIC = {};
+                    dataSic.forEach(row => {
+                        let proceso = String(row["Proceso"] || "").trim(); 
+                        let estado = String(row["Estado"] || "").trim();
+                        let cedula = limpiarCedula(row["Cedula"] || row["Cédula"] || row["Identificador"] || "");
+                        let nombre = String(row["Nombre"] || row["Nombres"] || "").trim();
+                        let fechaInicio = "";
+                        let fechaFin = "";
 
-                    if (procesosValidosSIC.includes(proceso)) {
-                        ausentismosSIC.push({ cedula, fechaInicio, fechaFin, estado: proceso, estadoAprobacion: estado });
-                    }
-                });
-
-                function obtenerAusentismo(cedula, fecha) {
-                    return ausentismosSIC.find(a => a.cedula == cedula && a.fechaInicio <= fecha && a.fechaFin >= fecha);
-                }
-
-                // 2.2 Procesar Geovictoria (El origen de la verdad de los turnos)
-                dataGeo.forEach(row => {
-                    let cedula = row["Cedula"] || row["C"] || ""; 
-                    let fecha = row["Fecha"] || row["E"] || ""; 
-                    let permiso = row["Permiso"] || row["F"] || ""; 
-                    let entrada = row["Entrada"] || row["H"] || ""; 
-                    let salida = row["Salida"] || row["N"] || ""; 
-                    let nombre = row["Nombre"] || "";
-
-                    if (permisosIgnorarGeo.includes(permiso)) return;
-
-                    let ausentismoSIC = obtenerAusentismo(cedula, fecha);
-                    let tieneEntrada = entrada !== ""; 
-                    let tieneSalida = salida !== "";
-
-                    // CASO ESPECIAL: Si la persona fue programada, tiene un registro en SIC, pero está ANULADO
-                    if (ausentismoSIC && (ausentismoSIC.estadoAprobacion === "ANULADO" || ausentismoSIC.estadoAprobacion === "falta adjunto")) {
-                        hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
-                        if(cedula) cedulasUnicas.add(cedula.toString());
-                        return; // Si ya es inválido, saltamos al siguiente empleado
-                    }
-
-                    // Lógicas normales de inasistencia o marcación
-                    if (!tieneEntrada && !tieneSalida) {
-                        if (!ausentismoSIC) {
-                            hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
-                            if(cedula) cedulasUnicas.add(cedula.toString());
+                        // REGLA MATEMÁTICA DE RETIROS DEFINITIVOS (ESCUDO DE 30 DÍAS)
+                        if (retirosDefinitivos.includes(proceso.toLowerCase())) {
+                            let udl = normalizarFecha(row["Ultimo Dia Laborado"] || row["Ultimo dia laborado"] || row["Ultimo Día Laborado"] || row["I"] || "");
+                            if (udl) {
+                                fechaInicio = sumarDias(udl, 1); // El escudo arranca al día siguiente
+                                fechaFin = sumarDias(udl, 31);   // Y dura 30 días
+                            }
+                        } else {
+                            fechaInicio = normalizarFecha(row["Fecha inicio ausencia"] || row["Fecha Inicio"] || "");
+                            fechaFin = normalizarFecha(row["Fecha final ausencia"] || row["Fecha Fin"] || "");
                         }
-                    } else if ((tieneEntrada && !tieneSalida) || (!tieneEntrada && tieneSalida)) {
-                        let alertaSic = ausentismoSIC ? `Tiene SIC (${ausentismoSIC.estado})` : "Sin registro";
-                        hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: alertaSic, Alerta: "Marcación Incompleta" });
-                        if(cedula) cedulasUnicas.add(cedula.toString());
-                    } else if (tieneEntrada && tieneSalida && ausentismoSIC) {
-                        hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
-                        if(cedula) cedulasUnicas.add(cedula.toString());
-                    }
-                });
 
-                // 2.3 Procesar Ramonapp
-                dataRamon.forEach(row => {
-                    let cedula = row["Cedula"] || row["D"] || ""; 
-                    let fecha = row["Fecha"] || row["H"] || ""; 
-                    let novedad = row["Novedad restrictiva"] || row["J"] || ""; 
-                    let entrada = row["Entró"] || row["K"] || ""; 
-                    let salida = row["Salió"] || row["L"] || ""; 
-                    let nombre = row["Nombre"] || "";
+                        if (cedula && nombre) nombresExcel[cedula] = nombre;
 
-                    if (novedad === "Descanso programado") return;
-
-                    let ausentismoSIC = obtenerAusentismo(cedula, fecha);
-                    let tieneEntrada = entrada !== ""; 
-                    let tieneSalida = salida !== "";
-
-                    // CASO ESPECIAL: Si la persona fue programada, tiene un registro en SIC, pero está ANULADO
-                    if (ausentismoSIC && (ausentismoSIC.estadoAprobacion === "ANULADO" || ausentismoSIC.estadoAprobacion === "falta adjunto")) {
-                        hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
-                        if(cedula) cedulasUnicas.add(cedula.toString());
-                        return;
-                    }
-
-                    if (!tieneEntrada && !tieneSalida) {
-                        if (!ausentismoSIC) {
-                            hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
-                            if(cedula) cedulasUnicas.add(cedula.toString());
+                        if (procesosValidosSIC.includes(proceso) && cedula && fechaInicio) {
+                            if (!diccionarioSIC[cedula]) diccionarioSIC[cedula] = [];
+                            diccionarioSIC[cedula].push({ fechaInicio, fechaFin, estado: proceso, estadoAprobacion: estado });
                         }
-                    } else if ((tieneEntrada && !tieneSalida) || (!tieneEntrada && tieneSalida)) {
-                        let alertaSic = ausentismoSIC ? `Tiene SIC (${ausentismoSIC.estado})` : "Sin registro";
-                        hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: alertaSic, Alerta: "Marcación Incompleta" });
-                        if(cedula) cedulasUnicas.add(cedula.toString());
-                    } else if (tieneEntrada && tieneSalida && ausentismoSIC) {
-                        hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
-                        if(cedula) cedulasUnicas.add(cedula.toString());
-                    }
-                });
-
-                // ==========================================
-                // 3. ENVIAR A n8n ÚNICAMENTE EL RESULTADO (¡Pesa poquísimo!)
-                // ==========================================
-                const payloadDinamico = {
-                    listaCedulasSQL: Array.from(cedulasUnicas).map(c => `'${c}'`).join(',') || "''",
-                    hallazgos: hallazgos
-                };
-
-                const response = await fetch('https://n8n.casalimpia.com/webhook/AUSENTISMOS', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payloadDinamico)
-                });
-
-                if (!response.ok) throw new Error("Error en la respuesta de n8n");
-
-                const data = await response.json();
-                
-                // Asegurar que usamos el array devuelto por n8n (ya enriquecido con Supabase)
-                const resultadosFinales = Array.isArray(data) ? data : (data.data || []);
-
-                // 4. CALCULAR KPIs
-                let reqAusentismo = 0; let marcIncompleta = 0; let falsoAusentismo = 0;
-                resultadosFinales.forEach(h => {
-                    if(h.Alerta === "Requiere grabar ausentismo") reqAusentismo++;
-                    if(h.Alerta === "Marcación Incompleta") marcIncompleta++;
-                    if(h.Alerta === "Falso Ausentismo en SIC" || h.Alerta === "Ausentismo Inválido") falsoAusentismo++;
-                });
-
-                document.getElementById('kpi-total').innerText = resultadosFinales.length;
-                document.getElementById('kpi-ausentismos').innerText = reqAusentismo;
-                document.getElementById('kpi-incompletas').innerText = marcIncompleta;
-                document.getElementById('kpi-graves').innerText = falsoAusentismo;
-
-                // 5. LLENAR TABLA DINÁMICA
-                tbody.innerHTML = ""; 
-                if (resultadosFinales.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;"><strong>✅ ¡Todo perfecto! No se encontraron inconsistencias.</strong></td></tr>`;
-                } else {
-                    resultadosFinales.forEach(h => {
-                        let alertaBadge = "gris";
-                        if(h.Alerta === "Requiere grabar ausentismo") alertaBadge = "rojo";
-                        if(h.Alerta === "Marcación Incompleta") alertaBadge = "amarillo";
-                        if(h.Alerta === "Falso Ausentismo en SIC" || h.Alerta === "Ausentismo Inválido") alertaBadge = "morado";
-                        let origenBadge = h.Origen === "Geovictoria" ? "azul" : "gris";
-
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><span class="badge ${origenBadge}">${h.Origen || "--"}</span></td>
-                                <td><strong>${h.Cedula || "--"}</strong></td>
-                                <td>${h.NombreEmpleado || "--"}</td>
-                                <td>${h.CentroCostos || "--"}<br><span style="font-size:0.75rem;color:#64748B;">${h.SitioTrabajo || "--"}</span></td>
-                                <td>${h.Jefatura || "--"}</td>
-                                <td><span class="badge gris">${h.EstadoEmpleado || "--"}</span></td>
-                                <td>${h.FechaTurno || "--"}</td>
-                                <td>${h.Entrada || "--"} - ${h.Salida || "--"}</td>
-                                <td>${h.EstadoSIC || "--"}</td>
-                                <td><span class="badge ${alertaBadge}">${h.Alerta || "--"}</span></td>
-                            </tr>
-                        `;
                     });
+
+                    function obtenerAusentismo(cedula, fechaBusqueda) {
+                        let registros = diccionarioSIC[cedula];
+                        if (!registros) return null;
+                        return registros.find(a => a.fechaInicio <= fechaBusqueda && a.fechaFin >= fechaBusqueda);
+                    }
+
+                    // 2. PROCESAR GEOVICTORIA
+                    dataGeo.forEach(row => {
+                        let cedula = limpiarCedula(row["Identificador"] || row["Cedula"] || row["Cédula"] || ""); 
+                        let fecha = normalizarFecha(row["Fecha"]); 
+                        let permiso = String(row["Permiso"] || "").trim(); 
+                        
+                        let marcaciones = extraerMarcaciones(row);
+                        let entrada = marcaciones.entrada;
+                        let salida = marcaciones.salida;
+                        
+                        let apellidos = String(row["Apellidos"] || "").trim();
+                        let nombres = String(row["Nombres"] || "").trim();
+                        let nombre = (nombres + " " + apellidos).trim() || String(row["Nombre"] || "");
+                        
+                        if (!cedula || cedula.toLowerCase().includes("identificador")) return;
+                        if (nombre) nombresExcel[cedula] = nombre;
+                        if (permisosIgnorarGeo.includes(permiso) || permiso === "Descanso programado") return;
+
+                        let ausentismoSIC = obtenerAusentismo(cedula, fecha);
+                        let tieneEntrada = entrada !== ""; 
+                        let tieneSalida = salida !== "";
+
+                        if (ausentismoSIC && (ausentismoSIC.estadoAprobacion === "ANULADO" || ausentismoSIC.estadoAprobacion === "falta adjunto")) {
+                            hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
+                            cedulasUnicas.add(cedula);
+                            return;
+                        }
+
+                        if (!tieneEntrada && !tieneSalida) {
+                            if (!ausentismoSIC) {
+                                hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
+                                cedulasUnicas.add(cedula);
+                            }
+                        } else if ((tieneEntrada && !tieneSalida) || (!tieneEntrada && tieneSalida)) {
+                            let alertaSic = ausentismoSIC ? `Tiene SIC (${ausentismoSIC.estado})` : "Sin registro";
+                            hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: alertaSic, Alerta: "Marcación Incompleta" });
+                            cedulasUnicas.add(cedula);
+                        } else if (tieneEntrada && tieneSalida && ausentismoSIC) {
+                            hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
+                            cedulasUnicas.add(cedula);
+                        }
+                    });
+
+                    // 3. PROCESAR RAMONAPP
+                    dataRamon.forEach(row => {
+                        let cedula = limpiarCedula(row["Cedula"] || row["Cédula"] || ""); 
+                        let fecha = normalizarFecha(row["Fecha"] || row["Fecha texto"]); 
+                        let novedad = String(row["Novedad restrictiva"] || "").trim(); 
+                        
+                        let marcaciones = extraerMarcaciones(row);
+                        let entrada = marcaciones.entrada;
+                        let salida = marcaciones.salida;
+                        
+                        let nombre = String(row["Nombre"] || row["Nombres"] || "").trim();
+                        
+                        if (!cedula || cedula.toLowerCase().includes("cedula")) return;
+                        if (nombre) nombresExcel[cedula] = nombre;
+                        if (novedad === "Descanso programado" || novedad === "Descanso compensatorio") return;
+
+                        let ausentismoSIC = obtenerAusentismo(cedula, fecha);
+                        let tieneEntrada = entrada !== ""; 
+                        let tieneSalida = salida !== "";
+
+                        if (ausentismoSIC && (ausentismoSIC.estadoAprobacion === "ANULADO" || ausentismoSIC.estadoAprobacion === "falta adjunto")) {
+                            hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
+                            cedulasUnicas.add(cedula);
+                            return;
+                        }
+
+                        if (!tieneEntrada && !tieneSalida) {
+                            if (!ausentismoSIC) {
+                                hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
+                                cedulasUnicas.add(cedula);
+                            }
+                        } else if ((tieneEntrada && !tieneSalida) || (!tieneEntrada && tieneSalida)) {
+                            let alertaSic = ausentismoSIC ? `Tiene SIC (${ausentismoSIC.estado})` : "Sin registro";
+                            hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: alertaSic, Alerta: "Marcación Incompleta" });
+                            cedulasUnicas.add(cedula);
+                        } else if (tieneEntrada && tieneSalida && ausentismoSIC) {
+                            hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
+                            cedulasUnicas.add(cedula);
+                        }
+                    });
+
+                    // 4. CONSULTAR N8N
+                    let stringSQL = Array.from(cedulasUnicas).map(c => `'${c}'`).join(',');
+                    if (!stringSQL) stringSQL = "''"; 
+
+                    const response = await fetch('https://n8n.casalimpia.com/webhook/AUSENTISMOS', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ listaCedulasSQL: stringSQL })
+                    });
+
+                    if (!response.ok) throw new Error("Error en la respuesta de n8n");
+
+                    const dataSupabase = await response.json();
+                    const arrayBD = Array.isArray(dataSupabase) ? dataSupabase : (dataSupabase.data || []);
+
+                    const infoEmpleados = {};
+                    arrayBD.forEach(emp => { infoEmpleados[String(emp.codEmp)] = emp; });
+
+                    // Guardamos la matriz principal en memoria global
+                    resultadosGlobales = hallazgos.map(h => {
+                        const bd = infoEmpleados[String(h.Cedula)] || {};
+                        let nomFinal = bd.nomEmp || h.NombreEmpleado || h.Nombre || nombresExcel[h.Cedula] || "--";
+                        
+                        return {
+                            Origen: h.Origen,
+                            Cedula: h.Cedula,
+                            NombreEmpleado: nomFinal,
+                            CentroCostos: bd.codCco ? `${bd.codCco} - ${bd.nomCco}` : "Sin Asignar",
+                            SitioTrabajo: bd.clasif4 || "Sin Asignar",
+                            Jefatura: bd.clasif3 || "Sin Asignar",
+                            EstadoEmpleado: bd.nomEst || "Desconocido",
+                            FechaTurno: h.FechaTurno,
+                            Entrada: h.Entrada,
+                            Salida: h.Salida,
+                            EstadoSIC: h.EstadoSIC,
+                            Alerta: h.Alerta
+                        };
+                    });
+
+                    // Llamamos al motor de renderizado que aplica los filtros
+                    renderTabla();
+                    
+                    loader.style.display = 'none';
+                    resultados.style.display = 'flex';
+
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("Ocurrió un error al procesar. Revisa la consola.");
+                    loader.style.display = 'none';
+                } finally {
+                    btn.disabled = false;
                 }
+            }, 100); 
+        }
 
-                loader.style.display = 'none';
-                resultados.style.display = 'flex';
+        // ==========================================
+        // MOTOR DE FILTRADO Y RENDERIZADO VISUAL
+        // ==========================================
+        function renderTabla() {
+            const tbody = document.querySelector('#tabla-resultados tbody');
+            
+            // 1. Obtener valores de los Filtros Globales
+            const filtroOrigen = document.getElementById("filtroOrigen").value.toLowerCase();
+            const filtroAlerta = document.getElementById("filtroAlerta").value.toLowerCase();
+            
+            // 2. Obtener valores de los Filtros de Columna
+            const colOrigen = document.getElementById("colOrigen").value.toLowerCase();
+            const colCedula = document.getElementById("colCedula").value.toLowerCase();
+            const colNombre = document.getElementById("colNombre").value.toLowerCase();
+            const colSitio = document.getElementById("colSitio").value.toLowerCase();
+            const colJefatura = document.getElementById("colJefatura").value.toLowerCase();
+            const colEstado = document.getElementById("colEstado").value.toLowerCase();
+            const colFecha = document.getElementById("colFecha").value.toLowerCase();
+            const colSic = document.getElementById("colSic").value.toLowerCase();
 
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Ocurrió un error al cruzar los datos. Verifica la consola para más detalles.");
-                loader.style.display = 'none';
-            } finally {
-                btn.disabled = false;
+            // 3. Aplicar Filtros a la matriz de datos
+            let datosFiltrados = resultadosGlobales.filter(r => {
+                // Filtros Globales
+                if (filtroOrigen && r.Origen.toLowerCase() !== filtroOrigen) return false;
+                if (filtroAlerta && r.Alerta.toLowerCase() !== filtroAlerta) return false;
+
+                // Filtros de Columna (Búsqueda parcial "includes")
+                if (colOrigen && !r.Origen.toLowerCase().includes(colOrigen)) return false;
+                if (colCedula && !r.Cedula.toLowerCase().includes(colCedula)) return false;
+                if (colNombre && !r.NombreEmpleado.toLowerCase().includes(colNombre)) return false;
+                if (colSitio && !(r.CentroCostos.toLowerCase().includes(colSitio) || r.SitioTrabajo.toLowerCase().includes(colSitio))) return false;
+                if (colJefatura && !r.Jefatura.toLowerCase().includes(colJefatura)) return false;
+                if (colEstado && !r.EstadoEmpleado.toLowerCase().includes(colEstado)) return false;
+                if (colFecha && !r.FechaTurno.toLowerCase().includes(colFecha)) return false;
+                if (colSic && !r.EstadoSIC.toLowerCase().includes(colSic)) return false;
+                
+                return true;
+            });
+
+            // 4. Preparar Datos para Exportación (Solo exporta lo filtrado)
+            datosParaExcel = datosFiltrados.map(r => ({
+                "Origen": r.Origen, "Cédula": r.Cedula, "Nombre Empleado": r.NombreEmpleado, 
+                "Centro Costos": r.CentroCostos, "Sitio Trabajo": r.SitioTrabajo, "Jefatura": r.Jefatura,
+                "Estado Empleado": r.EstadoEmpleado, "Fecha Turno": r.FechaTurno, 
+                "Entrada": r.Entrada, "Salida": r.Salida, "Estado en SIC": r.EstadoSIC, "Alerta": r.Alerta
+            }));
+
+            // 5. Recalcular KPIs en base a lo filtrado
+            let reqAusentismo = 0; let marcIncompleta = 0; let falsoAusentismo = 0;
+            let htmlRows = "";
+
+            if (datosFiltrados.length === 0) {
+                htmlRows = `<tr><td colspan="10" style="text-align:center; padding: 20px;"><strong>No hay resultados para estos filtros.</strong></td></tr>`;
+            } else {
+                datosFiltrados.forEach(r => {
+                    if(r.Alerta === "Requiere grabar ausentismo") reqAusentismo++;
+                    if(r.Alerta === "Marcación Incompleta") marcIncompleta++;
+                    if(r.Alerta === "Falso Ausentismo en SIC" || r.Alerta === "Ausentismo Inválido") falsoAusentismo++;
+
+                    let alertaBadge = "gris";
+                    if(r.Alerta === "Requiere grabar ausentismo") alertaBadge = "rojo";
+                    if(r.Alerta === "Marcación Incompleta") alertaBadge = "amarillo";
+                    if(r.Alerta === "Falso Ausentismo en SIC" || r.Alerta === "Ausentismo Inválido") alertaBadge = "morado";
+                    let origenBadge = r.Origen === "Geovictoria" ? "azul" : "gris";
+
+                    htmlRows += `
+                        <tr>
+                            <td><span class="badge ${origenBadge}">${r.Origen}</span></td>
+                            <td><strong>${r.Cedula}</strong></td>
+                            <td>${r.NombreEmpleado}</td>
+                            <td>${r.CentroCostos}<br><span style="font-size:0.75rem;color:#64748B;">${r.SitioTrabajo}</span></td>
+                            <td>${r.Jefatura}</td>
+                            <td><span class="badge gris">${r.EstadoEmpleado}</span></td>
+                            <td>${r.FechaTurno}</td>
+                            <td>${r.Entrada} - ${r.Salida}</td>
+                            <td>${r.EstadoSIC}</td>
+                            <td><span class="badge ${alertaBadge}">${r.Alerta}</span></td>
+                        </tr>
+                    `;
+                });
             }
+
+            document.getElementById('kpi-total').innerText = datosFiltrados.length;
+            document.getElementById('kpi-ausentismos').innerText = reqAusentismo;
+            document.getElementById('kpi-incompletas').innerText = marcIncompleta;
+            document.getElementById('kpi-graves').innerText = falsoAusentismo;
+            
+            tbody.innerHTML = htmlRows;
+        }
+
+        function descargarExcelFinal() {
+            if (datosParaExcel.length === 0) {
+                alert("No hay datos visibles para exportar.");
+                return;
+            }
+            const worksheet = XLSX.utils.json_to_sheet(datosParaExcel);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Inconsistencias");
+            XLSX.writeFile(workbook, "Reporte_Auditoria_Asistencias.xlsx");
         }
     </script>
 </body>
