@@ -366,7 +366,7 @@
                         let tieneEntrada = entrada !== ""; 
                         let tieneSalida = salida !== "";
 
-                        if (ausentismoSIC && (ausentismoSIC.estadoAprobacion === "ANULADO" || ausentismoSIC.estadoAprobacion === "falta adjunto")) {
+                        if (ausentismoSIC && (ausentismoSIC.estadoAprobacion.toLowerCase() === "anulado" || ausentismoSIC.estadoAprobacion.toLowerCase() === "falta adjunto")) {
                             hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
                             cedulasUnicas.add(cedula);
                             return;
@@ -407,7 +407,7 @@
                         let tieneEntrada = entrada !== ""; 
                         let tieneSalida = salida !== "";
 
-                        if (ausentismoSIC && (ausentismoSIC.estadoAprobacion === "ANULADO" || ausentismoSIC.estadoAprobacion === "falta adjunto")) {
+                        if (ausentismoSIC && (ausentismoSIC.estadoAprobacion.toLowerCase() === "anulado" || ausentismoSIC.estadoAprobacion.toLowerCase() === "falta adjunto")) {
                             hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
                             cedulasUnicas.add(cedula);
                             return;
