@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Auditoría de Asistencias | Casalimpia</title>
     
-    <!-- Librería para extraer datos de Excel sin saturar el servidor -->
+    <!-- Librería para extraer datos de Excel en el navegador -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -107,7 +107,7 @@
 
         <div id="loader">
             <div class="spinner"></div>
-            Extrayendo datos y cruzando con Supabase. Esto puede tomar unos segundos...
+            Optimizando archivos y cruzando datos con n8n...
         </div>
 
         <div id="resultados-container" style="display: none; flex-direction: column; gap: 20px;">
@@ -152,7 +152,6 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
                     const firstSheet = workbook.SheetNames[0];
-                    // defval: "" asegura que las celdas vacías no se omitan, sino que se envíen vacías
                     const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], {defval: ""});
                     resolve(jsonData);
                 };
@@ -181,12 +180,45 @@
             loader.style.display = 'block';
             
             try {
-                // 1. EXTRAER LA DATA (Transforma 8MB en unos pocos KB de texto)
-                const geoData = await leerExcel(geo);
-                const ramData = await leerExcel(ram);
-                const sicData = await leerExcel(sic);
+                // 1. EXTRAER LA DATA EN BRUTO
+                const rawGeo = await leerExcel(geo);
+                const rawRamon = await leerExcel(ram);
+                const rawSic = await leerExcel(sic);
 
-                // 2. EMPAQUETAR Y ENVIAR COMO JSON
+                // 1.5 LA DIETA AGRESIVA: Limpiar la basura antes de enviar a n8n
+                const procesosValidos = ["Incapacidad", "Suspension", "DiaFamilia", "Vacaciones", "PermisoNoRemunerado", "FaltaSinJustificar", "CalamidadDomestica", "LicenciaMaternidad", "AbandonoPuesto", "SegSocial"];
+
+                // Dejar solo las 6 columnas que sirven y solo las filas de ausencias válidas
+                const sicData = rawSic
+                    .filter(row => procesosValidos.includes(row["Proceso"] || row["B"]))
+                    .map(row => ({
+                        "B": row["Proceso"] || row["B"],
+                        "AG": row["Estado"] || row["AG"],
+                        "J": row["Cedula"] || row["J"],
+                        "K": row["Nombre"] || row["K"],
+                        "E": row["Fecha inicio ausencia"] || row["E"],
+                        "F": row["Fecha final ausencia"] || row["F"]
+                    }));
+
+                // Dejar solo las 5 columnas útiles de Geovictoria
+                const geoData = rawGeo.map(row => ({
+                    "C": row["Cedula"] || row["C"],
+                    "E": row["Fecha"] || row["E"],
+                    "F": row["Permiso"] || row["F"],
+                    "H": row["Entrada"] || row["H"],
+                    "N": row["Salida"] || row["N"]
+                }));
+
+                // Dejar solo las 5 columnas útiles de Ramonapp
+                const ramData = rawRamon.map(row => ({
+                    "D": row["Cedula"] || row["D"],
+                    "H": row["Fecha"] || row["H"],
+                    "J": row["Novedad restrictiva"] || row["J"],
+                    "K": row["Entró"] || row["K"],
+                    "L": row["Salió"] || row["L"]
+                }));
+
+                // 2. EMPAQUETAR Y ENVIAR COMO JSON ULTRA LIVIANO
                 const payloadDinamico = {
                     geovictoria: geoData,
                     ramonapp: ramData,
