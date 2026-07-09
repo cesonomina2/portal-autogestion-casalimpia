@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Informe Gestión Área Contabilidad</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
+        
+        :root {
+            --color-azul-logo: #0085CA; /* Azul principal Casalimpia */
+            --color-verde-logo: #8DC63F; /* Verde secundario Casalimpia */
+            --color-rojo-alerta: #EF4444; /* Rojo para no cumplimiento */
+            --color-blanco: #ffffff; 
+            --color-gris-bg: #F1F5F9;
+            --color-texto: #334155; 
+            --sombra: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --borde: 1px solid #E2E8F0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--color-gris-bg); color: var(--color-texto); }
+
+        /* HEADER */
+        header { background-color: var(--color-blanco); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--sombra); border-bottom: 4px solid var(--color-azul-logo); flex-wrap: wrap; gap: 15px; position: sticky; top: 0; z-index: 100; }
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .logo-img { height: 40px; width: auto; }
+        .logo-text { font-family: 'Outfit', sans-serif; font-weight: 700; display: flex; align-items: center; }
+        .text-verde { color: var(--color-verde-logo); font-size: 1.6rem; }
+        .text-azul { color: var(--color-azul-logo); font-size: 1.6rem; margin-left: 2px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 600; color: #475569; background: #E2E8F0; padding: 6px 18px; border-radius: 50px; }
+
+        /* TABS */
+        .tabs-container { background: white; border-bottom: 1px solid #CBD5E1; display: flex; justify-content: center; gap: 20px; padding-top: 15px; flex-wrap: wrap;}
+        .tab-btn { background: none; border: none; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: #64748B; padding: 10px 15px; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .tab-btn:hover { color: var(--color-azul-logo); }
+        .tab-btn.active { color: var(--color-azul-logo); border-bottom: 3px solid var(--color-azul-logo); }
+        .tab-content { display: none; padding: 20px 0; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 0 15px; display: flex; flex-direction: column; gap: 20px; }
+
+        /* CARGA MANUAL */
+        #zona-carga-manual { background-color: #FEF3C7; border: 1px dashed #D97706; color: #92400E; padding: 15px; border-radius: 8px; text-align: center; display: none; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px;}
+        #zona-carga-manual input[type="file"] { background: white; padding: 10px; border-radius: 5px; border: 1px solid #D97706; cursor: pointer; }
+
+        /* FILTROS GLOBALES */
+        .filtros-banner { background-color: var(--color-azul-logo); border-radius: 8px; padding: 15px 25px; display: flex; align-items: flex-end; flex-wrap: wrap; gap: 15px; color: white; box-shadow: var(--sombra); margin-top: 15px; }
+        .filtros-banner h2 { font-family: 'Outfit', sans-serif; margin-right: 15px; font-size: 1.8rem; margin-bottom: 2px;}
+        .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
+        .input-group label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #ffffff; letter-spacing: 0.5px;}
+        .input-text-search { padding: 8px 12px; border-radius: 5px; border: none; outline: none; font-family: 'Roboto', sans-serif; width: 100%; height: 40px; color: #334155;}
+        
+        /* CHOICES.JS ESTILOS */
+        .choices { margin-bottom: 0; width: 100%; }
+        .choices__inner { min-height: 40px; max-height: 85px; overflow-y: auto; padding: 2px 8px; border-radius: 5px; background-color: white; border: none; font-family: 'Roboto', sans-serif; font-size: 0.9rem; }
+        .choices__input { color: #334155 !important; background-color: transparent !important; margin-bottom: 0; }
+        .choices__list--dropdown .choices__item { color: #334155; font-size: 0.9rem; }
+        .choices__list--multiple .choices__item { background-color: var(--color-azul-logo); border: 1px solid #005f9e; border-radius: 20px; color: white; padding: 3px 10px; margin: 2px 4px 2px 0; font-size: 0.75rem; display: inline-block; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+        .choices__list--multiple .choices__item[data-deletable] { padding-right: 25px; }
+        .btn-limpiar { background-color: transparent; border: 1px solid white; color: white; padding: 9px 20px; border-radius: 50px; cursor: pointer; font-weight: 700; transition: 0.3s; align-self: flex-end; margin-bottom: 2px;}
+        .btn-limpiar:hover { background-color: white; color: var(--color-azul-logo); }
+
+        /* KPIs CARDS */
+        .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .kpi-card { padding: 25px 20px; border-radius: 8px; box-shadow: var(--sombra); text-align: center; border: none; }
+        
+        .kpi-card.total { background-color: #0085CA; }      /* Azul */
+        .kpi-card.cumple { background-color: var(--color-verde-logo); }     /* Verde Corporativo */
+        .kpi-card.nocumple { background-color: var(--color-rojo-alerta); }  /* Rojo Corporativo */
+        .kpi-card.porcentaje { background-color: #F59E0B; } /* Amarillo/Naranja */
+        
+        .kpi-card .kpi-title { font-size: 0.85rem; color: rgba(255, 255, 255, 0.95); text-transform: uppercase; font-weight: 800; margin-bottom: 12px; letter-spacing: 0.5px;}
+        .kpi-card .kpi-value { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 800; color: #ffffff; }
+
+        /* BATERÍAS DE CUMPLIMIENTO */
+        .baterias-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 10px; }
+        .bateria-card { background: white; padding: 15px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); text-align: center; }
+        .bateria-nombre { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--color-azul-logo); margin-bottom: 12px; font-size: 1.1rem; }
+        .bateria-outer { width: 100%; height: 35px; background: #E2E8F0; border-radius: 6px; position: relative; overflow: hidden; border: 2px solid #CBD5E1; }
+        .bateria-inner { height: 100%; border-radius: 4px 0 0 4px; transition: width 0.8s ease-in-out; }
+        .bateria-inner.alta { background: var(--color-verde-logo); } /* Verde Casalimpia */
+        .bateria-inner.media { background: #F59E0B; }
+        .bateria-inner.baja { background: var(--color-rojo-alerta); }
+        .bateria-texto { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #1E293B; font-size: 0.95rem; z-index: 2; text-shadow: 0px 0px 5px rgba(255,255,255,0.9); }
+        .bateria-stats { display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.85rem; color: #64748B; background: #F8FAFC; padding: 8px; border-radius: 4px; border: 1px solid #E2E8F0; }
+        .bateria-stats span { flex: 1; }
+        .bateria-stats strong { color: var(--color-texto); font-size: 0.95rem; display: block; margin-top: 2px;}
+
+        /* TABLAS Y PANELES */
+        .seccion-titulo { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); border-bottom: 2px solid var(--color-verde-logo); padding-bottom: 5px; margin: 20px 0 10px 0; font-size: 1.4rem;}
+        .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); }
+        .table-responsive { overflow-x: auto; max-height: 600px; border: 1px solid #E2E8F0; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        thead { position: sticky; top: 0; background: #F1F5F9; z-index: 10; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; white-space: nowrap; font-size: 0.85rem;}
+        th { font-weight: 800; color: #475569; text-transform: uppercase; font-family: 'Outfit', sans-serif; font-size: 0.8rem;}
+        tbody tr:hover { background-color: #F8FAFC; }
+
+        .estado-cumple { background-color: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
+        .estado-no-cumple { background-color: #FEE2E2; color: #991B1B; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
+
+        .herramientas-tabla { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;}
+        .btn-accion { color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 5px; transition: 0.2s; font-family: 'Outfit', sans-serif;}
+        .btn-excel { background: var(--color-verde-logo); } .btn-excel:hover { background: #76A633; }
+        .btn-pdf { background: var(--color-rojo-alerta); } .btn-pdf:hover { background: #DC2626; }
+
+        /* Ajustes PDF */
+        .pdf-export-mode { padding: 10px !important; background: white !important; }
+        .pdf-export-mode .table-responsive { max-height: none !important; overflow: visible !important; border: none !important; }
+        .pdf-export-mode table { min-width: 0 !important; width: 100% !important; table-layout: auto !important; }
+        .pdf-export-mode tr { page-break-inside: avoid !important; }
+        .pdf-export-mode th, .pdf-export-mode td { white-space: normal !important; word-wrap: break-word !important; padding: 6px 4px !important; font-size: 11px !important; }
+
+        @media (max-width: 768px) {
+            .filtros-banner { flex-direction: column; align-items: stretch; }
+            .btn-limpiar { align-self: stretch; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
+            <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Casalimpia</span></div>
+        </div>
+        <div class="header-title">Informe Gestión Área Contabilidad</div>
+    </header>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="cambiarPestana('resumen', this)">Resumen General</button>
+        <button class="tab-btn" onclick="cambiarPestana('detalles', this)">Data Detallada</button>
+    </div>
+
+    <div class="container">
+        
+        <div id="zona-carga-manual">
+            <h3>⚠️ No se pudo conectar a Google Sheets de forma automática</h3>
+            <p>Asegúrate de que el enlace de Google Drive esté publicado en la web. Si sigue fallando, descarga tu archivo como CSV y cárgalo aquí.</p>
+            <input type="file" id="csvFileInput" accept=".csv">
+        </div>
+
+        <div class="filtros-banner">
+            <h2>Filtros</h2>
+            <div class="input-group">
+                <label>Búsqueda Global</label>
+                <input type="text" id="filtro-texto" class="input-text-search" placeholder="Buscar cualquier caracter...">
+            </div>
+            <div class="input-group">
+                <label>Mes</label>
+                <select id="filtro-mes" multiple></select>
+            </div>
+            <div class="input-group">
+                <label>Corte</label>
+                <select id="filtro-corte" multiple></select>
+            </div>
+            <div class="input-group">
+                <label>Responsable de Causación</label>
+                <select id="filtro-responsable" multiple></select>
+            </div>
+            <button class="btn-limpiar" onclick="resetFilters()">Limpiar</button>
+        </div>
+
+        <div id="tab-resumen" class="tab-content active">
+            <div class="kpis-grid">
+                <div class="kpi-card total"><div class="kpi-title">Total Registros</div><div class="kpi-value" id="kpi-total">0</div></div>
+                <div class="kpi-card cumple"><div class="kpi-title">Cumplieron Meta</div><div class="kpi-value" id="kpi-cumple">0</div></div>
+                <div class="kpi-card nocumple"><div class="kpi-title">No Cumplieron</div><div class="kpi-value" id="kpi-nocumple">0</div></div>
+                <div class="kpi-card porcentaje"><div class="kpi-title">% Eficiencia</div><div class="kpi-value" id="kpi-eficiencia">0%</div></div>
+            </div>
+
+            <div id="baterias-container" class="baterias-grid">
+                </div>
+
+            <div class="panel">
+                <div class="herramientas-tabla">
+                    <h2 class="seccion-titulo" style="margin: 0; border: none;">Cumplimiento por Corte y Persona</h2>
+                    <button class="btn-accion btn-pdf" onclick="generarPDF()">Descargar Resumen en PDF</button>
+                </div>
+                
+                <div id="informe-a-pdf" class="table-responsive">
+                    <table id="tabla-resumen">
+                        <thead>
+                            <tr>
+                                <th>Mes</th>
+                                <th>Corte</th>
+                                <th>Responsable Causación</th>
+                                <th>Total Facturas</th>
+                                <th>Registros Asignados</th>
+                                <th>Cumplieron Meta</th>
+                                <th>No Cumplieron</th>
+                                <th>% Cumplimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-resumen"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-detalles" class="tab-content">
+            <div class="panel">
+                <div class="herramientas-tabla">
+                    <h2 class="seccion-titulo" style="margin: 0; border: none;">Base de Datos Filtrada</h2>
+                    <button class="btn-accion btn-excel" onclick="exportarExcel()">Exportar a Excel</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="tabla-maestra">
+                        <thead>
+                            <tr>
+                                <th>Mes</th>
+                                <th>Corte</th>
+                                <th>Área</th>
+                                <th>Responsable Causación</th>
+                                <th>Cant. Facturas</th>
+                                <th>Fecha Meta</th>
+                                <th>Fecha Causación</th>
+                                <th>Status Cumplimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-maestra"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Enlace de Google Sheets en tiempo real
+        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1759455245&single=true&output=csv"; 
+        
+        let datosGlobales = [];
+        let datosFiltradosActuales = []; 
+
+        let mesChoices, corteChoices, respChoices;
+
+        function cambiarPestana(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+
+        // Función crucial para comparar fechas formato DD/MM/YYYY
+        function parseCustomDate(dateStr) {
+            if (!dateStr) return null;
+            let parts = String(dateStr).split('/');
+            if (parts.length === 3) {
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+            return new Date(dateStr);
+        }
+
+        function evaluarCumplimiento(fechaMetaStr, fechaCausaStr) {
+            let fMeta = parseCustomDate(fechaMetaStr);
+            let fCausa = parseCustomDate(fechaCausaStr);
+            
+            if(!fCausa) return false;
+            if(!fMeta) return true; 
+
+            return fCausa.getTime() <= fMeta.getTime();
+        }
+
+        function inicializarDashboard() {
+            inicializarChoicesJS();
+            
+            Papa.parse(GOOGLE_SHEET_CSV_URL, {
+                download: true, 
+                header: true, 
+                dynamicTyping: true, 
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if(results.data && results.data.length > 0) {
+                        procesarDatos(results.data);
+                    } else { 
+                        mostrarCargaManual(); 
+                    }
+                },
+                error: function(err) { 
+                    console.error("Error al descargar CSV:", err);
+                    mostrarCargaManual(); 
+                }
+            });
+
+            document.getElementById('filtro-texto').addEventListener('input', aplicarFiltros);
+        }
+
+        function inicializarChoicesJS() {
+            mesChoices = new Choices('#filtro-mes', { removeItemButton: true, placeholderValue: 'Todos', searchEnabled: true });
+            corteChoices = new Choices('#filtro-corte', { removeItemButton: true, placeholderValue: 'Todos', searchEnabled: true });
+            respChoices = new Choices('#filtro-responsable', { removeItemButton: true, placeholderValue: 'Todos', searchEnabled: true });
+
+            document.getElementById('filtro-mes').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtro-corte').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtro-responsable').addEventListener('change', aplicarFiltros);
+        }
+
+        function mostrarCargaManual() {
+            document.getElementById("zona-carga-manual").style.display = "flex";
+            document.getElementById("csvFileInput").addEventListener("change", function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                Papa.parse(file, {
+                    header: true, dynamicTyping: true, skipEmptyLines: true,
+                    complete: function(results) {
+                        document.getElementById("zona-carga-manual").style.display = "none";
+                        procesarDatos(results.data);
+                    }
+                });
+            });
+        }
+
+        function procesarDatos(data) {
+            datosGlobales = data.map(row => {
+                let objLimpiado = {};
+                for (let key in row) {
+                    objLimpiado[key.trim()] = row[key];
+                }
+                
+                // Conversión de cantidad de facturas
+                objLimpiado['CANTIDAD FACTURAS'] = parseInt(objLimpiado['CANTIDAD FACTURAS']) || 0;
+
+                let meta = objLimpiado['FECHA META'];
+                let causa = objLimpiado['FECHA CAUSACION'];
+                objLimpiado['Cumplio'] = evaluarCumplimiento(meta, causa);
+                
+                return objLimpiado;
+            }).filter(d => d['RESPONSABLE CAUSACION']); 
+
+            poblarFiltrosIniciales();
+            aplicarFiltros(); 
+        }
+
+        function poblarFiltrosIniciales() {
+            const meses = [...new Set(datosGlobales.map(d => d['MES']))].filter(Boolean).sort();
+            const cortes = [...new Set(datosGlobales.map(d => d['CORTE']))].filter(Boolean).sort();
+            const responsables = [...new Set(datosGlobales.map(d => d['RESPONSABLE CAUSACION']))].filter(Boolean).sort();
+            
+            mesChoices.setChoices(meses.map(t => ({ value: t, label: String(t) })), 'value', 'label', true);
+            corteChoices.setChoices(cortes.map(t => ({ value: t, label: String(t) })), 'value', 'label', true);
+            respChoices.setChoices(responsables.map(t => ({ value: t, label: String(t) })), 'value', 'label', true);
+        }
+
+        function aplicarFiltros() {
+            const selMes = mesChoices.getValue(true);
+            const selCorte = corteChoices.getValue(true);
+            const selResp = respChoices.getValue(true);
+            const textoBusqueda = document.getElementById('filtro-texto').value.toLowerCase();
+
+            datosFiltradosActuales = datosGlobales.filter(d => {
+                let mMes = selMes.length === 0 || selMes.includes(String(d['MES']));
+                let mCorte = selCorte.length === 0 || selCorte.includes(String(d['CORTE']));
+                let mResp = selResp.length === 0 || selResp.includes(String(d['RESPONSABLE CAUSACION']));
+                
+                let mTexto = true;
+                if (textoBusqueda) {
+                    let filaString = Object.values(d).join(" ").toLowerCase();
+                    mTexto = filaString.includes(textoBusqueda);
+                }
+
+                return mMes && mCorte && mResp && mTexto;
+            });
+            
+            actualizarDashboard();
+            generarTablaResumen();
+            generarTablaDetalle();
+        }
+
+        function resetFilters() {
+            mesChoices.removeActiveItems();
+            corteChoices.removeActiveItems();
+            respChoices.removeActiveItems();
+            document.getElementById('filtro-texto').value = '';
+            aplicarFiltros();
+        }
+
+        function actualizarDashboard() {
+            let total = datosFiltradosActuales.length;
+            let cumplen = datosFiltradosActuales.filter(d => d['Cumplio']).length;
+            let noCumplen = total - cumplen;
+            let eficiencia = total > 0 ? (cumplen / total) * 100 : 0;
+
+            document.getElementById('kpi-total').innerText = total;
+            document.getElementById('kpi-cumple').innerText = cumplen;
+            document.getElementById('kpi-nocumple').innerText = noCumplen;
+            document.getElementById('kpi-eficiencia').innerText = eficiencia.toFixed(1) + '%';
+
+            // Construir Baterías Individuales
+            let personasStats = {};
+            
+            datosFiltradosActuales.forEach(d => {
+                let resp = d['RESPONSABLE CAUSACION'] || 'Sin Asignar';
+                if (!personasStats[resp]) {
+                    personasStats[resp] = { totalRegistros: 0, cumplen: 0, totalFacturas: 0 };
+                }
+                
+                personasStats[resp].totalRegistros++;
+                if (d['Cumplio']) personasStats[resp].cumplen++;
+                personasStats[resp].totalFacturas += d['CANTIDAD FACTURAS'];
+            });
+
+            let htmlBaterias = '';
+            let personasArr = Object.keys(personasStats).sort(); // Ordenar alfabéticamente
+
+            personasArr.forEach(resp => {
+                let stats = personasStats[resp];
+                let pct = stats.totalRegistros > 0 ? (stats.cumplen / stats.totalRegistros) * 100 : 0;
+                
+                // Determinar el color de la batería (Verde solo si es >= 90%)
+                let claseBateria = pct >= 90 ? 'alta' : (pct >= 50 ? 'media' : 'baja');
+
+                htmlBaterias += `
+                <div class="bateria-card">
+                    <div class="bateria-nombre">${resp}</div>
+                    <div class="bateria-outer">
+                        <div class="bateria-inner ${claseBateria}" style="width: ${pct}%"></div>
+                        <div class="bateria-texto">${pct.toFixed(1)}%</div>
+                    </div>
+                    <div class="bateria-stats">
+                        <span>Cant. Facturas <strong>${stats.totalFacturas}</strong></span>
+                        <span>Asignaciones <strong>${stats.totalRegistros}</strong></span>
+                    </div>
+                </div>`;
+            });
+
+            document.getElementById('baterias-container').innerHTML = htmlBaterias;
+        }
+
+        function generarTablaResumen() {
+            let resumen = {};
+
+            datosFiltradosActuales.forEach(d => {
+                let mes = d['MES'] || 'N/A';
+                let corte = d['CORTE'] || 'N/A';
+                let resp = d['RESPONSABLE CAUSACION'] || 'N/A';
+                
+                let key = `${mes}|${corte}|${resp}`;
+                if (!resumen[key]) resumen[key] = { mes, corte, resp, totalRegistros: 0, cumplen: 0, facturas: 0 };
+                
+                resumen[key].totalRegistros++;
+                if (d['Cumplio']) resumen[key].cumplen++;
+                resumen[key].facturas += d['CANTIDAD FACTURAS'];
+            });
+
+            let arrResumen = Object.values(resumen).sort((a,b) => a.mes.localeCompare(b.mes) || a.corte.localeCompare(b.corte));
+            
+            let tbody = "";
+            arrResumen.forEach(r => {
+                let nocumplen = r.totalRegistros - r.cumplen;
+                let pct = (r.cumplen / r.totalRegistros) * 100;
+                
+                tbody += `<tr>
+                    <td>${r.mes}</td>
+                    <td>${r.corte}</td>
+                    <td>${r.resp}</td>
+                    <td><strong>${r.facturas}</strong></td>
+                    <td>${r.totalRegistros}</td>
+                    <td style="color:#10B981; font-weight:bold;">${r.cumplen}</td>
+                    <td style="color:#EF4444; font-weight:bold;">${nocumplen}</td>
+                    <td><strong>${pct.toFixed(1)}%</strong></td>
+                </tr>`;
+            });
+
+            document.getElementById('tbody-resumen').innerHTML = tbody || "<tr><td colspan='8'>No hay datos.</td></tr>";
+        }
+
+        function generarTablaDetalle() {
+            let tbody = "";
+            let limit = Math.min(datosFiltradosActuales.length, 200); 
+
+            for(let i = 0; i < limit; i++) {
+                let d = datosFiltradosActuales[i];
+                let spanEstado = d['Cumplio'] 
+                    ? `<span class="estado-cumple">Cumplió</span>` 
+                    : `<span class="estado-no-cumple">No Cumplió</span>`;
+
+                tbody += `<tr>
+                    <td>${d['MES'] || ''}</td>
+                    <td>${d['CORTE'] || ''}</td>
+                    <td>${d['AREA'] || ''}</td>
+                    <td>${d['RESPONSABLE CAUSACION'] || ''}</td>
+                    <td>${d['CANTIDAD FACTURAS'] || '0'}</td>
+                    <td>${d['FECHA META'] || ''}</td>
+                    <td>${d['FECHA CAUSACION'] || ''}</td>
+                    <td>${spanEstado}</td>
+                </tr>`;
+            }
+            document.getElementById('tbody-maestra').innerHTML = tbody || "<tr><td colspan='8'>No hay datos con los filtros actuales.</td></tr>";
+        }
+
+        function exportarExcel() {
+            let datosLimpios = datosFiltradosActuales.map(d => ({
+                "Mes": d['MES'], 
+                "Corte": d['CORTE'], 
+                "Área": d['AREA'],
+                "Responsable Causación": d['RESPONSABLE CAUSACION'],
+                "Cantidad Facturas": d['CANTIDAD FACTURAS'],
+                "Fecha Meta": d['FECHA META'], 
+                "Fecha Causación": d['FECHA CAUSACION'],
+                "Cumplió Meta": d['Cumplio'] ? 'SÍ' : 'NO'
+            }));
+            const worksheet = XLSX.utils.json_to_sheet(datosLimpios);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Data_Causacion");
+            XLSX.writeFile(workbook, "Detalle_Causacion.xlsx");
+        }
+
+        function generarPDF() {
+            const elemento = document.getElementById('informe-a-pdf');
+            elemento.classList.add('pdf-export-mode');
+
+            const opciones = {
+                margin:       15,
+                filename:     'Resumen_Causacion.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'letter', orientation: 'landscape' }, 
+                pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr' } 
+            };
+
+            html2pdf().set(opciones).from(elemento).save().then(() => {
+                elemento.classList.remove('pdf-export-mode');
+            });
+        }
+
+        window.onload = inicializarDashboard;
+    </script>
+</body>
+</html>
