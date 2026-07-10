@@ -17,7 +17,7 @@ const CONFIG = {
      1. Ve a aistudio.google.com/app/apikey
      2. Crea una API Key con tu cuenta @casalimpia.com.co
      ------------------------------------------------------------------ */
-  GEMINI_API_KEY: 'AQ.Ab8RN6IhlU9kQ8H6-20ej44uciOHmTtquRJdia_VAEmK9qJ8ag',       // 'AIzaSy...'
+  GEMINI_API_KEY: '',       // 'AIzaSy...'
   GEMINI_MODEL: 'gemini-1.5-flash',
 
   /* ── Google Apps Script Web App ──────────────────────────────────────
