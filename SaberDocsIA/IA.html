@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaberDocs IA — Casalimpia</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════ HEADER -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <img
+          src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png"
+          alt="Casalimpia"
+          class="logo-img"
+          onerror="this.style.display='none'"
+        />
+        <div class="brand-text">
+          <span class="brand-saber">Saber</span><span class="brand-docs">Docs</span><span class="brand-ia"> IA</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="mode-badge" id="modeBadge">
+          <span class="mode-dot"></span>
+          <span id="modeText">MODO DEMO</span>
+        </span>
+        <span class="version-tag">v1.0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════ NAV -->
+  <nav class="app-nav">
+    <div class="nav-inner">
+      <button class="nav-tab active" data-tab="generar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14,2 14,8 20,8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        Generar Instructivo
+      </button>
+      <button class="nav-tab" data-tab="historial">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
+        </svg>
+        Historial
+      </button>
+      <button class="nav-tab" data-tab="configuracion">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/>
+        </svg>
+        Configuración
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════ MAIN -->
+  <main class="app-main">
+
+    <!-- ───────────────────────────── TAB: GENERAR INSTRUCTIVO -->
+    <section class="tab-content active" id="tab-generar">
+
+      <!-- SECCIÓN 1 — CARGA + FORMULARIO -->
+      <div class="flow-section" id="section-upload">
+
+        <!-- Zona de carga -->
+        <div class="card upload-card" id="dropzone">
+          <div class="upload-icon">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17,8 12,3 7,8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <p class="upload-title">Arrastra tu grabación de pantalla aquí</p>
+          <p class="upload-sub">o haz clic para seleccionar el archivo</p>
+          <p class="upload-formats">MP4 · AVI · MOV · MKV &mdash; máximo 500 MB · máximo 30 minutos</p>
+          <input type="file" id="fileInput" accept="video/*,.mp4,.avi,.mov,.mkv" hidden />
+          <button class="btn btn-outline" id="btnSelectFile">Seleccionar archivo</button>
+        </div>
+
+        <!-- Vista previa del archivo -->
+        <div class="card file-preview hidden" id="filePreview"></div>
+
+        <!-- Formulario de metadatos -->
+        <div class="card form-card">
+          <h2 class="card-title">Datos del proceso</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="inputProceso">
+                Nombre del proceso <span class="required">*</span>
+              </label>
+              <input type="text" id="inputProceso" class="form-input"
+                     placeholder="Ej: Creación de orden de compra en SAP" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="selectArea">
+                Área responsable <span class="required">*</span>
+              </label>
+              <select id="selectArea" class="form-input">
+                <option value="">— Seleccione un área —</option>
+                <option>Mejoramiento Continuo</option>
+                <option>Operaciones</option>
+                <option>Talento Humano</option>
+                <option>Tecnología de Información</option>
+                <option>Finanzas y Contabilidad</option>
+                <option>Compras y Logística</option>
+                <option>Atención al Cliente</option>
+                <option>Calidad</option>
+                <option>Comercial / Ventas</option>
+                <option>Otra área</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inputVersion">Versión</label>
+              <input type="text" id="inputVersion" class="form-input" value="1.0" />
+            </div>
+            <div class="form-group form-check-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="checkSlides" />
+                <span class="checkbox-custom"></span>
+                <span>Generar también presentación en <strong>Google Slides</strong></span>
+              </label>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary btn-lg" id="btnProcess" disabled>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5,3 19,12 5,21 5,3"/>
+              </svg>
+              Procesar video y generar instructivo
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /section-upload -->
+
+      <!-- SECCIÓN 2 — PROCESAMIENTO -->
+      <div class="flow-section hidden" id="section-processing">
+        <div class="card processing-card">
+          <div class="processing-header">
+            <div class="processing-spinner"></div>
+            <div>
+              <h2 class="card-title" style="margin-bottom:4px">Procesando tu grabación</h2>
+              <p class="processing-subtitle" id="processingStageLabel">Iniciando el pipeline de IA...</p>
+            </div>
+          </div>
+
+          <div class="stages-list" id="stagesList"></div>
+
+          <div class="overall-progress">
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="overallBar" style="width:0%"></div>
+            </div>
+            <span class="progress-pct" id="progressPct">0%</span>
+          </div>
+
+          <p class="processing-note">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Para un video de 20 minutos el procesamiento real toma entre 10 y 15 minutos.
+            En modo demo la simulación dura aproximadamente 20 segundos.
+          </p>
+        </div>
+      </div><!-- /section-processing -->
+
+      <!-- SECCIÓN 3 — RESULTADO -->
+      <div class="flow-section hidden" id="section-result">
+
+        <div class="card">
+          <div class="result-header">
+            <div class="result-success-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20,6 9,17 4,12"/>
+              </svg>
+            </div>
+            <div style="flex:1">
+              <h2 class="result-title" id="resultTitle">¡Instructivo generado correctamente!</h2>
+              <p class="result-meta" id="resultMeta">— — —</p>
+            </div>
+            <button class="btn btn-outline btn-sm" id="btnNewProcess">Nuevo proceso</button>
+          </div>
+
+          <!-- KPIs -->
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-value" id="statPasos">—</div>
+              <div class="stat-label">Pasos generados</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="statDuracion">—</div>
+              <div class="stat-label">Tiempo de proceso</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="statConfianza">—</div>
+              <div class="stat-label">Confianza STT</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="statAlertas">—</div>
+              <div class="stat-label">Pasos a validar</div>
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="action-cards-row">
+            <div class="action-card action-docs" id="btnOpenDoc">
+              <div class="action-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14,2 14,8 20,8"/>
+                </svg>
+              </div>
+              <div class="action-text">
+                <strong>Abrir en Google Docs</strong>
+                <span>Borrador editable listo para revisión</span>
+              </div>
+              <svg class="action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/>
+              </svg>
+            </div>
+
+            <div class="action-card action-pdf" id="btnDownloadPdf">
+              <div class="action-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7,10 12,15 17,10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+              </div>
+              <div class="action-text">
+                <strong>Descargar PDF</strong>
+                <span>Formato corporativo Casalimpia</span>
+              </div>
+              <svg class="action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/>
+              </svg>
+            </div>
+
+            <div class="action-card action-slides hidden" id="slidesCard">
+              <div class="action-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+              </div>
+              <div class="action-text">
+                <strong>Abrir en Google Slides</strong>
+                <span>Presentación generada</span>
+              </div>
+              <svg class="action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Aviso nomenclatura -->
+          <div class="nomenclatura-notice">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div>
+              <strong>Pendiente de nomenclatura oficial</strong>
+              <p>El encabezado contiene campos marcados como <code>[PENDIENTE — Área de Procesos]</code>.
+              Comparta el enlace de Google Docs con el Área de Procesos para la asignación del código oficial y la aprobación formal.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vista previa -->
+        <div class="card preview-card">
+          <div class="preview-card-header">
+            <h3>Vista previa del instructivo generado</h3>
+            <span class="draft-badge">BORRADOR</span>
+          </div>
+          <div id="instructivoPreview"></div>
+        </div>
+
+      </div><!-- /section-result -->
+
+    </section><!-- /tab-generar -->
+
+    <!-- ─────────────────────────────────── TAB: HISTORIAL -->
+    <section class="tab-content hidden" id="tab-historial">
+      <div class="card">
+        <div class="card-header-row">
+          <h2 class="card-title">Historial de instructivos generados</h2>
+          <span class="history-count" id="historyCount">0 registros</span>
+        </div>
+        <div id="historyEmpty" class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
+          </svg>
+          <p>Aún no hay instructivos generados en esta sesión.</p>
+        </div>
+        <div id="historyTable" class="history-table-wrap hidden">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Proceso</th>
+                <th>Área</th>
+                <th>Fecha</th>
+                <th>Duración</th>
+                <th>Pasos</th>
+                <th>Estado</th>
+                <th>Documento</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section><!-- /tab-historial -->
+
+    <!-- ──────────────────────────────── TAB: CONFIGURACIÓN -->
+    <section class="tab-content hidden" id="tab-configuracion">
+      <div class="config-grid">
+
+        <div class="card">
+          <h2 class="card-title">Verificar conexión a APIs</h2>
+          <p class="config-desc">Prueba que las claves configuradas en <code>js/config.js</code> responden correctamente.</p>
+          <div class="form-group">
+            <label class="form-label">Estado de la conexión</label>
+            <div class="input-with-btn">
+              <input type="text" id="inputBackendUrl" class="form-input"
+                     value="Claves definidas en js/config.js" readonly
+                     style="background:var(--gris-bg);color:var(--gris-500)" />
+              <button class="btn btn-outline" id="btnTestConnection">Probar APIs</button>
+            </div>
+          </div>
+          <div class="connection-status">
+            <span class="status-dot status-unknown" id="connectionDot"></span>
+            <span id="connectionText">Sin probar — usa el botón para verificar</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">APIs de Inteligencia Artificial</h2>
+          <p class="config-desc">Estado de las credenciales configuradas en <code>js/config.js</code>.</p>
+          <div class="api-status-list">
+            <div class="api-status-item">
+              <div class="api-icon api-google">G</div>
+              <div class="api-info">
+                <strong>Google Cloud Speech-to-Text</strong>
+                <span>Transcripción en español colombiano (es-CO)</span>
+              </div>
+              <span class="api-badge pending" id="badge-google-stt">Pendiente</span>
+            </div>
+            <div class="api-status-item">
+              <div class="api-icon api-google" style="background:#4285f4">G</div>
+              <div class="api-info">
+                <strong>Google Gemini API</strong>
+                <span>Redacción de pasos del instructivo con IA</span>
+              </div>
+              <span class="api-badge pending" id="badge-claude">Pendiente</span>
+            </div>
+            <div class="api-status-item">
+              <div class="api-icon api-drive">D</div>
+              <div class="api-info">
+                <strong>Google Workspace (Docs · Drive · Sheets)</strong>
+                <span>Generación y almacenamiento de documentos</span>
+              </div>
+              <span class="api-badge pending" id="badge-google-workspace">Pendiente</span>
+            </div>
+          </div>
+          <p class="config-note">
+            Edita <code>js/config.js</code> con las claves de API. No se necesita servidor.
+          </p>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Google Drive corporativo</h2>
+          <p class="config-desc">IDs configurados en <code>js/config.js</code> para almacenar los documentos generados.</p>
+          <div class="form-group">
+            <label class="form-label">Carpeta de destino en Drive</label>
+            <input type="text" class="form-input" id="driveFolderId"
+                   placeholder="ID visible en la URL de la carpeta de Drive" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Google Sheet de historial</label>
+            <input type="text" class="form-input" id="sheetsHistoryId"
+                   placeholder="ID visible en la URL de Google Sheets" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dominio de Google Workspace</label>
+            <input type="text" class="form-input" id="wsDomain" value="casalimpia.com" />
+          </div>
+          <button class="btn btn-primary" id="btnSaveConfig">Guardar configuración</button>
+        </div>
+
+        <div class="card card-info">
+          <h2 class="card-title">Sobre SaberDocs IA</h2>
+          <p style="margin-bottom:12px">
+            <strong>SaberDocs IA</strong> transforma grabaciones de pantalla en instructivos técnicos estructurados automáticamente.
+            Funciona 100% en el navegador — sin instalar nada.
+          </p>
+          <p style="margin-bottom:12px">
+            En <strong>modo demo</strong> simula el pipeline completo con datos de muestra.
+            Al agregar las claves de API en <code>js/config.js</code>, pasa automáticamente a <strong>modo real</strong>.
+          </p>
+          <div class="mode-legend">
+            <div class="mode-item"><span class="dot dot-demo"></span> MODO DEMO — sin claves de API</div>
+            <div class="mode-item"><span class="dot dot-real"></span> MODO REAL — claves configuradas en config.js</div>
+          </div>
+        </div>
+
+      </div>
+    </section><!-- /tab-configuracion -->
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════ FOOTER -->
+  <footer class="app-footer">
+    <strong style="color:#8DC63F">Saber</strong><strong style="color:#0085CA">Docs</strong><strong style="color:#EF4444"> IA</strong>
+    &nbsp;·&nbsp; Casalimpia S.A. &nbsp;·&nbsp; Área de Mejoramiento Continuo &nbsp;·&nbsp; v1.0
+  </footer>
+
+  <!-- ══════════════════════════════════════════════════════ TOAST -->
+  <div class="toast hidden" id="toast">
+    <span class="toast-icon" id="toastIcon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20,6 9,17 4,12"/>
+      </svg>
+    </span>
+    <span id="toastText">Mensaje</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ SCRIPTS -->
+  <script src="js/config.js"></script>
+  <script src="js/mock.js"></script>
+  <script src="js/video_processor.js"></script>
+  <script src="js/stt_service.js"></script>
+  <script src="js/ai_service.js"></script>
+  <script src="js/workspace_service.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
