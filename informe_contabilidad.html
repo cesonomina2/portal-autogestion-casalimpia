@@ -72,16 +72,14 @@
         .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         .kpi-card { padding: 25px 20px; border-radius: 8px; box-shadow: var(--sombra); text-align: center; border: none; }
         
-        .kpi-card.total { background-color: #0085CA; }      
+        .kpi-card.total { background-color: var(--color-azul-logo); }      
         .kpi-card.cumple { background-color: var(--color-verde-logo); }     
         .kpi-card.nocumple { background-color: var(--color-rojo-alerta); }  
         .kpi-card.porcentaje { background-color: #F59E0B; } 
+        .kpi-card.errores-motivos { background-color: #64748B; }
         
         .kpi-card .kpi-title { font-size: 0.85rem; color: rgba(255, 255, 255, 0.95); text-transform: uppercase; font-weight: 800; margin-bottom: 12px; letter-spacing: 0.5px;}
         .kpi-card .kpi-value { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 800; color: #ffffff; }
-
-        .kpi-card.errores-total { background-color: #C25973; }
-        .kpi-card.errores-motivos { background-color: #64748B; }
 
         /* BATERÍAS DE CUMPLIMIENTO */
         .baterias-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 10px; }
@@ -255,7 +253,9 @@
         <!-- TAB 3: ERRORES Y AJUSTES -->
         <div id="tab-errores" class="tab-content">
             <div class="kpis-grid">
-                <div class="kpi-card errores-total"><div class="kpi-title">Total de Errores Reportados</div><div class="kpi-value" id="kpi-err-total">0</div></div>
+                <div class="kpi-card total"><div class="kpi-title">Total de Errores Reportados</div><div class="kpi-value" id="kpi-err-total">0</div></div>
+                <div class="kpi-card cumple"><div class="kpi-title">Errores Subsanables</div><div class="kpi-value" id="kpi-err-sub">0</div></div>
+                <div class="kpi-card nocumple"><div class="kpi-title">Errores No Subsanables</div><div class="kpi-value" id="kpi-err-nosub">0</div></div>
                 <div class="kpi-card errores-motivos"><div class="kpi-title">Tipos de Error Distintos</div><div class="kpi-value" id="kpi-err-tipos">0</div></div>
                 <div class="kpi-card porcentaje"><div class="kpi-title">Motivo Más Frecuente</div><div class="kpi-value" id="kpi-err-motivo" style="font-size: 1.4rem;">-</div></div>
             </div>
@@ -326,7 +326,7 @@
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1759455245&single=true&output=csv"; 
         
         // ENLACE 2: DATOS DE ERRORES Y AJUSTES
-        const GOOGLE_SHEET_ERRORES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1512340927&single=true&output=csv"; 
+        const GOOGLE_SHEET_ERRORES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=297495094&single=true&output=csv"; 
         
         // Variables Base Datos
         let datosGlobales = [];
@@ -483,18 +483,30 @@
         // --- SECCIÓN ERRORES ---
         function actualizarDashboardErrores() {
             let totalErrores = 0;
+            let totalSub = 0;
+            let totalNoSub = 0;
             let motivosCount = {};
 
             datosErroresFiltrados.forEach(d => {
-                let cant = d['CANTIDAD ERROR'];
+                let cant = d['CANTIDAD ERROR'] || 0;
                 let motivo = d['MOTIVO'] || 'Desconocido';
+                let tipologia = d['TIPOLOGIA'] || '';
                 
                 totalErrores += cant;
+                
+                if(tipologia === 'NO SUBSANABLE') {
+                    totalNoSub += cant;
+                } else {
+                    totalSub += cant;
+                }
+
                 motivosCount[motivo] = (motivosCount[motivo] || 0) + cant;
             });
 
             // KPIs
             document.getElementById('kpi-err-total').innerText = totalErrores;
+            document.getElementById('kpi-err-sub').innerText = totalSub;
+            document.getElementById('kpi-err-nosub').innerText = totalNoSub;
             document.getElementById('kpi-err-tipos').innerText = Object.keys(motivosCount).length;
 
             let topMotivo = Object.keys(motivosCount).sort((a,b) => motivosCount[b] - motivosCount[a])[0] || '-';
@@ -510,7 +522,6 @@
                 if(d['TIPOLOGIA'] === 'NO SUBSANABLE') {
                     sumRespMes[key].noSub += cant;
                 } else {
-                    // Por defecto o si es explícitamente "SUBSANABLE"
                     sumRespMes[key].sub += cant;
                 }
             });
