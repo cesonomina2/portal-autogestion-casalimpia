@@ -100,8 +100,12 @@
         /* TABLAS Y PANELES */
         .seccion-titulo { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); font-size: 1.4rem;}
         .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); }
+        
         .table-responsive { overflow: auto; max-height: 450px; border: 1px solid #E2E8F0; border-radius: 8px; }
+        
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        table.tabla-corta { min-width: 100%; } /* Evita scroll horizontal innecesario */
+
         thead { position: sticky; top: 0; background: #F1F5F9; z-index: 10; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; white-space: nowrap; font-size: 0.85rem;}
         th { font-weight: 800; color: #475569; text-transform: uppercase; font-family: 'Outfit', sans-serif; font-size: 0.8rem;}
@@ -131,8 +135,8 @@
 
     <div class="tabs-container">
         <button class="tab-btn active" onclick="cambiarPestana('resumen', this)">Resumen General</button>
-        <button class="tab-btn" onclick="cambiarPestana('errores', this)">Errores y Ajustes</button>
         <button class="tab-btn" onclick="cambiarPestana('detalles', this)">Data Detallada</button>
+        <button class="tab-btn" onclick="cambiarPestana('errores', this)">Errores y Ajustes</button>
     </div>
 
     <div class="container">
@@ -218,19 +222,45 @@
             </div>
         </div>
 
+        <div id="tab-detalles" class="tab-content">
+            <div class="panel">
+                <div class="herramientas-tabla">
+                    <h2 class="seccion-titulo" style="margin: 0; border: none;">Base de Datos Filtrada (Causación)</h2>
+                    <button class="btn-accion btn-excel" onclick="exportarExcel()">Exportar a Excel</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="tabla-maestra">
+                        <thead>
+                            <tr>
+                                <th>Mes</th>
+                                <th>Corte</th>
+                                <th>Área</th>
+                                <th>Responsable Causación</th>
+                                <th>Cant. Facturas</th>
+                                <th>Fecha Meta</th>
+                                <th>Fecha Causación</th>
+                                <th>Status Cumplimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-maestra"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div id="tab-errores" class="tab-content">
             <div class="kpis-grid">
                 <div class="kpi-card errores-total"><div class="kpi-title">Total de Errores Reportados</div><div class="kpi-value" id="kpi-err-total">0</div></div>
                 <div class="kpi-card errores-motivos"><div class="kpi-title">Tipos de Error Distintos</div><div class="kpi-value" id="kpi-err-tipos">0</div></div>
-                <div class="kpi-card nocumple"><div class="kpi-title">Principal Responsable</div><div class="kpi-value" id="kpi-err-resp" style="font-size: 1.4rem;">-</div></div>
                 <div class="kpi-card porcentaje"><div class="kpi-title">Motivo Más Frecuente</div><div class="kpi-value" id="kpi-err-motivo" style="font-size: 1.4rem;">-</div></div>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
+                
                 <div class="panel">
                     <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Errores por Responsable y Mes</h3>
                     <div class="table-responsive">
-                        <table id="tabla-err-resp">
+                        <table id="tabla-err-resp" class="tabla-corta">
                             <thead>
                                 <tr>
                                     <th>Responsable Causación</th>
@@ -246,7 +276,7 @@
                 <div class="panel">
                     <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Consolidado por Motivo</h3>
                     <div class="table-responsive">
-                        <table id="tabla-err-motivo">
+                        <table id="tabla-err-motivo" class="tabla-corta">
                             <thead>
                                 <tr>
                                     <th>Motivo del Error</th>
@@ -278,32 +308,6 @@
             </div>
         </div>
 
-        <div id="tab-detalles" class="tab-content">
-            <div class="panel">
-                <div class="herramientas-tabla">
-                    <h2 class="seccion-titulo" style="margin: 0; border: none;">Base de Datos Filtrada (Causación)</h2>
-                    <button class="btn-accion btn-excel" onclick="exportarExcel()">Exportar a Excel</button>
-                </div>
-                <div class="table-responsive">
-                    <table id="tabla-maestra">
-                        <thead>
-                            <tr>
-                                <th>Mes</th>
-                                <th>Corte</th>
-                                <th>Área</th>
-                                <th>Responsable Causación</th>
-                                <th>Cant. Facturas</th>
-                                <th>Fecha Meta</th>
-                                <th>Fecha Causación</th>
-                                <th>Status Cumplimiento</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody-maestra"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
@@ -311,7 +315,7 @@
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1759455245&single=true&output=csv"; 
         
         // ENLACE 2: DATOS DE ERRORES Y AJUSTES (¡Debes reemplazar este enlace!)
-        const GOOGLE_SHEET_ERRORES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1512340927&single=true&output=csv"; 
+        const GOOGLE_SHEET_ERRORES_CSV_URL = "PEGA_AQUI_EL_LINK_CSV_DE_LA_PESTANA_ERRORES"; 
         
         // Variables Base Datos 1
         let datosGlobales = [];
@@ -359,7 +363,6 @@
             });
 
             // Cargar Pestaña 2 (Errores)
-            // Solo funcionará correctamente si reemplazas el link arriba.
             if(GOOGLE_SHEET_ERRORES_CSV_URL && GOOGLE_SHEET_ERRORES_CSV_URL.startsWith("http")) {
                 Papa.parse(GOOGLE_SHEET_ERRORES_CSV_URL, {
                     download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
@@ -410,7 +413,6 @@
         }
 
         function actualizarFiltrosUI() {
-            // Combinar opciones de ambas bases para los filtros globales
             let todosMeses = [...datosGlobales.map(d=>d['MES']), ...datosErroresGlobales.map(d=>d['MES'])].filter(Boolean);
             let todosResp = [...datosGlobales.map(d=>d['RESPONSABLE CAUSACION']), ...datosErroresGlobales.map(d=>d['RESPONSABLE CAUSACION'])].filter(Boolean);
             let todosCortes = datosGlobales.map(d => d['CORTE']).filter(Boolean);
@@ -419,7 +421,6 @@
             const responsables = [...new Set(todosResp)].sort();
             const cortes = [...new Set(todosCortes)].sort();
             
-            // Actualizar choices sin perder selección actual
             let currMes = mesChoices.getValue(true);
             let currCorte = corteChoices.getValue(true);
             let currResp = respChoices.getValue(true);
@@ -444,7 +445,7 @@
                 return mMes && mCorte && mResp && mTexto;
             });
             
-            // Filtrar Base Errores (Ignora el filtro de corte porque no aplica)
+            // Filtrar Base Errores
             datosErroresFiltrados = datosErroresGlobales.filter(d => {
                 let mMes = selMes.length === 0 || selMes.includes(String(d['MES']));
                 let mResp = selResp.length === 0 || selResp.includes(String(d['RESPONSABLE CAUSACION']));
@@ -452,7 +453,6 @@
                 return mMes && mResp && mTexto;
             });
             
-            // Renderizar Todo
             actualizarDashboard();
             generarTablaCruzada();
             generarTablaResumen(); 
@@ -473,26 +473,20 @@
         function actualizarDashboardErrores() {
             let totalErrores = 0;
             let motivosCount = {};
-            let respCount = {};
 
             datosErroresFiltrados.forEach(d => {
                 let cant = d['CANTIDAD ERROR'];
                 let motivo = d['MOTIVO'] || 'Desconocido';
-                let resp = d['RESPONSABLE CAUSACION'] || 'Desconocido';
-
+                
                 totalErrores += cant;
                 motivosCount[motivo] = (motivosCount[motivo] || 0) + cant;
-                respCount[resp] = (respCount[resp] || 0) + cant;
             });
 
             // KPIs
             document.getElementById('kpi-err-total').innerText = totalErrores;
             document.getElementById('kpi-err-tipos').innerText = Object.keys(motivosCount).length;
 
-            let topResp = Object.keys(respCount).sort((a,b) => respCount[b] - respCount[a])[0] || '-';
             let topMotivo = Object.keys(motivosCount).sort((a,b) => motivosCount[b] - motivosCount[a])[0] || '-';
-            
-            document.getElementById('kpi-err-resp').innerText = topResp;
             document.getElementById('kpi-err-motivo').innerText = topMotivo;
 
             // Tabla 1: Errores por Responsable y Mes
@@ -521,9 +515,18 @@
             });
             document.getElementById('tbody-err-motivo').innerHTML = tbodyMotivo || "<tr><td colspan='2'>No hay registros.</td></tr>";
 
-            // Tabla 3: Detalle Maestra
+            // Tabla 3: Detalle Maestra (Ordenada Alfabéticamente por persona y luego por mes)
             let tbodyMaestraErr = "";
-            datosErroresFiltrados.slice(0, 150).forEach(d => {
+            
+            let erroresOrdenados = [...datosErroresFiltrados].sort((a,b) => {
+                let rA = a['RESPONSABLE CAUSACION'] || '';
+                let rB = b['RESPONSABLE CAUSACION'] || '';
+                let mA = a['MES'] || '';
+                let mB = b['MES'] || '';
+                return rA.localeCompare(rB) || mA.localeCompare(mB);
+            });
+
+            erroresOrdenados.slice(0, 150).forEach(d => {
                 tbodyMaestraErr += `<tr>
                     <td>${d['FECHA ERROR'] || ''}</td>
                     <td>${d['MES'] || ''}</td>
@@ -536,7 +539,7 @@
         }
 
 
-        // --- SECCIÓN CAUSACIÓN (Pestaña 1 y 3) ---
+        // --- SECCIÓN CAUSACIÓN (Pestaña 1 y 2) ---
         function actualizarDashboard() {
             let total = datosFiltradosActuales.length;
             let cumplen = datosFiltradosActuales.filter(d => d['Cumplio']).length;
