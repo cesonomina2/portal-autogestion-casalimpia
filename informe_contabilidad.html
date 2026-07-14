@@ -116,6 +116,7 @@
         .btn-excel { background: var(--color-verde-logo); } .btn-excel:hover { background: #76A633; }
 
         .badge-error { background-color: #FEE2E2; color: #991B1B; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+        .badge-subsanable { color: #166534; background-color: #DCFCE7; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; border: 1px solid #86EFAC;}
 
         @media (max-width: 768px) {
             .filtros-banner { flex-direction: column; align-items: stretch; }
@@ -146,6 +147,7 @@
             <p>Asegúrate de que los enlaces de Google Drive estén publicados en la web en formato CSV.</p>
         </div>
 
+        <!-- FILTROS GLOBALES -->
         <div class="filtros-banner">
             <h2>Filtros</h2>
             <div class="input-group">
@@ -167,6 +169,7 @@
             <button class="btn-limpiar" onclick="resetFilters()">Limpiar</button>
         </div>
 
+        <!-- TAB 1: RESUMEN GENERAL -->
         <div id="tab-resumen" class="tab-content active">
             <div class="kpis-grid">
                 <div class="kpi-card total"><div class="kpi-title">Total Registros</div><div class="kpi-value" id="kpi-total">0</div></div>
@@ -222,6 +225,7 @@
             </div>
         </div>
 
+        <!-- TAB 2: DATA DETALLADA -->
         <div id="tab-detalles" class="tab-content">
             <div class="panel">
                 <div class="herramientas-tabla">
@@ -248,6 +252,7 @@
             </div>
         </div>
 
+        <!-- TAB 3: ERRORES Y AJUSTES -->
         <div id="tab-errores" class="tab-content">
             <div class="kpis-grid">
                 <div class="kpi-card errores-total"><div class="kpi-title">Total de Errores Reportados</div><div class="kpi-value" id="kpi-err-total">0</div></div>
@@ -257,15 +262,18 @@
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
                 
+                <!-- Errores por Responsable (con Calidad) -->
                 <div class="panel">
-                    <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Errores por Responsable y Mes</h3>
+                    <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Errores por Responsable y Calidad del Mes</h3>
                     <div class="table-responsive">
                         <table id="tabla-err-resp" class="tabla-corta">
                             <thead>
                                 <tr>
                                     <th>Responsable Causación</th>
                                     <th>Mes</th>
-                                    <th>Cantidad de Errores</th>
+                                    <th>Subsanables</th>
+                                    <th>No Subsanables</th>
+                                    <th>% Calidad</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-err-resp"></tbody>
@@ -273,6 +281,7 @@
                     </div>
                 </div>
 
+                <!-- Errores por Motivo -->
                 <div class="panel">
                     <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Consolidado por Motivo</h3>
                     <div class="table-responsive">
@@ -289,6 +298,7 @@
                 </div>
             </div>
 
+            <!-- Tabla Maestra de Errores -->
             <div class="panel">
                 <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Registro Detallado de Errores</h3>
                 <div class="table-responsive">
@@ -299,6 +309,7 @@
                                 <th>Mes</th>
                                 <th>Responsable Causación</th>
                                 <th>Motivo</th>
+                                <th>Tipología</th>
                                 <th>Cantidad</th>
                             </tr>
                         </thead>
@@ -314,14 +325,12 @@
         // ENLACE 1: DATOS PRINCIPALES DE CAUSACIÓN
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1759455245&single=true&output=csv"; 
         
-        // ENLACE 2: DATOS DE ERRORES Y AJUSTES (¡Debes reemplazar este enlace!)
-        const GOOGLE_SHEET_ERRORES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1512340927&single=true&output=csv"; 
+        // ENLACE 2: DATOS DE ERRORES Y AJUSTES
+        const GOOGLE_SHEET_ERRORES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=297495094&single=true&output=csv"; 
         
-        // Variables Base Datos 1
+        // Variables Base Datos
         let datosGlobales = [];
         let datosFiltradosActuales = []; 
-
-        // Variables Base Datos 2 (Errores)
         let datosErroresGlobales = [];
         let datosErroresFiltrados = [];
 
@@ -405,6 +414,8 @@
                 for (let key in row) objLimpiado[key.trim()] = row[key];
                 
                 objLimpiado['CANTIDAD ERROR'] = parseInt(objLimpiado['CANTIDAD ERROR']) || 0;
+                // Extraer tipología
+                objLimpiado['TIPOLOGIA'] = (objLimpiado['TIPOLOGIA'] || '').toUpperCase().trim();
                 return objLimpiado;
             }).filter(d => d['RESPONSABLE CAUSACION']);
 
@@ -489,23 +500,54 @@
             let topMotivo = Object.keys(motivosCount).sort((a,b) => motivosCount[b] - motivosCount[a])[0] || '-';
             document.getElementById('kpi-err-motivo').innerText = topMotivo;
 
-            // Tabla 1: Errores por Responsable y Mes
+            // Tabla 1: Errores por Responsable y Calidad
             let sumRespMes = {};
             datosErroresFiltrados.forEach(d => {
                 let key = `${d['RESPONSABLE CAUSACION'] || 'N/A'}|${d['MES'] || 'N/A'}`;
-                sumRespMes[key] = (sumRespMes[key] || 0) + d['CANTIDAD ERROR'];
+                if(!sumRespMes[key]) sumRespMes[key] = { sub: 0, noSub: 0 };
+                
+                let cant = d['CANTIDAD ERROR'] || 0;
+                if(d['TIPOLOGIA'] === 'NO SUBSANABLE') {
+                    sumRespMes[key].noSub += cant;
+                } else {
+                    // Por defecto o si es explícitamente "SUBSANABLE"
+                    sumRespMes[key].sub += cant;
+                }
             });
 
+            // Ordenamiento por persona y mes
             let arrRespMes = Object.keys(sumRespMes).map(k => {
                 let parts = k.split('|');
-                return { resp: parts[0], mes: parts[1], cant: sumRespMes[k] };
+                let sub = sumRespMes[k].sub;
+                let noSub = sumRespMes[k].noSub;
+                let pct = 0;
+                
+                // Lógica de cumplimiento
+                if (noSub > 0) {
+                    pct = 0;
+                } else if (sub <= 15) {
+                    pct = 100;
+                } else if (sub >= 16 && sub <= 20) {
+                    pct = 50;
+                } else {
+                    pct = 0; // Más de 20
+                }
+
+                return { resp: parts[0], mes: parts[1], sub, noSub, pct };
             }).sort((a,b) => a.resp.localeCompare(b.resp) || a.mes.localeCompare(b.mes));
 
             let tbodyResp = "";
             arrRespMes.forEach(r => {
-                tbodyResp += `<tr><td><strong>${r.resp}</strong></td><td>${r.mes}</td><td><span class="badge-error">${r.cant} Errores</span></td></tr>`;
+                let colorPct = r.pct === 100 ? '#166534' : (r.pct === 50 ? '#9A3412' : '#991B1B');
+                tbodyResp += `<tr>
+                    <td><strong>${r.resp}</strong></td>
+                    <td>${r.mes}</td>
+                    <td><span style="color:#64748B; font-weight:bold;">${r.sub}</span></td>
+                    <td><span style="color:#EF4444; font-weight:bold;">${r.noSub}</span></td>
+                    <td><strong style="color:${colorPct}; font-size:1rem;">${r.pct}%</strong></td>
+                </tr>`;
             });
-            document.getElementById('tbody-err-resp').innerHTML = tbodyResp || "<tr><td colspan='3'>No hay registros.</td></tr>";
+            document.getElementById('tbody-err-resp').innerHTML = tbodyResp || "<tr><td colspan='5'>No hay registros.</td></tr>";
 
             // Tabla 2: Errores por Motivo
             let arrMotivos = Object.keys(motivosCount).map(k => ({ motivo: k, cant: motivosCount[k] })).sort((a,b) => b.cant - a.cant);
@@ -515,7 +557,7 @@
             });
             document.getElementById('tbody-err-motivo').innerHTML = tbodyMotivo || "<tr><td colspan='2'>No hay registros.</td></tr>";
 
-            // Tabla 3: Detalle Maestra (Ordenada Alfabéticamente por persona y luego por mes)
+            // Tabla 3: Detalle Maestra (Ordenada Alfabéticamente)
             let tbodyMaestraErr = "";
             
             let erroresOrdenados = [...datosErroresFiltrados].sort((a,b) => {
@@ -527,19 +569,25 @@
             });
 
             erroresOrdenados.slice(0, 150).forEach(d => {
+                let tipoStr = d['TIPOLOGIA'] || '';
+                let tipoBadge = tipoStr === 'NO SUBSANABLE' 
+                    ? '<span class="badge-error">NO SUBSANABLE</span>' 
+                    : '<span class="badge-subsanable">SUBSANABLE</span>';
+
                 tbodyMaestraErr += `<tr>
                     <td>${d['FECHA ERROR'] || ''}</td>
                     <td>${d['MES'] || ''}</td>
                     <td>${d['RESPONSABLE CAUSACION'] || ''}</td>
                     <td>${d['MOTIVO'] || ''}</td>
+                    <td>${tipoBadge}</td>
                     <td><strong>${d['CANTIDAD ERROR']}</strong></td>
                 </tr>`;
             });
-            document.getElementById('tbody-err-maestra').innerHTML = tbodyMaestraErr || "<tr><td colspan='5'>No hay datos.</td></tr>";
+            document.getElementById('tbody-err-maestra').innerHTML = tbodyMaestraErr || "<tr><td colspan='6'>No hay datos.</td></tr>";
         }
 
 
-        // --- SECCIÓN CAUSACIÓN (Pestaña 1 y 2) ---
+        // --- SECCIÓN CAUSACIÓN ---
         function actualizarDashboard() {
             let total = datosFiltradosActuales.length;
             let cumplen = datosFiltradosActuales.filter(d => d['Cumplio']).length;
