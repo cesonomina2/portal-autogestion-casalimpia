@@ -16,9 +16,9 @@
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
         
         :root {
-            --color-azul-logo: #0085CA; /* Azul principal Casalimpia */
-            --color-verde-logo: #8DC63F; /* Verde secundario Casalimpia */
-            --color-rojo-alerta: #EF4444; /* Rojo para no cumplimiento */
+            --color-azul-logo: #0085CA; 
+            --color-verde-logo: #8DC63F; 
+            --color-rojo-alerta: #EF4444; 
             --color-blanco: #ffffff; 
             --color-gris-bg: #F1F5F9;
             --color-texto: #334155; 
@@ -72,13 +72,16 @@
         .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         .kpi-card { padding: 25px 20px; border-radius: 8px; box-shadow: var(--sombra); text-align: center; border: none; }
         
-        .kpi-card.total { background-color: #0085CA; }      /* Azul */
-        .kpi-card.cumple { background-color: var(--color-verde-logo); }     /* Verde Corporativo */
-        .kpi-card.nocumple { background-color: var(--color-rojo-alerta); }  /* Rojo Corporativo */
-        .kpi-card.porcentaje { background-color: #F59E0B; } /* Amarillo/Naranja */
+        .kpi-card.total { background-color: #0085CA; }      
+        .kpi-card.cumple { background-color: var(--color-verde-logo); }     
+        .kpi-card.nocumple { background-color: var(--color-rojo-alerta); }  
+        .kpi-card.porcentaje { background-color: #F59E0B; } 
         
         .kpi-card .kpi-title { font-size: 0.85rem; color: rgba(255, 255, 255, 0.95); text-transform: uppercase; font-weight: 800; margin-bottom: 12px; letter-spacing: 0.5px;}
         .kpi-card .kpi-value { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 800; color: #ffffff; }
+
+        .kpi-card.errores-total { background-color: #C25973; }
+        .kpi-card.errores-motivos { background-color: #64748B; }
 
         /* BATERÍAS DE CUMPLIMIENTO */
         .baterias-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 10px; }
@@ -86,7 +89,7 @@
         .bateria-nombre { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--color-azul-logo); margin-bottom: 12px; font-size: 1.1rem; }
         .bateria-outer { width: 100%; height: 35px; background: #E2E8F0; border-radius: 6px; position: relative; overflow: hidden; border: 2px solid #CBD5E1; }
         .bateria-inner { height: 100%; border-radius: 4px 0 0 4px; transition: width 0.8s ease-in-out; }
-        .bateria-inner.alta { background: var(--color-verde-logo); } /* Verde Casalimpia */
+        .bateria-inner.alta { background: var(--color-verde-logo); } 
         .bateria-inner.media { background: #F59E0B; }
         .bateria-inner.baja { background: var(--color-rojo-alerta); }
         .bateria-texto { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #1E293B; font-size: 0.95rem; z-index: 2; text-shadow: 0px 0px 5px rgba(255,255,255,0.9); }
@@ -95,29 +98,20 @@
         .bateria-stats strong { color: var(--color-texto); font-size: 0.95rem; display: block; margin-top: 2px;}
 
         /* TABLAS Y PANELES */
-        .seccion-titulo { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); border-bottom: 2px solid var(--color-verde-logo); padding-bottom: 5px; margin: 20px 0 10px 0; font-size: 1.4rem;}
+        .seccion-titulo { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); font-size: 1.4rem;}
         .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); }
-        .table-responsive { overflow-x: auto; max-height: 600px; border: 1px solid #E2E8F0; border-radius: 8px; }
+        .table-responsive { overflow: auto; max-height: 450px; border: 1px solid #E2E8F0; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         thead { position: sticky; top: 0; background: #F1F5F9; z-index: 10; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; white-space: nowrap; font-size: 0.85rem;}
         th { font-weight: 800; color: #475569; text-transform: uppercase; font-family: 'Outfit', sans-serif; font-size: 0.8rem;}
         tbody tr:hover { background-color: #F8FAFC; }
 
-        .estado-cumple { background-color: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
-        .estado-no-cumple { background-color: #FEE2E2; color: #991B1B; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
-
-        .herramientas-tabla { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;}
+        .herramientas-tabla { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;}
         .btn-accion { color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 5px; transition: 0.2s; font-family: 'Outfit', sans-serif;}
         .btn-excel { background: var(--color-verde-logo); } .btn-excel:hover { background: #76A633; }
-        .btn-pdf { background: var(--color-rojo-alerta); } .btn-pdf:hover { background: #DC2626; }
 
-        /* Ajustes PDF */
-        .pdf-export-mode { padding: 10px !important; background: white !important; }
-        .pdf-export-mode .table-responsive { max-height: none !important; overflow: visible !important; border: none !important; }
-        .pdf-export-mode table { min-width: 0 !important; width: 100% !important; table-layout: auto !important; }
-        .pdf-export-mode tr { page-break-inside: avoid !important; }
-        .pdf-export-mode th, .pdf-export-mode td { white-space: normal !important; word-wrap: break-word !important; padding: 6px 4px !important; font-size: 11px !important; }
+        .badge-error { background-color: #FEE2E2; color: #991B1B; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
 
         @media (max-width: 768px) {
             .filtros-banner { flex-direction: column; align-items: stretch; }
@@ -137,6 +131,7 @@
 
     <div class="tabs-container">
         <button class="tab-btn active" onclick="cambiarPestana('resumen', this)">Resumen General</button>
+        <button class="tab-btn" onclick="cambiarPestana('errores', this)">Errores y Ajustes</button>
         <button class="tab-btn" onclick="cambiarPestana('detalles', this)">Data Detallada</button>
     </div>
 
@@ -144,8 +139,7 @@
         
         <div id="zona-carga-manual">
             <h3>⚠️ No se pudo conectar a Google Sheets de forma automática</h3>
-            <p>Asegúrate de que el enlace de Google Drive esté publicado en la web. Si sigue fallando, descarga tu archivo como CSV y cárgalo aquí.</p>
-            <input type="file" id="csvFileInput" accept=".csv">
+            <p>Asegúrate de que los enlaces de Google Drive estén publicados en la web en formato CSV.</p>
         </div>
 
         <div class="filtros-banner">
@@ -159,11 +153,11 @@
                 <select id="filtro-mes" multiple></select>
             </div>
             <div class="input-group">
-                <label>Corte</label>
+                <label>Corte (Solo Pestaña Principal)</label>
                 <select id="filtro-corte" multiple></select>
             </div>
             <div class="input-group">
-                <label>Responsable de Causación</label>
+                <label>Responsable</label>
                 <select id="filtro-responsable" multiple></select>
             </div>
             <button class="btn-limpiar" onclick="resetFilters()">Limpiar</button>
@@ -177,30 +171,108 @@
                 <div class="kpi-card porcentaje"><div class="kpi-title">% Eficiencia</div><div class="kpi-value" id="kpi-eficiencia">0%</div></div>
             </div>
 
-            <div id="baterias-container" class="baterias-grid">
+            <div id="baterias-container" class="baterias-grid"></div>
+
+            <div class="herramientas-tabla">
+                <h2 class="seccion-titulo" style="margin: 0; border: none;">Cumplimiento Operativo</h2>
+            </div>
+
+            <div>
+                <div class="panel" style="margin-bottom: 20px;">
+                    <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Resumen Consolidado de Cumplimiento (Cortes 1, 2 y 3)</h3>
+                    <div class="table-responsive">
+                        <table id="tabla-cruzada">
+                            <thead>
+                                <tr>
+                                    <th>Responsable Causación</th>
+                                    <th style="text-align:center;">Corte 1</th>
+                                    <th style="text-align:center;">Corte 2</th>
+                                    <th style="text-align:center;">Corte 3</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-cruzada"></tbody>
+                        </table>
+                    </div>
                 </div>
 
-            <div class="panel">
-                <div class="herramientas-tabla">
-                    <h2 class="seccion-titulo" style="margin: 0; border: none;">Cumplimiento por Corte y Persona</h2>
-                    <button class="btn-accion btn-pdf" onclick="generarPDF()">Descargar Resumen en PDF</button>
+                <div class="panel">
+                    <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Desglose por Mes, Corte y Persona</h3>
+                    <div class="table-responsive">
+                        <table id="tabla-resumen">
+                            <thead>
+                                <tr>
+                                    <th>Mes</th>
+                                    <th>Corte</th>
+                                    <th>Responsable Causación</th>
+                                    <th>Total Facturas</th>
+                                    <th>Registros Asignados</th>
+                                    <th>Cumplieron Meta</th>
+                                    <th>No Cumplieron</th>
+                                    <th>% Cumplimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-resumen"></tbody>
+                        </table>
+                    </div>
                 </div>
-                
-                <div id="informe-a-pdf" class="table-responsive">
-                    <table id="tabla-resumen">
+            </div>
+        </div>
+
+        <div id="tab-errores" class="tab-content">
+            <div class="kpis-grid">
+                <div class="kpi-card errores-total"><div class="kpi-title">Total de Errores Reportados</div><div class="kpi-value" id="kpi-err-total">0</div></div>
+                <div class="kpi-card errores-motivos"><div class="kpi-title">Tipos de Error Distintos</div><div class="kpi-value" id="kpi-err-tipos">0</div></div>
+                <div class="kpi-card nocumple"><div class="kpi-title">Principal Responsable</div><div class="kpi-value" id="kpi-err-resp" style="font-size: 1.4rem;">-</div></div>
+                <div class="kpi-card porcentaje"><div class="kpi-title">Motivo Más Frecuente</div><div class="kpi-value" id="kpi-err-motivo" style="font-size: 1.4rem;">-</div></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
+                <div class="panel">
+                    <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Errores por Responsable y Mes</h3>
+                    <div class="table-responsive">
+                        <table id="tabla-err-resp">
+                            <thead>
+                                <tr>
+                                    <th>Responsable Causación</th>
+                                    <th>Mes</th>
+                                    <th>Cantidad de Errores</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-err-resp"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Consolidado por Motivo</h3>
+                    <div class="table-responsive">
+                        <table id="tabla-err-motivo">
+                            <thead>
+                                <tr>
+                                    <th>Motivo del Error</th>
+                                    <th>Total Reportados</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-err-motivo"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Registro Detallado de Errores</h3>
+                <div class="table-responsive">
+                    <table id="tabla-err-maestra">
                         <thead>
                             <tr>
+                                <th>Fecha Error</th>
                                 <th>Mes</th>
-                                <th>Corte</th>
                                 <th>Responsable Causación</th>
-                                <th>Total Facturas</th>
-                                <th>Registros Asignados</th>
-                                <th>Cumplieron Meta</th>
-                                <th>No Cumplieron</th>
-                                <th>% Cumplimiento</th>
+                                <th>Motivo</th>
+                                <th>Cantidad</th>
                             </tr>
                         </thead>
-                        <tbody id="tbody-resumen"></tbody>
+                        <tbody id="tbody-err-maestra"></tbody>
                     </table>
                 </div>
             </div>
@@ -209,7 +281,7 @@
         <div id="tab-detalles" class="tab-content">
             <div class="panel">
                 <div class="herramientas-tabla">
-                    <h2 class="seccion-titulo" style="margin: 0; border: none;">Base de Datos Filtrada</h2>
+                    <h2 class="seccion-titulo" style="margin: 0; border: none;">Base de Datos Filtrada (Causación)</h2>
                     <button class="btn-accion btn-excel" onclick="exportarExcel()">Exportar a Excel</button>
                 </div>
                 <div class="table-responsive">
@@ -235,11 +307,19 @@
     </div>
 
     <script>
-        // Enlace de Google Sheets en tiempo real
+        // ENLACE 1: DATOS PRINCIPALES DE CAUSACIÓN
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1759455245&single=true&output=csv"; 
         
+        // ENLACE 2: DATOS DE ERRORES Y AJUSTES (¡Debes reemplazar este enlace!)
+        const GOOGLE_SHEET_ERRORES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1512340927&single=true&output=csv"; 
+        
+        // Variables Base Datos 1
         let datosGlobales = [];
         let datosFiltradosActuales = []; 
+
+        // Variables Base Datos 2 (Errores)
+        let datosErroresGlobales = [];
+        let datosErroresFiltrados = [];
 
         let mesChoices, corteChoices, respChoices;
 
@@ -250,7 +330,6 @@
             btnElement.classList.add('active');
         }
 
-        // Función crucial para comparar fechas formato DD/MM/YYYY
         function parseCustomDate(dateStr) {
             if (!dateStr) return null;
             let parts = String(dateStr).split('/');
@@ -263,33 +342,32 @@
         function evaluarCumplimiento(fechaMetaStr, fechaCausaStr) {
             let fMeta = parseCustomDate(fechaMetaStr);
             let fCausa = parseCustomDate(fechaCausaStr);
-            
             if(!fCausa) return false;
             if(!fMeta) return true; 
-
             return fCausa.getTime() <= fMeta.getTime();
         }
 
         function inicializarDashboard() {
             inicializarChoicesJS();
             
+            // Cargar Pestaña 1 (Causación)
             Papa.parse(GOOGLE_SHEET_CSV_URL, {
-                download: true, 
-                header: true, 
-                dynamicTyping: true, 
-                skipEmptyLines: true,
+                download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
-                    if(results.data && results.data.length > 0) {
-                        procesarDatos(results.data);
-                    } else { 
-                        mostrarCargaManual(); 
-                    }
-                },
-                error: function(err) { 
-                    console.error("Error al descargar CSV:", err);
-                    mostrarCargaManual(); 
+                    if(results.data && results.data.length > 0) procesarDatos(results.data);
                 }
             });
+
+            // Cargar Pestaña 2 (Errores)
+            // Solo funcionará correctamente si reemplazas el link arriba.
+            if(GOOGLE_SHEET_ERRORES_CSV_URL && GOOGLE_SHEET_ERRORES_CSV_URL.startsWith("http")) {
+                Papa.parse(GOOGLE_SHEET_ERRORES_CSV_URL, {
+                    download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
+                    complete: function(results) {
+                        if(results.data && results.data.length > 0) procesarDatosErrores(results.data);
+                    }
+                });
+            }
 
             document.getElementById('filtro-texto').addEventListener('input', aplicarFiltros);
         }
@@ -304,75 +382,83 @@
             document.getElementById('filtro-responsable').addEventListener('change', aplicarFiltros);
         }
 
-        function mostrarCargaManual() {
-            document.getElementById("zona-carga-manual").style.display = "flex";
-            document.getElementById("csvFileInput").addEventListener("change", function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                Papa.parse(file, {
-                    header: true, dynamicTyping: true, skipEmptyLines: true,
-                    complete: function(results) {
-                        document.getElementById("zona-carga-manual").style.display = "none";
-                        procesarDatos(results.data);
-                    }
-                });
-            });
-        }
-
         function procesarDatos(data) {
             datosGlobales = data.map(row => {
                 let objLimpiado = {};
-                for (let key in row) {
-                    objLimpiado[key.trim()] = row[key];
-                }
+                for (let key in row) objLimpiado[key.trim()] = row[key];
                 
-                // Conversión de cantidad de facturas
                 objLimpiado['CANTIDAD FACTURAS'] = parseInt(objLimpiado['CANTIDAD FACTURAS']) || 0;
-
-                let meta = objLimpiado['FECHA META'];
-                let causa = objLimpiado['FECHA CAUSACION'];
-                objLimpiado['Cumplio'] = evaluarCumplimiento(meta, causa);
-                
+                objLimpiado['Cumplio'] = evaluarCumplimiento(objLimpiado['FECHA META'], objLimpiado['FECHA CAUSACION']);
                 return objLimpiado;
             }).filter(d => d['RESPONSABLE CAUSACION']); 
 
-            poblarFiltrosIniciales();
+            actualizarFiltrosUI();
             aplicarFiltros(); 
         }
 
-        function poblarFiltrosIniciales() {
-            const meses = [...new Set(datosGlobales.map(d => d['MES']))].filter(Boolean).sort();
-            const cortes = [...new Set(datosGlobales.map(d => d['CORTE']))].filter(Boolean).sort();
-            const responsables = [...new Set(datosGlobales.map(d => d['RESPONSABLE CAUSACION']))].filter(Boolean).sort();
+        function procesarDatosErrores(data) {
+            datosErroresGlobales = data.map(row => {
+                let objLimpiado = {};
+                for (let key in row) objLimpiado[key.trim()] = row[key];
+                
+                objLimpiado['CANTIDAD ERROR'] = parseInt(objLimpiado['CANTIDAD ERROR']) || 0;
+                return objLimpiado;
+            }).filter(d => d['RESPONSABLE CAUSACION']);
+
+            actualizarFiltrosUI();
+            aplicarFiltros();
+        }
+
+        function actualizarFiltrosUI() {
+            // Combinar opciones de ambas bases para los filtros globales
+            let todosMeses = [...datosGlobales.map(d=>d['MES']), ...datosErroresGlobales.map(d=>d['MES'])].filter(Boolean);
+            let todosResp = [...datosGlobales.map(d=>d['RESPONSABLE CAUSACION']), ...datosErroresGlobales.map(d=>d['RESPONSABLE CAUSACION'])].filter(Boolean);
+            let todosCortes = datosGlobales.map(d => d['CORTE']).filter(Boolean);
+
+            const meses = [...new Set(todosMeses)].sort();
+            const responsables = [...new Set(todosResp)].sort();
+            const cortes = [...new Set(todosCortes)].sort();
             
-            mesChoices.setChoices(meses.map(t => ({ value: t, label: String(t) })), 'value', 'label', true);
-            corteChoices.setChoices(cortes.map(t => ({ value: t, label: String(t) })), 'value', 'label', true);
-            respChoices.setChoices(responsables.map(t => ({ value: t, label: String(t) })), 'value', 'label', true);
+            // Actualizar choices sin perder selección actual
+            let currMes = mesChoices.getValue(true);
+            let currCorte = corteChoices.getValue(true);
+            let currResp = respChoices.getValue(true);
+
+            mesChoices.setChoices(meses.map(t => ({ value: t, label: String(t), selected: currMes.includes(t) })), 'value', 'label', true);
+            corteChoices.setChoices(cortes.map(t => ({ value: t, label: String(t), selected: currCorte.includes(t) })), 'value', 'label', true);
+            respChoices.setChoices(responsables.map(t => ({ value: t, label: String(t), selected: currResp.includes(t) })), 'value', 'label', true);
         }
 
         function aplicarFiltros() {
             const selMes = mesChoices.getValue(true);
             const selCorte = corteChoices.getValue(true);
             const selResp = respChoices.getValue(true);
-            const textoBusqueda = document.getElementById('filtro-texto').value.toLowerCase();
+            const txt = document.getElementById('filtro-texto').value.toLowerCase();
 
+            // Filtrar Base Principal
             datosFiltradosActuales = datosGlobales.filter(d => {
                 let mMes = selMes.length === 0 || selMes.includes(String(d['MES']));
                 let mCorte = selCorte.length === 0 || selCorte.includes(String(d['CORTE']));
                 let mResp = selResp.length === 0 || selResp.includes(String(d['RESPONSABLE CAUSACION']));
-                
-                let mTexto = true;
-                if (textoBusqueda) {
-                    let filaString = Object.values(d).join(" ").toLowerCase();
-                    mTexto = filaString.includes(textoBusqueda);
-                }
-
+                let mTexto = txt === '' || Object.values(d).join(" ").toLowerCase().includes(txt);
                 return mMes && mCorte && mResp && mTexto;
             });
             
+            // Filtrar Base Errores (Ignora el filtro de corte porque no aplica)
+            datosErroresFiltrados = datosErroresGlobales.filter(d => {
+                let mMes = selMes.length === 0 || selMes.includes(String(d['MES']));
+                let mResp = selResp.length === 0 || selResp.includes(String(d['RESPONSABLE CAUSACION']));
+                let mTexto = txt === '' || Object.values(d).join(" ").toLowerCase().includes(txt);
+                return mMes && mResp && mTexto;
+            });
+            
+            // Renderizar Todo
             actualizarDashboard();
-            generarTablaResumen();
+            generarTablaCruzada();
+            generarTablaResumen(); 
             generarTablaDetalle();
+
+            actualizarDashboardErrores();
         }
 
         function resetFilters() {
@@ -383,6 +469,74 @@
             aplicarFiltros();
         }
 
+        // --- SECCIÓN ERRORES ---
+        function actualizarDashboardErrores() {
+            let totalErrores = 0;
+            let motivosCount = {};
+            let respCount = {};
+
+            datosErroresFiltrados.forEach(d => {
+                let cant = d['CANTIDAD ERROR'];
+                let motivo = d['MOTIVO'] || 'Desconocido';
+                let resp = d['RESPONSABLE CAUSACION'] || 'Desconocido';
+
+                totalErrores += cant;
+                motivosCount[motivo] = (motivosCount[motivo] || 0) + cant;
+                respCount[resp] = (respCount[resp] || 0) + cant;
+            });
+
+            // KPIs
+            document.getElementById('kpi-err-total').innerText = totalErrores;
+            document.getElementById('kpi-err-tipos').innerText = Object.keys(motivosCount).length;
+
+            let topResp = Object.keys(respCount).sort((a,b) => respCount[b] - respCount[a])[0] || '-';
+            let topMotivo = Object.keys(motivosCount).sort((a,b) => motivosCount[b] - motivosCount[a])[0] || '-';
+            
+            document.getElementById('kpi-err-resp').innerText = topResp;
+            document.getElementById('kpi-err-motivo').innerText = topMotivo;
+
+            // Tabla 1: Errores por Responsable y Mes
+            let sumRespMes = {};
+            datosErroresFiltrados.forEach(d => {
+                let key = `${d['RESPONSABLE CAUSACION'] || 'N/A'}|${d['MES'] || 'N/A'}`;
+                sumRespMes[key] = (sumRespMes[key] || 0) + d['CANTIDAD ERROR'];
+            });
+
+            let arrRespMes = Object.keys(sumRespMes).map(k => {
+                let parts = k.split('|');
+                return { resp: parts[0], mes: parts[1], cant: sumRespMes[k] };
+            }).sort((a,b) => a.resp.localeCompare(b.resp) || a.mes.localeCompare(b.mes));
+
+            let tbodyResp = "";
+            arrRespMes.forEach(r => {
+                tbodyResp += `<tr><td><strong>${r.resp}</strong></td><td>${r.mes}</td><td><span class="badge-error">${r.cant} Errores</span></td></tr>`;
+            });
+            document.getElementById('tbody-err-resp').innerHTML = tbodyResp || "<tr><td colspan='3'>No hay registros.</td></tr>";
+
+            // Tabla 2: Errores por Motivo
+            let arrMotivos = Object.keys(motivosCount).map(k => ({ motivo: k, cant: motivosCount[k] })).sort((a,b) => b.cant - a.cant);
+            let tbodyMotivo = "";
+            arrMotivos.forEach(m => {
+                tbodyMotivo += `<tr><td>${m.motivo}</td><td><span class="badge-error">${m.cant} Errores</span></td></tr>`;
+            });
+            document.getElementById('tbody-err-motivo').innerHTML = tbodyMotivo || "<tr><td colspan='2'>No hay registros.</td></tr>";
+
+            // Tabla 3: Detalle Maestra
+            let tbodyMaestraErr = "";
+            datosErroresFiltrados.slice(0, 150).forEach(d => {
+                tbodyMaestraErr += `<tr>
+                    <td>${d['FECHA ERROR'] || ''}</td>
+                    <td>${d['MES'] || ''}</td>
+                    <td>${d['RESPONSABLE CAUSACION'] || ''}</td>
+                    <td>${d['MOTIVO'] || ''}</td>
+                    <td><strong>${d['CANTIDAD ERROR']}</strong></td>
+                </tr>`;
+            });
+            document.getElementById('tbody-err-maestra').innerHTML = tbodyMaestraErr || "<tr><td colspan='5'>No hay datos.</td></tr>";
+        }
+
+
+        // --- SECCIÓN CAUSACIÓN (Pestaña 1 y 3) ---
         function actualizarDashboard() {
             let total = datosFiltradosActuales.length;
             let cumplen = datosFiltradosActuales.filter(d => d['Cumplio']).length;
@@ -394,14 +548,10 @@
             document.getElementById('kpi-nocumple').innerText = noCumplen;
             document.getElementById('kpi-eficiencia').innerText = eficiencia.toFixed(1) + '%';
 
-            // Construir Baterías Individuales
             let personasStats = {};
-            
             datosFiltradosActuales.forEach(d => {
                 let resp = d['RESPONSABLE CAUSACION'] || 'Sin Asignar';
-                if (!personasStats[resp]) {
-                    personasStats[resp] = { totalRegistros: 0, cumplen: 0, totalFacturas: 0 };
-                }
+                if (!personasStats[resp]) personasStats[resp] = { totalRegistros: 0, cumplen: 0, totalFacturas: 0 };
                 
                 personasStats[resp].totalRegistros++;
                 if (d['Cumplio']) personasStats[resp].cumplen++;
@@ -409,13 +559,11 @@
             });
 
             let htmlBaterias = '';
-            let personasArr = Object.keys(personasStats).sort(); // Ordenar alfabéticamente
+            let personasArr = Object.keys(personasStats).sort();
 
             personasArr.forEach(resp => {
                 let stats = personasStats[resp];
                 let pct = stats.totalRegistros > 0 ? (stats.cumplen / stats.totalRegistros) * 100 : 0;
-                
-                // Determinar el color de la batería (Verde solo si es >= 90%)
                 let claseBateria = pct >= 90 ? 'alta' : (pct >= 50 ? 'media' : 'baja');
 
                 htmlBaterias += `
@@ -431,8 +579,50 @@
                     </div>
                 </div>`;
             });
-
             document.getElementById('baterias-container').innerHTML = htmlBaterias;
+        }
+
+        function generarTablaCruzada() {
+            let stats = {};
+            let cortesIdentificados = ['CORTE 1', 'CORTE 2', 'CORTE 3'];
+
+            datosFiltradosActuales.forEach(d => {
+                let resp = d['RESPONSABLE CAUSACION'] || 'N/A';
+                let corte = String(d['CORTE'] || '').toUpperCase().trim();
+                
+                if (!stats[resp]) {
+                    stats[resp] = {};
+                    cortesIdentificados.forEach(c => stats[resp][c] = { total: 0, cumplen: 0 });
+                }
+                
+                if (stats[resp][corte]) {
+                    stats[resp][corte].total++;
+                    if (d['Cumplio']) stats[resp][corte].cumplen++;
+                }
+            });
+
+            let tbody = "";
+            let responsables = Object.keys(stats).sort();
+
+            responsables.forEach(resp => {
+                let filaHtml = `<td><strong>${resp}</strong></td>`;
+                
+                cortesIdentificados.forEach(c => {
+                    let data = stats[resp][c];
+                    if (data.total === 0) {
+                        filaHtml += `<td style='color: #94A3B8; text-align:center;'>-</td>`;
+                    } else {
+                        let pct = (data.cumplen / data.total) * 100;
+                        let colorTexto = pct >= 90 ? '#166534' : (pct >= 50 ? '#9A3412' : '#991B1B');
+                        let colorBg = pct >= 90 ? '#DCFCE7' : (pct >= 50 ? '#FFEDD5' : '#FEE2E2');
+                        filaHtml += `<td style="color: ${colorTexto}; background-color: ${colorBg}; font-weight: bold; text-align:center;">${pct.toFixed(1)}%</td>`;
+                    }
+                });
+
+                tbody += `<tr>${filaHtml}</tr>`;
+            });
+
+            document.getElementById('tbody-cruzada').innerHTML = tbody || "<tr><td colspan='4'>No hay datos.</td></tr>";
         }
 
         function generarTablaResumen() {
@@ -451,7 +641,11 @@
                 resumen[key].facturas += d['CANTIDAD FACTURAS'];
             });
 
-            let arrResumen = Object.values(resumen).sort((a,b) => a.mes.localeCompare(b.mes) || a.corte.localeCompare(b.corte));
+            let arrResumen = Object.values(resumen).sort((a,b) => 
+                a.resp.localeCompare(b.resp) || 
+                a.mes.localeCompare(b.mes) || 
+                a.corte.localeCompare(b.corte) 
+            );
             
             let tbody = "";
             arrResumen.forEach(r => {
@@ -464,8 +658,8 @@
                     <td>${r.resp}</td>
                     <td><strong>${r.facturas}</strong></td>
                     <td>${r.totalRegistros}</td>
-                    <td style="color:#10B981; font-weight:bold;">${r.cumplen}</td>
-                    <td style="color:#EF4444; font-weight:bold;">${nocumplen}</td>
+                    <td style="color:#166534; font-weight:bold;">${r.cumplen}</td>
+                    <td style="color:#991B1B; font-weight:bold;">${nocumplen}</td>
                     <td><strong>${pct.toFixed(1)}%</strong></td>
                 </tr>`;
             });
@@ -512,24 +706,6 @@
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Data_Causacion");
             XLSX.writeFile(workbook, "Detalle_Causacion.xlsx");
-        }
-
-        function generarPDF() {
-            const elemento = document.getElementById('informe-a-pdf');
-            elemento.classList.add('pdf-export-mode');
-
-            const opciones = {
-                margin:       15,
-                filename:     'Resumen_Causacion.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'letter', orientation: 'landscape' }, 
-                pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr' } 
-            };
-
-            html2pdf().set(opciones).from(elemento).save().then(() => {
-                elemento.classList.remove('pdf-export-mode');
-            });
         }
 
         window.onload = inicializarDashboard;
