@@ -46,7 +46,6 @@
         .btn-excel { background: var(--color-verde-logo); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-left: 15px;}
         .btn-excel:hover { background: #7ab32e; }
 
-        /* Cuadrícula forzada a 6 columnas para que nunca quede una tarjeta volando */
         .kpis-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; margin-top: 10px; }
         .kpi-card { padding: 20px; border-radius: 10px; box-shadow: var(--sombra); display: flex; flex-direction: column; position: relative; background: white; border: var(--borde); min-width: 0; }
         .kpi-card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 10px 0 0 10px; }
@@ -62,13 +61,11 @@
 
         .card-tabla { background: var(--color-blanco); padding: 20px; border-radius: 10px; box-shadow: var(--sombra); border: var(--borde); display: flex; flex-direction: column; }
         
-        /* Controles de Filtros Globales */
         .header-filtros { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;}
         .header-filtros h3 { font-size: 1.2rem; color: var(--color-azul-logo); font-family: 'Outfit', sans-serif; margin: 0;}
         .filtros-globales { display: flex; gap: 10px; flex-wrap: wrap;}
         .filtro-select { padding: 8px 15px; border-radius: 6px; border: 1px solid #CBD5E1; font-family: 'Outfit'; font-size: 0.9rem; outline: none; background: #F8FAFC; color: var(--color-texto);}
         
-        /* Inputs para Filtros de Columna */
         .col-filter { width: 100%; padding: 6px; font-size: 0.75rem; border: 1px solid #CBD5E1; border-radius: 4px; margin-top: 8px; box-sizing: border-box; font-family: 'Roboto'; outline: none; background: #ffffff;}
         .col-filter:focus { border-color: var(--color-azul-logo); }
 
@@ -89,7 +86,6 @@
         .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--color-verde-logo); animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Diseño Responsivo para pantallas pequeñas */
         @media (max-width: 1200px) {
             .kpis-grid { grid-template-columns: repeat(3, 1fr); }
         }
@@ -113,17 +109,18 @@
     <div class="container">
         <div class="upload-banner">
             <h2>Carga de Reportes Diarios</h2>
+            <!-- Quitamos el 'required' de Geo y Ramonapp para hacerlos opcionales -->
             <form id="uploadForm" class="upload-grid">
                 <div class="input-file-group">
-                    <label>1. Reporte Geovictoria</label>
-                    <input type="file" id="fileGeovictoria" accept=".xlsx, .xls, .csv" required>
+                    <label>1. Reporte Geovictoria (Opcional)</label>
+                    <input type="file" id="fileGeovictoria" accept=".xlsx, .xls, .csv">
                 </div>
                 <div class="input-file-group">
-                    <label>2. Reporte Ramonapp</label>
-                    <input type="file" id="fileRamonapp" accept=".xlsx, .xls, .csv" required>
+                    <label>2. Reporte Ramonapp (Opcional)</label>
+                    <input type="file" id="fileRamonapp" accept=".xlsx, .xls, .csv">
                 </div>
                 <div class="input-file-group">
-                    <label>3. Novedades SIC</label>
+                    <label>3. Novedades SIC (Obligatorio)</label>
                     <input type="file" id="fileSic" accept=".xlsx, .xls, .csv" required>
                 </div>
                 <button type="button" class="btn-procesar" onclick="procesarArchivos()">Ejecutar Cruce</button>
@@ -193,26 +190,17 @@
         let datosParaExcel = [];
         let totalTurnosGlobal = 0; 
 
+        // Modificado para traer la data en formato matriz (Arreglo de Arreglos)
         async function leerExcel(file) {
+            if (!file) return [];
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array', cellDates: false});
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    
-                    const jsonArr = XLSX.utils.sheet_to_json(firstSheet, {header: 1, defval: ""});
-                    
-                    let filaEncabezado = 0;
-                    for (let i = 0; i < Math.min(jsonArr.length, 10); i++) {
-                        let textoFila = jsonArr[i].join(" ").toLowerCase();
-                        if (textoFila.includes("cedula") || textoFila.includes("cédula") || textoFila.includes("identificador")) {
-                            filaEncabezado = i;
-                            break;
-                        }
-                    }
-
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { range: filaEncabezado, defval: "" });
+                    // header: 1 permite leer por columnas (índices) y blankrows: false elimina filas totalmente vacías
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1, blankrows: false, defval: ""});
                     resolve(jsonData);
                 };
                 reader.onerror = reject;
@@ -256,30 +244,6 @@
             return d.toISOString().split("T")[0];
         }
 
-        function extraerMarcaciones(row) {
-            let entradas = [];
-            let salidas = [];
-            
-            for (let key in row) {
-                let k = key.toLowerCase().trim();
-                let val = String(row[key]).trim();
-                
-                if (val && val !== "--" && val.toLowerCase() !== "sin registro") {
-                    if ((k.startsWith("entr") || k.startsWith("entro") || k.startsWith("entrada")) && !k.includes("observa") && !k.includes("fecha")) {
-                        entradas.push(val);
-                    }
-                    if ((k.startsWith("sal") || k.startsWith("salio") || k.startsWith("salida")) && !k.includes("observa") && !k.includes("fecha")) {
-                        salidas.push(val);
-                    }
-                }
-            }
-
-            return {
-                entrada: entradas.length > 0 ? entradas[0] : "",
-                salida: salidas.length > 0 ? salidas[salidas.length - 1] : ""
-            };
-        }
-
         async function procesarArchivos() {
             const btn = document.querySelector('.btn-procesar');
             const loader = document.getElementById('loader');
@@ -289,8 +253,13 @@
             const ram = document.getElementById('fileRamonapp').files[0];
             const sic = document.getElementById('fileSic').files[0];
 
-            if(!geo || !ram || !sic) {
-                alert("Por favor carga los 3 archivos antes de ejecutar el cruce.");
+            // Nuevas validaciones: Solo SIC es obligatorio, y debe haber al menos un reporte
+            if (!sic) {
+                alert("El archivo de Novedades SIC es OBLIGATORIO para realizar el cruce.");
+                return;
+            }
+            if (!geo && !ram) {
+                alert("Debes cargar al menos un reporte de asistencia (Geovictoria o Ramonapp) para realizar el cruce.");
                 return;
             }
 
@@ -300,8 +269,8 @@
             
             setTimeout(async () => {
                 try {
-                    const dataGeo = await leerExcel(geo);
-                    const dataRamon = await leerExcel(ram);
+                    const dataGeo = geo ? await leerExcel(geo) : [];
+                    const dataRamon = ram ? await leerExcel(ram) : [];
                     const dataSic = await leerExcel(sic);
 
                     const procesosValidosSIC = [
@@ -325,145 +294,179 @@
 
                     // 1. PROCESAR DICCIONARIO SIC
                     let diccionarioSIC = {};
-                    dataSic.forEach(row => {
-                        let proceso = String(row["Proceso"] || "").trim(); 
-                        let estado = String(row["Estado"] || "").trim();
-                        let cedula = limpiarCedula(row["Cedula"] || row["Cédula"] || row["Identificador"] || "");
-                        let nombre = String(row["Nombre"] || row["Nombres"] || "").trim();
-                        let fechaInicio = "";
-                        let fechaFin = "";
-
-                        if (retirosDefinitivos.includes(proceso.toLowerCase())) {
-                            let udl = normalizarFecha(row["Ultimo Dia Laborado"] || row["Ultimo dia laborado"] || row["Ultimo Día Laborado"] || row["I"] || "");
-                            if (udl) {
-                                fechaInicio = sumarDias(udl, 1); 
-                                fechaFin = sumarDias(udl, 31);   
+                    if (dataSic.length > 0) {
+                        let headerSicIndex = -1;
+                        let mapSic = {};
+                        
+                        // Buscamos dinámicamente dónde empiezan los títulos del SIC para más seguridad
+                        for (let i = 0; i < dataSic.length; i++) {
+                            let rowText = dataSic[i].join(" ").toLowerCase();
+                            if (rowText.includes("cedula") || rowText.includes("cédula") || rowText.includes("identificador")) {
+                                headerSicIndex = i;
+                                dataSic[i].forEach((h, idx) => { if (h) mapSic[String(h).toLowerCase().trim()] = idx; });
+                                break;
                             }
-                        } else {
-                            fechaInicio = normalizarFecha(row["Fecha inicio ausencia"] || row["Fecha Inicio"] || "");
-                            fechaFin = normalizarFecha(row["Fecha final ausencia"] || row["Fecha Fin"] || "");
                         }
 
-                        if (cedula && nombre) nombresExcel[cedula] = nombre;
+                        if (headerSicIndex !== -1) {
+                            for (let i = headerSicIndex + 1; i < dataSic.length; i++) {
+                                let row = dataSic[i];
+                                let getCol = (names) => {
+                                    for (let n of names) {
+                                        if (mapSic[n] !== undefined) return row[mapSic[n]];
+                                    }
+                                    return "";
+                                };
+                                
+                                let cedula = limpiarCedula(getCol(["cedula", "cédula", "identificador"]));
+                                if (!cedula || !cedula.match(/^\d+$/)) continue; // Omite cualquier fila basurilla
+                                
+                                let proceso = String(getCol(["proceso"]) || "").trim();
+                                let estado = String(getCol(["estado"]) || "").trim();
+                                let nombre = String(getCol(["nombre", "nombres"]) || "").trim();
+                                let fechaInicio = "";
+                                let fechaFin = "";
 
-                        if (procesosValidosSIC.includes(proceso) && cedula && fechaInicio) {
-                            if (!diccionarioSIC[cedula]) diccionarioSIC[cedula] = [];
-                            diccionarioSIC[cedula].push({ fechaInicio, fechaFin, estado: proceso, estadoAprobacion: estado });
+                                if (retirosDefinitivos.includes(proceso.toLowerCase())) {
+                                    let udl = normalizarFecha(getCol(["ultimo dia laborado", "último día laborado", "i"]));
+                                    if (udl) {
+                                        fechaInicio = sumarDias(udl, 1); 
+                                        fechaFin = sumarDias(udl, 31);   
+                                    }
+                                } else {
+                                    fechaInicio = normalizarFecha(getCol(["fecha inicio ausencia", "fecha inicio"]));
+                                    fechaFin = normalizarFecha(getCol(["fecha final ausencia", "fecha fin"]));
+                                }
+
+                                if (cedula && nombre) nombresExcel[cedula] = nombre;
+
+                                if (procesosValidosSIC.includes(proceso) && fechaInicio) {
+                                    if (!diccionarioSIC[cedula]) diccionarioSIC[cedula] = [];
+                                    diccionarioSIC[cedula].push({ fechaInicio, fechaFin, estado: proceso, estadoAprobacion: estado });
+                                }
+                            }
                         }
-                    });
+                    }
 
-                    // BÚSQUEDA INTELIGENTE CON PRIORIDAD DE DESEMPATE
+                    // Función de prioridad
                     function obtenerAusentismo(cedula, fechaBusqueda) {
                         let registros = diccionarioSIC[cedula];
                         if (!registros) return null;
-
-                        // Buscar todas las novedades que coincidan en esa fecha
                         let coincidencias = registros.filter(a => a.fechaInicio <= fechaBusqueda && a.fechaFin >= fechaBusqueda);
                         if (coincidencias.length === 0) return null;
-
-                        // Prioridad: Buscar si existe al menos una novedad VÁLIDA en la lista
                         let valida = coincidencias.find(a => {
                             let est = (a.estadoAprobacion || "").toLowerCase();
                             return est !== "anulado" && est !== "falta adjunto";
                         });
-
-                        // Si hay una válida (así haya anuladas), retorna la válida. Si no, retorna la anulada.
                         return valida ? valida : coincidencias[0];
                     }
 
-                    // 2. PROCESAR GEOVICTORIA
-                    dataGeo.forEach(row => {
-                        let cedula = limpiarCedula(row["Identificador"] || row["Cedula"] || row["Cédula"] || ""); 
-                        let fecha = normalizarFecha(row["Fecha"]); 
-                        let permiso = String(row["Permiso"] || "").trim(); 
-                        
-                        let marcaciones = extraerMarcaciones(row);
-                        let entrada = marcaciones.entrada;
-                        let salida = marcaciones.salida;
-                        
-                        let apellidos = String(row["Apellidos"] || "").trim();
-                        let nombres = String(row["Nombres"] || "").trim();
-                        let nombre = (nombres + " " + apellidos).trim() || String(row["Nombre"] || "");
-                        
-                        if (!cedula || cedula.toLowerCase().includes("identificador")) return;
-                        if (nombre) nombresExcel[cedula] = nombre;
-                        if (permisosIgnorarGeo.includes(permiso) || permiso === "Descanso programado") return;
+                    // 2. PROCESAR GEOVICTORIA POR ÍNDICES FIJOS (Matriz)
+                    if (dataGeo.length > 0) {
+                        dataGeo.forEach(row => {
+                            let cedula = limpiarCedula(row[2]); // Columna C (Índice 2)
+                            // Si la cédula no es puramente números, es un encabezado o celda combinada y la ignoramos
+                            if (!cedula || !cedula.match(/^\d+$/)) return; 
 
-                        totalTurnosGlobal++;
+                            let fecha = normalizarFecha(row[4]); // Columna E (Índice 4)
+                            let permiso = String(row[5] || "").trim(); // Columna F (Índice 5)
+                            
+                            let apellidos = String(row[0] || "").trim();
+                            let nombres = String(row[1] || "").trim();
+                            let nombre = (nombres + " " + apellidos).trim();
+                            
+                            // Busca la entrada principal (índice 7) o la alterna (índice 11)
+                            let entradasArr = [String(row[7] || "").trim(), String(row[11] || "").trim()].filter(v => v && v !== "--" && v.toLowerCase() !== "sin registro");
+                            let entrada = entradasArr.length > 0 ? entradasArr[0] : "";
+                            
+                            // Busca la salida principal (índice 9) o la alterna (índice 13)
+                            let salidasArr = [String(row[9] || "").trim(), String(row[13] || "").trim()].filter(v => v && v !== "--" && v.toLowerCase() !== "sin registro");
+                            let salida = salidasArr.length > 0 ? salidasArr[salidasArr.length - 1] : "";
 
-                        let ausentismoSIC = obtenerAusentismo(cedula, fecha);
-                        let tieneEntrada = entrada !== ""; 
-                        let tieneSalida = salida !== "";
-                        
-                        let esInvalido = ausentismoSIC && ausentismoSIC.estadoAprobacion && 
-                            (ausentismoSIC.estadoAprobacion.toLowerCase() === "anulado" || ausentismoSIC.estadoAprobacion.toLowerCase() === "falta adjunto");
+                            if (nombre) nombresExcel[cedula] = nombre;
+                            if (permisosIgnorarGeo.includes(permiso) || permiso === "Descanso programado") return;
 
-                        if (tieneEntrada && tieneSalida) {
-                            if (ausentismoSIC && !esInvalido) {
-                                hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
+                            totalTurnosGlobal++;
+
+                            let ausentismoSIC = obtenerAusentismo(cedula, fecha);
+                            let tieneEntrada = entrada !== ""; 
+                            let tieneSalida = salida !== "";
+                            
+                            let esInvalido = ausentismoSIC && ausentismoSIC.estadoAprobacion && 
+                                (ausentismoSIC.estadoAprobacion.toLowerCase() === "anulado" || ausentismoSIC.estadoAprobacion.toLowerCase() === "falta adjunto");
+
+                            if (tieneEntrada && tieneSalida) {
+                                if (ausentismoSIC && !esInvalido) {
+                                    hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
+                                    cedulasUnicas.add(cedula);
+                                }
+                            } else if ((tieneEntrada && !tieneSalida) || (!tieneEntrada && tieneSalida)) {
+                                let alertaSic = ausentismoSIC ? `Tiene SIC (${ausentismoSIC.estado})` : "Sin registro";
+                                hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: alertaSic, Alerta: "Marcación Incompleta" });
                                 cedulasUnicas.add(cedula);
+                            } else if (!tieneEntrada && !tieneSalida) {
+                                if (esInvalido) {
+                                    hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
+                                    cedulasUnicas.add(cedula);
+                                } else if (!ausentismoSIC) {
+                                    hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
+                                    cedulasUnicas.add(cedula);
+                                }
                             }
-                        } else if ((tieneEntrada && !tieneSalida) || (!tieneEntrada && tieneSalida)) {
-                            let alertaSic = ausentismoSIC ? `Tiene SIC (${ausentismoSIC.estado})` : "Sin registro";
-                            hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: alertaSic, Alerta: "Marcación Incompleta" });
-                            cedulasUnicas.add(cedula);
-                        } else if (!tieneEntrada && !tieneSalida) {
-                            if (esInvalido) {
-                                hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
+                        });
+                    }
+
+                    // 3. PROCESAR RAMONAPP POR ÍNDICES FIJOS (Matriz)
+                    if (dataRamon.length > 0) {
+                        dataRamon.forEach(row => {
+                            let cedula = limpiarCedula(row[3]); // Columna D (Índice 3)
+                            // Si la cédula no es puramente números, es un encabezado o celda combinada y la ignoramos
+                            if (!cedula || !cedula.match(/^\d+$/)) return;
+
+                            let nombre = String(row[4] || "").trim(); // Columna E (Índice 4)
+                            let fecha = normalizarFecha(row[7]); // Columna H (Índice 7)
+                            let novedad = String(row[9] || "").trim(); // Columna J (Índice 9)
+                            
+                            let entrada = String(row[10] || "").trim(); // Columna K (Índice 10)
+                            if (entrada === "--" || entrada.toLowerCase() === "sin registro") entrada = "";
+                            
+                            let salida = String(row[11] || "").trim(); // Columna L (Índice 11)
+                            if (salida === "--" || salida.toLowerCase() === "sin registro") salida = "";
+                            
+                            if (nombre) nombresExcel[cedula] = nombre;
+                            if (novedad === "Descanso programado" || novedad === "Descanso compensatorio") return;
+
+                            totalTurnosGlobal++;
+
+                            let ausentismoSIC = obtenerAusentismo(cedula, fecha);
+                            let tieneEntrada = entrada !== ""; 
+                            let tieneSalida = salida !== "";
+
+                            let esInvalido = ausentismoSIC && ausentismoSIC.estadoAprobacion && 
+                                (ausentismoSIC.estadoAprobacion.toLowerCase() === "anulado" || ausentismoSIC.estadoAprobacion.toLowerCase() === "falta adjunto");
+
+                            if (tieneEntrada && tieneSalida) {
+                                if (ausentismoSIC && !esInvalido) {
+                                    hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
+                                    cedulasUnicas.add(cedula);
+                                }
+                            } else if ((tieneEntrada && !tieneSalida) || (!tieneEntrada && tieneSalida)) {
+                                let alertaSic = ausentismoSIC ? `Tiene SIC (${ausentismoSIC.estado})` : "Sin registro";
+                                hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: alertaSic, Alerta: "Marcación Incompleta" });
                                 cedulasUnicas.add(cedula);
-                            } else if (!ausentismoSIC) {
-                                hallazgos.push({ Origen: "Geovictoria", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
-                                cedulasUnicas.add(cedula);
+                            } else if (!tieneEntrada && !tieneSalida) {
+                                if (esInvalido) {
+                                    hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
+                                    cedulasUnicas.add(cedula);
+                                } else if (!ausentismoSIC) {
+                                    hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
+                                    cedulasUnicas.add(cedula);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
 
-                    // 3. PROCESAR RAMONAPP
-                    dataRamon.forEach(row => {
-                        let cedula = limpiarCedula(row["Cedula"] || row["Cédula"] || ""); 
-                        let fecha = normalizarFecha(row["Fecha"] || row["Fecha texto"]); 
-                        let novedad = String(row["Novedad restrictiva"] || "").trim(); 
-                        
-                        let marcaciones = extraerMarcaciones(row);
-                        let entrada = marcaciones.entrada;
-                        let salida = marcaciones.salida;
-                        
-                        let nombre = String(row["Nombre"] || row["Nombres"] || "").trim();
-                        
-                        if (!cedula || cedula.toLowerCase().includes("cedula")) return;
-                        if (nombre) nombresExcel[cedula] = nombre;
-                        if (novedad === "Descanso programado" || novedad === "Descanso compensatorio") return;
-
-                        totalTurnosGlobal++;
-
-                        let ausentismoSIC = obtenerAusentismo(cedula, fecha);
-                        let tieneEntrada = entrada !== ""; 
-                        let tieneSalida = salida !== "";
-
-                        let esInvalido = ausentismoSIC && ausentismoSIC.estadoAprobacion && 
-                            (ausentismoSIC.estadoAprobacion.toLowerCase() === "anulado" || ausentismoSIC.estadoAprobacion.toLowerCase() === "falta adjunto");
-
-                        if (tieneEntrada && tieneSalida) {
-                            if (ausentismoSIC && !esInvalido) {
-                                hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada, Salida: salida, EstadoSIC: ausentismoSIC.estado, Alerta: "Falso Ausentismo en SIC" });
-                                cedulasUnicas.add(cedula);
-                            }
-                        } else if ((tieneEntrada && !tieneSalida) || (!tieneEntrada && tieneSalida)) {
-                            let alertaSic = ausentismoSIC ? `Tiene SIC (${ausentismoSIC.estado})` : "Sin registro";
-                            hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: entrada || "--", Salida: salida || "--", EstadoSIC: alertaSic, Alerta: "Marcación Incompleta" });
-                            cedulasUnicas.add(cedula);
-                        } else if (!tieneEntrada && !tieneSalida) {
-                            if (esInvalido) {
-                                hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: `${ausentismoSIC.estado} - ${ausentismoSIC.estadoAprobacion}`, Alerta: "Ausentismo Inválido" });
-                                cedulasUnicas.add(cedula);
-                            } else if (!ausentismoSIC) {
-                                hallazgos.push({ Origen: "Ramonapp", Cedula: cedula, Nombre: nombre, FechaTurno: fecha, Entrada: "Sin registro", Salida: "Sin registro", EstadoSIC: "Sin registro", Alerta: "Requiere grabar ausentismo" });
-                                cedulasUnicas.add(cedula);
-                            }
-                        }
-                    });
-
-                    // 4. CONSULTAR N8N
+                    // 4. CONSULTAR N8N (Se mantiene igual)
                     let stringSQL = Array.from(cedulasUnicas).map(c => `'${c}'`).join(',');
                     if (!stringSQL) stringSQL = "''"; 
 
