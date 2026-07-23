@@ -333,8 +333,10 @@
                         if (!row || row.length < 20) continue;
                         
                         let cuenta = cleanStr(row[10]); 
-                        // HOMOLOGACIÓN DE CUENTA
+                        
+                        // HOMOLOGACIÓN DE CUENTAS (NOVA -> APO)
                         if (cuenta === "24080102") cuenta = "24080101";
+                        if (cuenta === "24080103") cuenta = "24080102"; // <--- NUEVA REGLA
 
                         if (CUENTAS_EXCLUIDAS.includes(cuenta)) continue;
 
