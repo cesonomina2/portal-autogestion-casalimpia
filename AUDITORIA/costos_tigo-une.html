@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditor-IA Costos Tigo - UNE - Casalimpia</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --color-azul-logo: #0085CA; 
+            --color-verde-logo: #8DC63F; 
+            --color-rojo-alerta: #e11d48; 
+            --color-naranja: #ea580c;
+            --color-azul-oscuro: #1179bf;
+            --color-dark: #1e293b;
+            --color-blanco: #ffffff; 
+            --color-gris-bg: #f8fafc;
+            --color-texto: #1e293b; 
+            --sombra: 0 4px 10px rgba(0, 0, 0, 0.05);
+            --borde: 1px solid #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--color-gris-bg); color: var(--color-texto); }
+
+        header { background-color: var(--color-blanco); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--sombra); border-bottom: 4px solid var(--color-azul-logo); flex-wrap: wrap; gap: 15px; position: sticky; top: 0; z-index: 100; }
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .logo-img { height: 40px; width: auto; }
+        .logo-text { font-family: 'Montserrat', sans-serif; font-weight: 800; display: flex; align-items: center; letter-spacing: -0.5px;}
+        .text-verde { color: var(--color-verde-logo); font-size: 1.6rem; }
+        .text-azul { color: var(--color-azul-logo); font-size: 1.6rem; margin-left: 2px; }
+        .header-title { font-family: 'Montserrat', sans-serif; font-size: 1.1rem; font-weight: 700; color: #475569; background: #e2e8f0; padding: 6px 18px; border-radius: 50px; }
+
+        .container { max-width: 1550px; margin: 30px auto; padding: 0 15px; display: flex; flex-direction: column; gap: 15px; }
+
+        .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 15px; margin-bottom: 5px; }
+        .upload-card { background: white; padding: 20px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); border-left: 4px solid var(--color-azul-logo); position: relative;}
+        .upload-card h3 { font-size: 1rem; color: var(--color-azul-logo); margin-bottom: 10px; font-weight: 700;}
+        .upload-card input[type="file"] { width: 100%; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 5px; cursor: pointer; background: #f8fafc; margin-bottom: 12px; font-family: 'Montserrat';}
+        .upload-card small { color: #64748b; font-size: 0.8rem; display: block; line-height: 1.4; font-weight: 500;}
+        .badge-opcional { position: absolute; top: 20px; right: 20px; background: #e2e8f0; color: #475569; font-size: 0.65rem; font-weight: 800; padding: 4px 8px; border-radius: 20px;}
+
+        .btn-procesar { background-color: var(--color-verde-logo); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 1.1rem; font-family: 'Montserrat', sans-serif; font-weight: 700; cursor: pointer; width: 100%; transition: 0.3s; box-shadow: 0 4px 10px rgba(141, 198, 63, 0.3); margin-bottom: 15px;}
+        .btn-procesar:hover { background-color: #76A633; transform: translateY(-2px); }
+        
+        /* BARRA RESUMEN OSCURA IDÉNTICA A PYTHON */
+        .summary-bar { background-color: var(--color-dark); color: white; border-radius: 8px; padding: 25px; display: flex; justify-content: space-around; align-items: center; margin-bottom: 5px; box-shadow: var(--sombra); flex-wrap: wrap; gap: 15px;}
+        .summary-item { text-align: center; flex: 1; border-right: 1px solid #334155;}
+        .summary-item:last-child { border-right: none; }
+        .summary-item .label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; font-weight: 800; letter-spacing: 0.8px; margin-bottom: 8px; }
+        .summary-item .value { font-size: 1.6rem; font-weight: 800; color: #ffffff; }
+
+        /* TARJETAS BLANCAS KPI */
+        .kpis-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 10px;}
+        .kpi-card { background-color: #ffffff; border-radius: 8px; padding: 20px 15px; border: 1px solid #e2e8f0; box-shadow: var(--sombra); text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 140px;}
+        
+        .border-total { border-top: 4px solid var(--color-dark); }
+        .border-total .kpi-title { color: var(--color-dark) !important; }
+        .border-total .kpi-value { color: var(--color-dark) !important; }
+        
+        .border-correcto { border-top: 4px solid var(--color-verde-logo); }
+        .border-correcto .kpi-title { color: #58801d !important; }
+        .border-correcto .kpi-value { color: var(--color-verde-logo) !important; }
+        
+        .border-nocobro { border-top: 4px solid var(--color-rojo-alerta); }
+        .border-nocobro .kpi-title { color: #be123c !important; }
+        .border-nocobro .kpi-value { color: var(--color-rojo-alerta) !important; }
+        
+        .border-perdida { border-top: 4px solid var(--color-naranja); }
+        .border-perdida .kpi-title { color: #c2410c !important; }
+        .border-perdida .kpi-value { color: var(--color-naranja) !important; }
+        
+        .border-sinreq { border-top: 4px solid var(--color-azul-oscuro); }
+        .border-sinreq .kpi-title { color: #0e629b !important; }
+        .border-sinreq .kpi-value { color: var(--color-azul-oscuro) !important; }
+        
+        .kpi-card .kpi-title { font-size: 0.70rem; text-transform: uppercase; font-weight: 800; margin-bottom: 12px; letter-spacing: 0.5px; line-height: 1.3;}
+        .kpi-card .kpi-value { font-size: 2.2rem; font-weight: 800; line-height: 1;}
+        .kpi-card .kpi-sub { font-size: 0.75rem; color: #64748b; font-weight: 700; margin-top: 12px; border-top: 1px dashed #cbd5e1; padding-top: 8px;}
+
+        /* TABLA Y PANELES */
+        .panel-resultados { background: white; padding: 20px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); margin-top: 5px;}
+        
+        .filtros-container { display: flex; gap: 15px; margin-top: 15px; margin-bottom: 10px; flex-wrap: wrap; padding: 5px 0;}
+        .filtro-input { flex: 1; min-width: 250px; padding: 10px 15px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: 'Montserrat'; outline: none; font-weight: 500; font-size: 0.85rem;}
+        .filtro-select { min-width: 250px; padding: 10px 15px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: 'Montserrat'; font-weight: 600; color: #334155; outline: none; cursor: pointer; background-color: #f8fafc; font-size: 0.85rem;}
+        
+        .table-responsive { overflow: auto; max-height: 500px; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 10px;}
+        table { width: 100%; border-collapse: collapse; min-width: 1400px; }
+        thead { position: sticky; top: 0; background: #f8fafc; z-index: 10; border-bottom: 2px solid #cbd5e1;}
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; white-space: nowrap; font-size: 0.8rem;}
+        th { font-weight: 800; color: #475569; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;}
+        tbody tr:hover { background-color: #f1f5f9; }
+
+        .badge { padding: 6px 10px; border-radius: 6px; font-weight: 700; font-size: 0.70rem; border: 1px solid transparent; display: inline-block;}
+        .badge-novedad { background: #eaf5d8; color: #4b6e19; border-color: #c2e28f; }
+        .badge-sincobro { background: #ffe4e6; color: #9f1239; border-color: #fecdd3; }
+        .badge-perdida { background: #ffedd5; color: #9a3412; border-color: #fdba74; }
+        .badge-sinreq { background: #e0f2fe; color: #075985; border-color: #bae6fd; }
+        .badge-f100 { background: #f3e8ff; color: #6b21a8; border-color: #d8b4fe; }
+        
+        .herramientas { display: flex; justify-content: space-between; align-items: center;}
+        .btn-excel { background-color: var(--color-azul-oscuro); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-family: 'Montserrat'; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(17, 121, 191, 0.2); font-size: 0.9rem;}
+        .btn-excel:hover { background-color: #0e629b; transform: translateY(-1px);}
+
+        #loading { display: none; text-align: center; font-size: 1.1rem; font-weight: 700; color: var(--color-azul-logo); margin: 20px 0; }
+        #resultadosWrapper { display: none; }
+
+        @media (max-width: 1100px) {
+            .kpis-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+            .summary-item { border-right: none; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+            .summary-item:last-child { border-bottom: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
+            <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Casalimpia</span></div>
+        </div>
+        <div class="header-title">Auditor-IA Costos Tigo - UNE</div>
+    </header>
+
+    <div class="container">
+        <h2 style="color: var(--color-verde-logo); font-weight: 800; font-size: 1.5rem; margin-bottom: 0;">1. 📁 Carga de Bases de Datos</h2>
+        
+        <div class="upload-grid">
+            <div class="upload-card">
+                <h3>1. Costos Novasoft</h3>
+                <input type="file" id="fileCostos" accept=".xlsx, .xls">
+                <small>💡 Cargue el archivo “COSTOS Y PRESUPUESTOS RAFA” generado del módulo CONTABILIDAD NIF Novasoft.</small>
+            </div>
+            <div class="upload-card">
+                <h3>2. Reversiones</h3>
+                <input type="file" id="fileRev" accept=".xlsx, .xls">
+                <small>💡 Cargue el archivo unificado de las Reversiones enviadas por Tigo UNE. Únicamente las columnas RQ, Valor Facturado, EA, FV, Mes.</small>
+            </div>
+            <div class="upload-card">
+                <h3>3. F-100</h3>
+                <input type="file" id="fileF100" accept=".xlsx, .xls">
+                <small>💡 Cargue el archivo de la hoja F–100 G. TIGO enviado por el área de Facturación.</small>
+            </div>
+            <div class="upload-card">
+                <h3>4. Cuadro-control</h3>
+                <input type="file" id="fileCuadro" accept=".xlsx, .xls">
+                <small>💡 Cargue el archivo “Cuadro Control” enviado por Tigo UNE hasta la columna PROVISIÓN.</small>
+            </div>
+            <div class="upload-card">
+                <h3>5. Facturas Nova</h3>
+                <input type="file" id="fileFNova" accept=".xlsx, .xls">
+                <small>💡 Cargue el archivo “Factura CXP consulta” generado desde el módulo CONTABILIDAD NIF Novasoft.</small>
+            </div>
+            <div class="upload-card" style="border-left-color: #94a3b8;">
+                <span class="badge-opcional">OPCIONAL</span>
+                <h3 style="color: #475569;">6. Facturas DIAN</h3>
+                <input type="file" id="fileDian" accept=".xlsx, .xls">
+                <small>💡 Si se adjunta, cruzará automáticamente NIT y Folio fiscal.</small>
+            </div>
+        </div>
+
+        <button class="btn-procesar" id="btnProcesar" onclick="ejecutarCruce()">🚀 Procesar Cruce de Datos</button>
+        <div id="loading">⚡ Relizando cruces... Por favor espere.</div>
+
+        <div id="resultadosWrapper">
+            <h2 style="color: var(--color-verde-logo); font-weight: 800; font-size: 1.5rem; margin-top: 10px; margin-bottom: 10px;">2. 📊 Resultado</h2>
+
+            <div class="summary-bar">
+                <div class="summary-item">
+                    <div class="label">Monto Revisado</div>
+                    <div class="value" id="topMonto">$ 0 COP</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Valor Total Alertas</div>
+                    <div class="value" id="topAlertas">$ 0 COP</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">% De Alertas</div>
+                    <div class="value" id="topPct">0.00%</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Cant. Alertas DIAN</div>
+                    <div class="value" id="topDian">0</div>
+                </div>
+            </div>
+
+            <div class="kpis-grid">
+                <div class="kpi-card border-total">
+                    <div class="kpi-title">Total Filas Procesadas</div>
+                    <div class="kpi-value" id="kpiFilas">0</div>
+                    <div class="kpi-sub" style="visibility: hidden;">-</div>
+                </div>
+                <div class="kpi-card border-correcto">
+                    <div class="kpi-title">Gestión Correcta</div>
+                    <div class="kpi-value" id="kpiCorrecta">0</div>
+                    <div class="kpi-sub" style="visibility: hidden;">-</div>
+                </div>
+                <div class="kpi-card border-nocobro">
+                    <div class="kpi-title">Facturación del Proveedor<br>Sin Cobro Al Cliente</div>
+                    <div class="kpi-value" id="kpiSinCobro">0</div>
+                    <div class="kpi-sub" id="kpiValSinCobro">$ 0 COP</div>
+                </div>
+                <div class="kpi-card border-perdida">
+                    <div class="kpi-title">Facturación del Proveedor<br>Con Pérdida</div>
+                    <div class="kpi-value" id="kpiPerdida">0</div>
+                    <div class="kpi-sub" id="kpiValPerdida">$ 0 COP</div>
+                </div>
+                <div class="kpi-card border-sinreq">
+                    <div class="kpi-title">Facturación del Proveedor<br>Sin Requerimientos Identificados</div>
+                    <div class="kpi-value" id="kpiSinReq">0</div>
+                    <div class="kpi-sub" id="kpiValSinReq">$ 0 COP</div>
+                </div>
+            </div>
+
+            <div class="panel-resultados">
+                <div class="herramientas">
+                    <div class="filtros-container" style="flex: 1; margin:0; padding:0; background: transparent; border: none;">
+                        <div style="display: flex; flex-direction: column; gap: 5px; flex: 1; max-width: 300px;">
+                            <label style="font-size: 0.75rem; font-weight: 700; color: #1179bf;">🔍 Filtrar por Estado:</label>
+                            <select id="estadoFilter" class="filtro-select" onchange="aplicarFiltros()">
+                                <option value="Todos">Todos los estados</option>
+                                <option value="Gestión correcta">Gestión correcta</option>
+                                <option value="Facturación del proveedor sin cobro al cliente">Facturación del proveedor sin cobro al cliente</option>
+                                <option value="Facturación del proveedor con pérdida">Facturación del proveedor con pérdida</option>
+                                <option value="Facturación del proveedor sin requerimientos identificados">Facturación del proveedor sin requerimientos identificados</option>
+                                <option value="Requerimiento identificado en F-100">Requerimiento identificado en F-100</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 5px; flex: 1; max-width: 400px;">
+                            <label style="font-size: 0.75rem; font-weight: 700; color: #1179bf;">🔎 Buscador en la Tabla:</label>
+                            <input type="text" id="searchInput" class="filtro-input" placeholder="Factura, NIT, Proveedor, RQ..." onkeyup="aplicarFiltros()">
+                        </div>
+                    </div>
+                    <button class="btn-excel" onclick="exportarExcelFinal()">📥 Exportar resultados</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>C. Costo</th>
+                                <th>Línea</th>
+                                <th>NIT Proveedor</th>
+                                <th>Factura (Doc)</th>
+                                <th>FP (Cruzada)</th>
+                                <th>FV (Venta)</th>
+                                <th>RQ</th>
+                                <th>Débito</th>
+                                <th>Valor Factura</th>
+                                <th>Utilidad</th>
+                                <th>Estado (OBS_2)</th>
+                                <th>Cruce DIAN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyResultados"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let resultadosGlobales = [];
+        let cabecerasOriginalesCostos = [];
+
+        const ESTADO_SIN_COBRO = "Facturación del proveedor sin cobro al cliente";
+        const ESTADO_PERDIDA = "Facturación del proveedor con pérdida";
+        const ESTADO_CORRECTA = "Gestión correcta";
+        const ESTADO_SIN_REQ = "Facturación del proveedor sin requerimientos identificados";
+        const ESTADO_F100 = "Requerimiento identificado en F-100";
+
+        function clean_key(val) {
+            if (val === null || val === undefined) return "";
+            let s = String(val).trim();
+            if (s.endsWith(".0")) s = s.substring(0, s.length - 2);
+            if (s.toLowerCase() === "nan" || s.toLowerCase() === "none") return "";
+            return s;
+        }
+
+        function es_requerimiento_valido(val) {
+            let s = clean_key(val);
+            if (!s || s === "0") return false;
+            if (!/^\d+$/.test(s)) return false;
+            return true;
+        }
+
+        function normalizeDate(val) {
+            if (val === undefined || val === null) return "";
+            let s = String(val).trim();
+            if (/^\d{5}(\.\d+)?$/.test(s)) {
+                let serial = parseFloat(s);
+                let utc_days  = Math.floor(serial - 25569);
+                let date_info = new Date(utc_days * 86400 * 1000);
+                let d = String(date_info.getUTCDate()).padStart(2, '0');
+                let m = String(date_info.getUTCMonth() + 1).padStart(2, '0');
+                let y = date_info.getUTCFullYear();
+                return `${d}/${m}/${y}`;
+            }
+            let parts = s.split(/[\/\-]/);
+            if (parts.length === 3) {
+                let d = parts[0].padStart(2, '0');
+                let m = parts[1].padStart(2, '0');
+                let y = parts[2];
+                if (y.length === 2) y = "20" + y; 
+                return `${y}-${m}-${d} 00:00:00`; 
+            }
+            return s;
+        }
+
+        function parseCurrency(val) {
+            if (!val) return 0;
+            if (typeof val === 'number') return val;
+            let s = String(val).replace(/\$/g, '').replace(/\./g, '').trim();
+            let parsed = parseFloat(s.replace(',', '.'));
+            return isNaN(parsed) ? 0 : parsed;
+        }
+
+        function extraerRQ(texto) {
+            if (!texto) return "";
+            let match = String(texto).match(/@(\d+)/);
+            return match ? match[1] : "";
+        }
+
+        function getColIdx(headers, keywords) {
+            if(!headers) return -1;
+            const hStr = headers.map(x => clean_key(x).toUpperCase().replace(/[^A-Z0-9]/g, ''));
+            for (let kw of keywords) {
+                let target = kw.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                let idx = hStr.findIndex(x => x.includes(target));
+                if (idx !== -1) return idx;
+            }
+            return -1;
+        }
+
+        function createBridgeKey(...parts) {
+            return parts.map(p => clean_key(p).replace(/\s+/g, '')).join('_').toUpperCase();
+        }
+
+        function formatMoneda(num) {
+            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
+        }
+
+        function leerExcelArray(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) { resolve({ json: [], sheets: [] }); return; }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', raw: false, dateNF: 'dd/mm/yyyy' });
+                    resolve({ workbook: workbook });
+                };
+                reader.onerror = (error) => reject(error);
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        async function ejecutarCruce() {
+            const files = {
+                costos: document.getElementById('fileCostos').files[0],
+                rev: document.getElementById('fileRev').files[0],
+                f100: document.getElementById('fileF100').files[0],
+                cuadro: document.getElementById('fileCuadro').files[0],
+                fnova: document.getElementById('fileFNova').files[0],
+                dian: document.getElementById('fileDian').files[0]
+            };
+
+            if(!files.costos || !files.rev || !files.cuadro || !files.fnova || !files.f100) {
+                alert("Por favor cargue los 5 archivos obligatorios.");
+                return;
+            }
+
+            document.getElementById('btnProcesar').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                const [wbCostos, wbRev, wbF100, wbCuadro, wbNova, wbDian] = await Promise.all([
+                    leerExcelArray(files.costos),
+                    leerExcelArray(files.rev),
+                    leerExcelArray(files.f100), 
+                    leerExcelArray(files.cuadro),
+                    leerExcelArray(files.fnova),
+                    leerExcelArray(files.dian)
+                ]);
+
+                const getSheetData = (wbWrapper, sheetNameFunc) => {
+                    if(!wbWrapper.workbook) return [];
+                    let w = wbWrapper.workbook;
+                    let targetSheet = sheetNameFunc(w.SheetNames);
+                    return XLSX.utils.sheet_to_json(w.Sheets[targetSheet], { header: 1, defval: "" });
+                };
+
+                const arrCostos = getSheetData(wbCostos, names => names[0]);
+                const arrRev = getSheetData(wbRev, names => names[0]);
+                const arrCuadro = getSheetData(wbCuadro, names => names[0]);
+                const arrNova = getSheetData(wbNova, names => names[0]);
+                const arrDian = getSheetData(wbDian, names => names[0]);
+                
+                // CANDADO 2: Buscador estricto del F-100 replicando Python
+                const arrF100 = getSheetData(wbF100, names => {
+                    let found = names.find(n => n.includes("F-100 G. TIGO"));
+                    return found ? found : names[0];
+                });
+
+                cabecerasOriginalesCostos = arrCostos[0] || [];
+
+                let f100RqSet = new Set();
+                let headF100 = arrF100[0] || [];
+                let obsF100Idx = headF100.findIndex(x => {
+                    let s = clean_key(x).toUpperCase();
+                    return s.includes("OBSERVAC") && s.includes("F100");
+                });
+                if (obsF100Idx === -1) {
+                    obsF100Idx = headF100.findIndex(x => clean_key(x).toUpperCase().includes("OBS"));
+                }
+                for (let i = 1; i < arrF100.length; i++) {
+                    let colValor = obsF100Idx !== -1 ? arrF100[i][obsF100Idx] : arrF100[i].join(" ");
+                    let rqEncontrado = extraerRQ(colValor);
+                    if(rqEncontrado) f100RqSet.add(clean_key(rqEncontrado));
+                }
+
+                let mapRev = {};
+                let headRev = arrRev[0] || [];
+                let rqRevIdx = getColIdx(headRev, ["RQ", "REQUERIMIENTO"]);
+                let valRevIdx = getColIdx(headRev, ["VALORFACTURADO", "VALOR"]);
+                let fvRevIdx = getColIdx(headRev, ["FV", "FACTURAS"]);
+                
+                if(rqRevIdx === -1) rqRevIdx = 0; 
+                if(valRevIdx === -1) valRevIdx = 1; 
+
+                for (let i = 1; i < arrRev.length; i++) {
+                    let rq = clean_key(arrRev[i][rqRevIdx]);
+                    let valor = parseCurrency(arrRev[i][valRevIdx]);
+                    let fv = fvRevIdx !== -1 ? clean_key(arrRev[i][fvRevIdx]) : "";
+
+                    if (rq) {
+                        if (!mapRev[rq]) mapRev[rq] = { valorTotal: 0, fvSet: new Set() };
+                        mapRev[rq].valorTotal += valor;
+                        if(fv && fv !== "0" && fv !== "0.0") mapRev[rq].fvSet.add(fv);
+                    }
+                }
+
+                let mapNova = {};
+                let headNova = arrNova[0] || [];
+                let nvNit = getColIdx(headNova, ["IDENTIFICACION", "PROVEEDOR"]);
+                let nvFec = getColIdx(headNova, ["FECHADOCUMENTO"]);
+                let nvNum = getColIdx(headNova, ["NUMDOCUMENTO", "NUMDOC"]);
+                let nvTip = getColIdx(headNova, ["TIPODOCUMENTO", "TIPODOC"]);
+                let nvSub = getColIdx(headNova, ["SUBTIPODOCUMENTO", "SUBTIPO"]);
+                let nvFac = getColIdx(headNova, ["NUMEROFACTURA", "FACTURA"]);
+
+                for (let i = 1; i < arrNova.length; i++) {
+                    let r = arrNova[i];
+                    let datePart = normalizeDate(r[nvFec]);
+                    let cleanDate = datePart.split(" ")[0]; 
+                    let cleanParts = cleanDate.split("-");
+                    let bridgeDate = cleanParts.length === 3 ? `${cleanParts[2]}/${cleanParts[1]}/${cleanParts[0]}` : cleanDate;
+
+                    let fpKeyNova = createBridgeKey(r[nvNit], bridgeDate, r[nvNum], r[nvTip], r[nvSub]);
+                    let numFactura = clean_key(r[nvFac]);
+                    if(fpKeyNova) mapNova[fpKeyNova] = numFactura;
+                }
+
+                let mapCuadro = {};
+                let mapFacturaClienteVal = {}; 
+                let conteoCuadro = {};
+                let headCuad = arrCuadro[0] || [];
+                let cuRq = getColIdx(headCuad, ["REQUERIMIENTO", "RQ"]);
+                let cuNit = getColIdx(headCuad, ["NITPROVEEDOR", "NIT"]);
+                let cuFac = getColIdx(headCuad, ["FACTURA"]);
+                let cuValCli = getColIdx(headCuad, ["VALORCLIENTE", "VALORFACTURACLIENTE"]);
+
+                for (let i = 1; i < arrCuadro.length; i++) {
+                    let rq = clean_key(arrCuadro[i][cuRq]);
+                    let nit = clean_key(arrCuadro[i][cuNit]);
+                    let facOriginal = String(arrCuadro[i][cuFac] || "").replace(/\D/g, "");
+                    let valCli = cuValCli !== -1 ? parseCurrency(arrCuadro[i][cuValCli]) : 0;
+                    
+                    if (nit || facOriginal) {
+                        let concatKey = `${nit}-${facOriginal}`;
+                        mapCuadro[concatKey] = rq;
+                        mapFacturaClienteVal[concatKey] = (mapFacturaClienteVal[concatKey] || 0) + valCli;
+                        conteoCuadro[concatKey] = (conteoCuadro[concatKey] || 0) + 1;
+                    }
+                }
+
+                let dianSet = new Set();
+                let cant_alertas_dian = 0;
+                if (arrDian.length > 0) {
+                    let headDian = arrDian[0] || [];
+                    let dNit = getColIdx(headDian, ["NITEMISOR", "NIT"]);
+                    let dFolio = getColIdx(headDian, ["FOLIO"]);
+                    for (let i = 1; i < arrDian.length; i++) {
+                        let nit = clean_key(arrDian[i][dNit]);
+                        let fol = clean_key(arrDian[i][dFolio]);
+                        if (nit && fol) dianSet.add(`${nit}-${fol}`);
+                    }
+                }
+
+                let filasCostosIntermedias = [];
+                let agrupado_status = {};
+
+                let cCc = getColIdx(cabecerasOriginalesCostos, ["CODIGOCENTRO", "CENTROCOSTOS", "CENTRODECOSTOS"]);
+                let cLin = getColIdx(cabecerasOriginalesCostos, ["NOMBRELINEA", "CODIGOLINEA", "LINEA"]);
+                let cNit = getColIdx(cabecerasOriginalesCostos, ["CODIGODELTERCERO", "TERCERO", "NIT"]);
+                let cFec = getColIdx(cabecerasOriginalesCostos, ["FECHA"]);
+                let cNum = getColIdx(cabecerasOriginalesCostos, ["NUMERODOCUEMNTO", "CAUSACION", "NUMERODOCUMENTO"]);
+                let cTip = getColIdx(cabecerasOriginalesCostos, ["TIPODEDOCUMENTO", "TIPODOCUMENTO"]);
+                let cSub = getColIdx(cabecerasOriginalesCostos, ["VENTA", "DESPACHO"]);
+                let cDeb = getColIdx(cabecerasOriginalesCostos, ["DEBITO", "DÉBITO"]);
+
+                for (let i = 1; i < arrCostos.length; i++) {
+                    let r = arrCostos[i];
+                    if (r.length === 0) continue;
+
+                    let cc = String(r[cCc] || "").split(".")[0].trim();
+                    let cc_num = parseInt(cc, 10);
+                    let linea = clean_key(r[cLin]);
+                    
+                    let validCC = [1987, 3597, 3661, 3662].includes(cc_num);
+                    let validLinea = ["MANTENIMI", "LIMPIEZA", "ESPECIALIZAD"].some(l => linea.toUpperCase().includes(l));
+
+                    if (validCC || validLinea) {
+                        let nit = clean_key(r[cNit]);
+                        let debito = parseCurrency(r[cDeb]);
+                        
+                        let datePart = normalizeDate(r[cFec]);
+                        let cleanDate = datePart.split(" ")[0]; 
+                        let cleanParts = cleanDate.split("-");
+                        let bridgeDate = cleanParts.length === 3 ? `${cleanParts[2]}/${cleanParts[1]}/${cleanParts[0]}` : cleanDate;
+
+                        let fpKeyCostos = createBridgeKey(nit, bridgeDate, r[cNum], r[cTip], r[cSub]);
+                        let FP = mapNova[fpKeyCostos] || ""; 
+                        
+                        let concatReq = FP ? `${nit}-${FP}` : null;
+                        let rqCruzado = mapCuadro[concatReq] || "0";
+                        
+                        let val_fac = 0;
+                        let fvCruzada = "";
+                        
+                        if (rqCruzado && rqCruzado !== "0" && mapRev[rqCruzado]) {
+                            val_fac = mapRev[rqCruzado].valorTotal;
+                            let fvArr = Array.from(mapRev[rqCruzado].fvSet);
+                            fvCruzada = fvArr.length > 0 ? fvArr.join(" / ") : "";
+                        }
+
+                        let rowObj = {
+                            _originalData: r,
+                            cc_raw: cc,
+                            linea_raw: linea,
+                            docCausacion: clean_key(r[cNum]),
+                            nit: nit,
+                            debito: debito,
+                            fpConcat: fpKeyCostos,
+                            FP: FP,
+                            FV: fvCruzada,
+                            concatReq: concatReq,
+                            rqCruzado: rqCruzado,
+                            val_fac: val_fac,
+                            cant_rq: conteoCuadro[concatReq] || 0
+                        };
+                        
+                        filasCostosIntermedias.push(rowObj);
+
+                        let groupKey = es_requerimiento_valido(rqCruzado) ? rqCruzado : "0";
+                        if (!agrupado_status[groupKey]) {
+                            agrupado_status[groupKey] = { debitos: 0, val_fac: 0, conteo: 0, fvRef: "0" };
+                        }
+                        agrupado_status[groupKey].debitos += debito;
+                        agrupado_status[groupKey].val_fac += val_fac;
+                        agrupado_status[groupKey].conteo += 1;
+                        
+                        if (fvCruzada && fvCruzada !== "0" && fvCruzada !== "0.0") {
+                            agrupado_status[groupKey].fvRef = fvCruzada;
+                        }
+                    }
+                }
+
+                let status_map = {};
+                for (let rq in agrupado_status) {
+                    let d = agrupado_status[rq];
+                    let divisor = d.conteo > 0 ? d.conteo : 1;
+                    let val_real = d.val_fac / divisor;
+                    let ut = val_real - d.debitos;
+
+                    if (rq === "0") {
+                        status_map[rq] = "SIN REQUERIMIENTO";
+                    } else if (d.fvRef === "0" || d.fvRef === "0.0" || d.fvRef === "") {
+                        status_map[rq] = "SIN FACTURAR AL CLIENTE";
+                    } else if (ut <= 0) {
+                        status_map[rq] = "A PERDIDA";
+                    } else {
+                        status_map[rq] = "SIN NOVEDAD";
+                    }
+                }
+
+                resultadosGlobales = [];
+                let stats = { montoTotal: 0, correcta: 0, sinCobro: 0, valSinCobro: 0, perdida: 0, sinReq: 0, valSinReq: 0 };
+                let rawPerdidaAcumulada = 0;
+
+                for (let rowObj of filasCostosIntermedias) {
+                    let rq_str = es_requerimiento_valido(rowObj.rqCruzado) ? rowObj.rqCruzado : "0";
+                    let obs = status_map[rq_str] || "SIN REQUERIMIENTO";
+                    let estado_original;
+
+                    // CANDADO 1: Cortocircuito y regla Valor Cliente
+                    if (!es_requerimiento_valido(rq_str)) {
+                        estado_original = "SIN REQUERIMIENTO";
+                    } else if (!rowObj.FV || rowObj.FV === "0" || rowObj.FV === "0.0") {
+                        estado_original = "SIN FACTURAR AL CLIENTE";
+                    } else {
+                        let val_concat_cliente = mapFacturaClienteVal[rowObj.concatReq] || 0;
+                        if (obs === "SIN FACTURAR AL CLIENTE" && val_concat_cliente > 0) {
+                            let util_concat = val_concat_cliente - rowObj.debito;
+                            estado_original = util_concat > 0 ? "SIN NOVEDAD" : "A PERDIDA";
+                        } else {
+                            estado_original = obs;
+                        }
+                    }
+
+                    let estado_final = "";
+                    if(estado_original === "SIN FACTURAR AL CLIENTE") estado_final = ESTADO_SIN_COBRO;
+                    else if(estado_original === "A PERDIDA") estado_final = ESTADO_PERDIDA;
+                    else if(estado_original === "SIN NOVEDAD") estado_final = ESTADO_CORRECTA;
+                    else estado_final = ESTADO_SIN_REQ;
+
+                    if (estado_final !== ESTADO_CORRECTA && f100RqSet.has(rowObj.rqCruzado)) {
+                        estado_final = ESTADO_F100;
+                    }
+
+                    // CANDADO 3: Alerta DIAN forzada si no hay FP
+                    let estadoDian = "N/A";
+                    if (arrDian.length > 0) {
+                        let concatReqDian = (rowObj.nit && rowObj.FP) ? `${rowObj.nit}-${rowObj.FP}` : null;
+                        if (concatReqDian && dianSet.has(concatReqDian)) {
+                            estadoDian = "Cruza";
+                        } else {
+                            estadoDian = "Alerta";
+                            cant_alertas_dian++;
+                        }
+                    }
+
+                    // CANDADO 4: El cero absoluto (Si no cruza, no infla la utilidad)
+                    let utFinal = 0;
+                    let rent = 0;
+                    if (rowObj.rqCruzado !== "0" && mapRev[rowObj.rqCruzado]) {
+                        utFinal = rowObj.val_fac - rowObj.debito;
+                        rent = rowObj.debito !== 0 ? (utFinal / rowObj.debito) : 0;
+                    } else {
+                        utFinal = 0; 
+                        rent = 0;
+                        rowObj.val_fac = 0;
+                        rowObj.FV = "0"; 
+                    }
+
+                    stats.montoTotal += rowObj.debito;
+                    
+                    if (estado_final === ESTADO_CORRECTA) stats.correcta++;
+                    else if (estado_final === ESTADO_SIN_COBRO) { stats.sinCobro++; stats.valSinCobro += rowObj.debito; }
+                    else if (estado_final === ESTADO_PERDIDA) { 
+                        stats.perdida++; 
+                        rawPerdidaAcumulada += utFinal; // Suma matemática lineal (Respeta negativos y positivos)
+                    }
+                    else if (estado_final === ESTADO_SIN_REQ) { stats.sinReq++; stats.valSinReq += rowObj.debito; }
+
+                    rowObj.estadoFinal = estado_final;
+                    rowObj.dian = estadoDian;
+                    rowObj.utilidad = utFinal;
+                    rowObj.rentabilidad = rent;
+                    resultadosGlobales.push(rowObj);
+                }
+
+                // Absoluto final para la tarjeta de A Pérdida
+                let valorPerdidaFinal = Math.abs(rawPerdidaAcumulada);
+                let valor_total_alertas = valorPerdidaFinal + stats.valSinCobro + stats.valSinReq;
+                let pct_alertas = stats.montoTotal > 0 ? (valor_total_alertas / stats.montoTotal) * 100 : 0;
+
+                document.getElementById('topMonto').innerText = `$ ${stats.montoTotal.toLocaleString('es-CO')} COP`;
+                document.getElementById('topAlertas').innerText = `$ ${valor_total_alertas.toLocaleString('es-CO')} COP`;
+                document.getElementById('topPct').innerText = `${pct_alertas.toFixed(2)}%`;
+                document.getElementById('topDian').innerText = cant_alertas_dian.toLocaleString('es-CO');
+
+                document.getElementById('kpiFilas').innerText = resultadosGlobales.length.toLocaleString('es-CO');
+                document.getElementById('kpiCorrecta').innerText = stats.correcta.toLocaleString('es-CO');
+                
+                document.getElementById('kpiSinCobro').innerText = stats.sinCobro.toLocaleString('es-CO');
+                document.getElementById('kpiValSinCobro').innerText = `$ ${stats.valSinCobro.toLocaleString('es-CO')} COP`;
+                
+                document.getElementById('kpiPerdida').innerText = stats.perdida.toLocaleString('es-CO');
+                document.getElementById('kpiValPerdida').innerText = `$ ${valorPerdidaFinal.toLocaleString('es-CO')} COP`;
+                
+                document.getElementById('kpiSinReq').innerText = stats.sinReq.toLocaleString('es-CO');
+                document.getElementById('kpiValSinReq').innerText = `$ ${stats.valSinReq.toLocaleString('es-CO')} COP`;
+
+                aplicarFiltros();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('resultadosWrapper').style.display = 'block';
+
+            } catch (error) {
+                console.error(error);
+                alert("Ocurrió un error. Verifique que los archivos sean correctos.");
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('btnProcesar').style.display = 'block';
+            }
+        }
+
+        function aplicarFiltros() {
+            let selectEstado = document.getElementById('estadoFilter').value;
+            let textBusqueda = document.getElementById('searchInput').value.toLowerCase();
+
+            let datosFiltrados = resultadosGlobales.filter(d => {
+                let matchEstado = (selectEstado === "Todos") || (d.estadoFinal === selectEstado);
+                let filaTexto = `${d.rqCruzado} ${d.nit} ${d.FP} ${d.estadoFinal} ${d.dian}`.toLowerCase();
+                let matchTexto = (textBusqueda === "") || filaTexto.includes(textBusqueda);
+                return matchEstado && matchTexto;
+            });
+
+            renderTabla(datosFiltrados);
+        }
+
+        function renderTabla(datos) {
+            let tbody = "";
+            datos.slice(0, 250).forEach(d => {
+                let badgeClass = "badge-novedad";
+                if(d.estadoFinal === ESTADO_SIN_COBRO) badgeClass = "badge-sincobro";
+                if(d.estadoFinal === ESTADO_PERDIDA) badgeClass = "badge-perdida";
+                if(d.estadoFinal === ESTADO_SIN_REQ) badgeClass = "badge-sinreq";
+                if(d.estadoFinal === ESTADO_F100) badgeClass = "badge-f100";
+                
+                let dianColor = d.dian === "Alerta" ? "color: #e11d48; font-weight: 800;" : "";
+                let utilidadColor = d.utilidad < 0 ? "color: #e11d48; font-weight: 800;" : "color: #4b6e19; font-weight: 800;";
+
+                tbody += `
+                    <tr>
+                        <td><strong>${d.cc_raw}</strong></td>
+                        <td>${d.linea_raw}</td>
+                        <td>${d.nit}</td>
+                        <td>${d.docCausacion}</td>
+                        <td><strong>${d.FP || "No encontrada"}</strong></td>
+                        <td>${d.rqCruzado === '0' ? 'Sin Asignar' : d.rqCruzado}</td>
+                        <td>${formatMoneda(d.debito)}</td>
+                        <td>${formatMoneda(d.val_fac)}</td>
+                        <td style="${utilidadColor}">${formatMoneda(d.utilidad)}</td>
+                        <td><span class="badge ${badgeClass}">${d.estadoFinal}</span></td>
+                        <td style="${dianColor}">${d.dian}</td>
+                    </tr>
+                `;
+            });
+            
+            if(datos.length === 0) {
+                tbody = `<tr><td colspan="11" style="text-align:center; padding: 20px; font-weight:600;">No se encontraron resultados con los filtros actuales.</td></tr>`;
+            }
+            document.getElementById('tbodyResultados').innerHTML = tbody;
+        }
+
+        function exportarExcelFinal() {
+            let selectEstado = document.getElementById('estadoFilter').value;
+            let textBusqueda = document.getElementById('searchInput').value.toLowerCase();
+
+            let datosParaExportar = resultadosGlobales.filter(d => {
+                let matchEstado = (selectEstado === "Todos") || (d.estadoFinal === selectEstado);
+                let filaTexto = `${d.rqCruzado} ${d.nit} ${d.FP} ${d.estadoFinal} ${d.dian}`.toLowerCase();
+                let matchTexto = (textBusqueda === "") || filaTexto.includes(textBusqueda);
+                return matchEstado && matchTexto;
+            });
+
+            if(datosParaExportar.length === 0) return;
+            
+            let exportData = datosParaExportar.map(d => {
+                let filaExcel = {};
+                cabecerasOriginalesCostos.forEach((head, index) => {
+                    filaExcel[head] = d._originalData[index];
+                });
+
+                filaExcel["Concatenado para FV"] = d.fpConcat;
+                filaExcel["FP"] = d.FP;
+                filaExcel["FV (Venta Cliente)"] = d.FV;
+                filaExcel["ConcatenadoRequerimiento"] = d.concatReq;
+                filaExcel["Requerimiento"] = d.rqCruzado;
+                filaExcel["FACTURA"] = d.FP || "0"; 
+                filaExcel["VALOR FACTURA"] = Number(d.val_fac);
+                filaExcel["UTILIDAD"] = Number(d.utilidad);
+                filaExcel["RENTABILIDAD"] = Number(d.rentabilidad);
+                filaExcel["Cant. RQ"] = Number(d.cant_rq);
+                filaExcel["Cruce con DIAN"] = d.dian;
+                filaExcel["OBS_2"] = d.estadoFinal;
+
+                return filaExcel;
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Depurado");
+            XLSX.writeFile(workbook, "Auditoria_TigoUNE_Depurado.xlsx");
+        }
+    </script>
+</body>
+</html>
