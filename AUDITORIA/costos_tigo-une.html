@@ -342,7 +342,7 @@
         }
 
         function formatMoneda(num) {
-            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
+            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.trunc(num));
         }
 
         function leerExcelArray(file) {
@@ -679,22 +679,22 @@
                 let valor_total_alertas = valorPerdidaFinal + stats.valSinCobro + stats.valSinReq;
                 let pct_alertas = stats.montoTotal > 0 ? (valor_total_alertas / stats.montoTotal) * 100 : 0;
 
-                document.getElementById('topMonto').innerText = `$ ${stats.montoTotal.toLocaleString('es-CO')} COP`;
-                document.getElementById('topAlertas').innerText = `$ ${valor_total_alertas.toLocaleString('es-CO')} COP`;
+                document.getElementById('topMonto').innerText = `$ ${Math.trunc(stats.montoTotal).toLocaleString('es-CO')} COP`;
+                document.getElementById('topAlertas').innerText = `$ ${Math.trunc(valor_total_alertas).toLocaleString('es-CO')} COP`;
                 document.getElementById('topPct').innerText = `${pct_alertas.toFixed(2)}%`;
-                document.getElementById('topDian').innerText = cant_alertas_dian.toLocaleString('es-CO');
+                document.getElementById('topDian').innerText = Math.trunc(cant_alertas_dian).toLocaleString('es-CO');
 
                 document.getElementById('kpiFilas').innerText = resultadosGlobales.length.toLocaleString('es-CO');
                 document.getElementById('kpiCorrecta').innerText = stats.correcta.toLocaleString('es-CO');
                 
                 document.getElementById('kpiSinCobro').innerText = stats.sinCobro.toLocaleString('es-CO');
-                document.getElementById('kpiValSinCobro').innerText = `$ ${stats.valSinCobro.toLocaleString('es-CO')} COP`;
+                document.getElementById('kpiValSinCobro').innerText = `$ ${Math.trunc(stats.valSinCobro).toLocaleString('es-CO')} COP`;
                 
                 document.getElementById('kpiPerdida').innerText = stats.perdida.toLocaleString('es-CO');
-                document.getElementById('kpiValPerdida').innerText = `$ ${valorPerdidaFinal.toLocaleString('es-CO')} COP`;
+                document.getElementById('kpiValPerdida').innerText = `$ ${Math.trunc(valorPerdidaFinal).toLocaleString('es-CO')} COP`;
                 
                 document.getElementById('kpiSinReq').innerText = stats.sinReq.toLocaleString('es-CO');
-                document.getElementById('kpiValSinReq').innerText = `$ ${stats.valSinReq.toLocaleString('es-CO')} COP`;
+                document.getElementById('kpiValSinReq').innerText = `$ ${Math.trunc(stats.valSinReq).toLocaleString('es-CO')} COP`;
 
                 aplicarFiltros();
 
@@ -742,6 +742,7 @@
                         <td>${d.nit}</td>
                         <td>${d.docCausacion}</td>
                         <td><strong>${d.FP || "No encontrada"}</strong></td>
+                        <td style="color:#0085CA; font-weight:bold;">${d.FV || "No facturado"}</td>
                         <td>${d.rqCruzado === '0' ? 'Sin Asignar' : d.rqCruzado}</td>
                         <td>${formatMoneda(d.debito)}</td>
                         <td>${formatMoneda(d.val_fac)}</td>
@@ -753,7 +754,7 @@
             });
             
             if(datos.length === 0) {
-                tbody = `<tr><td colspan="11" style="text-align:center; padding: 20px; font-weight:600;">No se encontraron resultados con los filtros actuales.</td></tr>`;
+                tbody = `<tr><td colspan="12" style="text-align:center; padding: 20px; font-weight:600;">No se encontraron resultados con los filtros actuales.</td></tr>`;
             }
             document.getElementById('tbodyResultados').innerHTML = tbody;
         }
