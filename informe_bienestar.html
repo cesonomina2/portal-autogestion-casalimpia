@@ -169,8 +169,9 @@
                     <option value="10_anios">Aniversario 10 Años</option>
                 </select>
             </div>
-            <div class="form-group"><label>Desde</label><input type="date" id="filtro-fecha-inicio" class="form-control" onchange="aplicarFiltros()"></div>
-            <div class="form-group"><label>Hasta</label><input type="date" id="filtro-fecha-fin" class="form-control" onchange="aplicarFiltros()"></div>
+            <!-- SE AÑADIÓ EL ATRIBUTO min="2026-05-13" A LOS INPUTS DE FECHA -->
+            <div class="form-group"><label>Desde</label><input type="date" id="filtro-fecha-inicio" class="form-control" min="2026-05-13" onchange="aplicarFiltros()"></div>
+            <div class="form-group"><label>Hasta</label><input type="date" id="filtro-fecha-fin" class="form-control" min="2026-05-13" onchange="aplicarFiltros()"></div>
         </div>
 
         <div class="kpis-grid">
@@ -225,17 +226,59 @@
         let datosFiltradosActuales = []; 
         let chartInstancia = null; 
 
+        // SE ACTUALIZÓ LA FUNCIÓN PARA RESPETAR EL 13 DE MAYO DE 2026
         async function inicializarDashboard() {
             const hoy = new Date();
-            document.getElementById('filtro-fecha-inicio').value = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString().split('T')[0];
-            document.getElementById('filtro-fecha-fin').value = hoy.toISOString().split('T')[0];
+            const fechaImplementacion = "2026-05-13";
+            
+            const inputInicio = document.getElementById('filtro-fecha-inicio');
+            const inputFin = document.getElementById('filtro-fecha-fin');
+
+            inputInicio.min = fechaImplementacion;
+            inputFin.min = fechaImplementacion;
+
+            let primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString().split('T')[0];
+            
+            inputInicio.value = (primerDiaMes < fechaImplementacion) ? fechaImplementacion : primerDiaMes;
+            inputFin.value = hoy.toISOString().split('T')[0];
+
             await cargarDatosBase();
             inicializarRealTime();
         }
 
+        // SE ACTUALIZÓ LA FUNCIÓN PARA USAR PAGINACIÓN POR LOTES (Sin límite de 1000)
         async function cargarDatosBase() {
-            const { data, error } = await supabaseClient.from('3-log_notificaciones').select('*').order('fecha_envio', { ascending: false }).limit(1000);
-            if (data) { datosGlobales = data; aplicarFiltros(); }
+            let allData = [];
+            let from = 0;
+            let step = 1000;
+            let keepFetching = true;
+
+            while (keepFetching) {
+                const { data, error } = await supabaseClient
+                    .from('3-log_notificaciones')
+                    .select('*')
+                    .order('fecha_envio', { ascending: false })
+                    .range(from, from + step - 1);
+
+                if (error) {
+                    console.error("Error cargando datos de Supabase:", error);
+                    break;
+                }
+
+                if (data && data.length > 0) {
+                    allData = allData.concat(data);
+                    from += step;
+                }
+
+                if (!data || data.length < step) {
+                    keepFetching = false;
+                }
+            }
+
+            if (allData.length > 0) {
+                datosGlobales = allData;
+                aplicarFiltros();
+            }
         }
 
         function inicializarRealTime() {
