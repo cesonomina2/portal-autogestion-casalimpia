@@ -190,7 +190,7 @@
         let datosParaExcel = [];
         let totalTurnosGlobal = 0; 
 
-        // Modificado para traer la data en formato matriz (Arreglo de Arreglos)
+        // Modificado para iterar y unir TODAS las pestañas del archivo
         async function leerExcel(file) {
             if (!file) return [];
             return new Promise((resolve, reject) => {
@@ -198,10 +198,16 @@
                 reader.onload = (e) => {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array', cellDates: false});
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    // header: 1 permite leer por columnas (índices) y blankrows: false elimina filas totalmente vacías
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1, blankrows: false, defval: ""});
-                    resolve(jsonData);
+                    
+                    let todaLaData = [];
+                    // Iteramos por todas las pestañas para unirlas en un solo gran arreglo
+                    workbook.SheetNames.forEach(nombrePestana => {
+                        const sheet = workbook.Sheets[nombrePestana];
+                        const jsonData = XLSX.utils.sheet_to_json(sheet, {header: 1, blankrows: false, defval: ""});
+                        todaLaData = todaLaData.concat(jsonData);
+                    });
+                    
+                    resolve(todaLaData);
                 };
                 reader.onerror = reject;
                 reader.readAsArrayBuffer(file);
@@ -253,7 +259,6 @@
             const ram = document.getElementById('fileRamonapp').files[0];
             const sic = document.getElementById('fileSic').files[0];
 
-            // Nuevas validaciones: Solo SIC es obligatorio, y debe haber al menos un reporte
             if (!sic) {
                 alert("El archivo de Novedades SIC es OBLIGATORIO para realizar el cruce.");
                 return;
@@ -292,13 +297,12 @@
                     let nombresExcel = {}; 
                     totalTurnosGlobal = 0; 
 
-                    // 1. PROCESAR DICCIONARIO SIC
+                    // 1. PROCESAR DICCIONARIO SIC (Toda la data extraída de todas las pestañas)
                     let diccionarioSIC = {};
                     if (dataSic.length > 0) {
                         let headerSicIndex = -1;
                         let mapSic = {};
                         
-                        // Buscamos dinámicamente dónde empiezan los títulos del SIC para más seguridad
                         for (let i = 0; i < dataSic.length; i++) {
                             let rowText = dataSic[i].join(" ").toLowerCase();
                             if (rowText.includes("cedula") || rowText.includes("cédula") || rowText.includes("identificador")) {
@@ -319,7 +323,7 @@
                                 };
                                 
                                 let cedula = limpiarCedula(getCol(["cedula", "cédula", "identificador"]));
-                                if (!cedula || !cedula.match(/^\d+$/)) continue; // Omite cualquier fila basurilla
+                                if (!cedula || !cedula.match(/^\d+$/)) continue; 
                                 
                                 let proceso = String(getCol(["proceso"]) || "").trim();
                                 let estado = String(getCol(["estado"]) || "").trim();
@@ -348,7 +352,6 @@
                         }
                     }
 
-                    // Función de prioridad
                     function obtenerAusentismo(cedula, fechaBusqueda) {
                         let registros = diccionarioSIC[cedula];
                         if (!registros) return null;
@@ -361,25 +364,22 @@
                         return valida ? valida : coincidencias[0];
                     }
 
-                    // 2. PROCESAR GEOVICTORIA POR ÍNDICES FIJOS (Matriz)
+                    // 2. PROCESAR GEOVICTORIA
                     if (dataGeo.length > 0) {
                         dataGeo.forEach(row => {
-                            let cedula = limpiarCedula(row[2]); // Columna C (Índice 2)
-                            // Si la cédula no es puramente números, es un encabezado o celda combinada y la ignoramos
+                            let cedula = limpiarCedula(row[2]); 
                             if (!cedula || !cedula.match(/^\d+$/)) return; 
 
-                            let fecha = normalizarFecha(row[4]); // Columna E (Índice 4)
-                            let permiso = String(row[5] || "").trim(); // Columna F (Índice 5)
+                            let fecha = normalizarFecha(row[4]); 
+                            let permiso = String(row[5] || "").trim(); 
                             
                             let apellidos = String(row[0] || "").trim();
                             let nombres = String(row[1] || "").trim();
                             let nombre = (nombres + " " + apellidos).trim();
                             
-                            // Busca la entrada principal (índice 7) o la alterna (índice 11)
                             let entradasArr = [String(row[7] || "").trim(), String(row[11] || "").trim()].filter(v => v && v !== "--" && v.toLowerCase() !== "sin registro");
                             let entrada = entradasArr.length > 0 ? entradasArr[0] : "";
                             
-                            // Busca la salida principal (índice 9) o la alterna (índice 13)
                             let salidasArr = [String(row[9] || "").trim(), String(row[13] || "").trim()].filter(v => v && v !== "--" && v.toLowerCase() !== "sin registro");
                             let salida = salidasArr.length > 0 ? salidasArr[salidasArr.length - 1] : "";
 
@@ -416,21 +416,20 @@
                         });
                     }
 
-                    // 3. PROCESAR RAMONAPP POR ÍNDICES FIJOS (Matriz)
+                    // 3. PROCESAR RAMONAPP
                     if (dataRamon.length > 0) {
                         dataRamon.forEach(row => {
-                            let cedula = limpiarCedula(row[3]); // Columna D (Índice 3)
-                            // Si la cédula no es puramente números, es un encabezado o celda combinada y la ignoramos
+                            let cedula = limpiarCedula(row[3]); 
                             if (!cedula || !cedula.match(/^\d+$/)) return;
 
-                            let nombre = String(row[4] || "").trim(); // Columna E (Índice 4)
-                            let fecha = normalizarFecha(row[7]); // Columna H (Índice 7)
-                            let novedad = String(row[9] || "").trim(); // Columna J (Índice 9)
+                            let nombre = String(row[4] || "").trim(); 
+                            let fecha = normalizarFecha(row[7]); 
+                            let novedad = String(row[9] || "").trim(); 
                             
-                            let entrada = String(row[10] || "").trim(); // Columna K (Índice 10)
+                            let entrada = String(row[10] || "").trim(); 
                             if (entrada === "--" || entrada.toLowerCase() === "sin registro") entrada = "";
                             
-                            let salida = String(row[11] || "").trim(); // Columna L (Índice 11)
+                            let salida = String(row[11] || "").trim(); 
                             if (salida === "--" || salida.toLowerCase() === "sin registro") salida = "";
                             
                             if (nombre) nombresExcel[cedula] = nombre;
@@ -466,7 +465,7 @@
                         });
                     }
 
-                    // 4. CONSULTAR N8N (Se mantiene igual)
+                    // 4. CONSULTAR N8N
                     let stringSQL = Array.from(cedulasUnicas).map(c => `'${c}'`).join(',');
                     if (!stringSQL) stringSQL = "''"; 
 
