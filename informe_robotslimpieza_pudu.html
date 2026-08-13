@@ -279,7 +279,9 @@
         // ---------------------------------------------------------
         const SUPABASE_URL = 'https://tyhdwpdefiatmxihycae.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_LH1iVez6V1qmj8Lk_YVZFA_Y2nYwdKw';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // CORRECCIÓN: Nombramos la variable clienteSupabase para evitar choques con el CDN
+        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         let datosGlobales = [];
         let datosFiltradosActuales = []; 
@@ -323,8 +325,8 @@
             inicializarChoicesJS();
             
             try {
-                // Ahora apuntamos a la Vista creada en Supabase
-                const { data, error } = await supabase
+                // CORRECCIÓN: Usamos clienteSupabase aquí también
+                const { data, error } = await clienteSupabase
                     .from('5-vista_dashboard_rendimiento')
                     .select('*')
                     .order('task_time', { ascending: true });
@@ -375,7 +377,6 @@
 
         function actualizarDropdownRobots() {
             const selectedTiendas = tiendaChoices.getValue(true); 
-            // Usamos apodo_robot en lugar de sn
             let robots = selectedTiendas.length === 0 ? 
                 [...new Set(datosGlobales.map(d => d.apodo_robot))].filter(Boolean).sort() :
                 [...new Set(datosGlobales.filter(d => selectedTiendas.includes(d.shop_name)).map(d => d.apodo_robot))].filter(Boolean).sort();
@@ -392,7 +393,6 @@
 
             datosFiltradosActuales = datosGlobales.filter(d => {
                 let matchTienda = selectedTiendas.length === 0 || selectedTiendas.includes(d.shop_name);
-                // Filtramos por apodo_robot
                 let matchRobot = selectedRobots.length === 0 || selectedRobots.includes(d.apodo_robot);
                 let matchFecha = true;
                 let fechaCorta = extraerFecha(d.task_time);
@@ -444,7 +444,6 @@
                 }, {});
             };
 
-            // Agrupamos usando apodo_robot
             const porRobot_Km = agruparPor(datos, 'apodo_robot', 'mileage');
             const porRobot_Duracion = agruparPor(datos, 'apodo_robot', 'duration');
             const porRobot_Tareas = agruparPor(datos, 'apodo_robot', 'task_count');
