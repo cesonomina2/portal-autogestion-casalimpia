@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Command Center Operativo | SaberBot Casalimpia</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
+        
+        :root {
+            --color-azul-logo: #0085CA; 
+            --color-verde-logo: #8DC63F; 
+            --color-robot-claro: #D4F1F9; 
+            --color-gris-texto: #334155;
+            --color-blanco: #ffffff; 
+            --sombra-suave: 0 4px 20px rgba(0, 133, 202, 0.1);
+            --bg-oscuro: #E2E8F0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', sans-serif; 
+            background-color: var(--bg-oscuro);
+            color: var(--color-gris-texto); 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column;
+            /* Aquí aplicamos el zoom al 80% */
+            zoom: 80%; 
+        }
+
+        /* En Firefox antiguo 'zoom' puede no estar soportado, este es un respaldo visual */
+        @-moz-document url-prefix() {
+            body {
+                transform: scale(0.8);
+                transform-origin: top center;
+                width: 125%; /* Compensa la reducción del scale */
+            }
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--color-blanco); 
+            padding: 1rem 5%; 
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-bottom: 4px solid var(--color-azul-logo); 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            flex-wrap: wrap; 
+            gap: 15px;
+        }
+
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .logo-img { height: 60px; width: auto; }
+        .logo-text { font-family: 'Outfit', sans-serif; font-weight: 700; display: flex; gap: 4px; align-items: center;}
+        .text-verde { color: var(--color-verde-logo); font-size: 1.6rem; }
+        .text-azul { color: var(--color-azul-logo); font-size: 1.6rem; margin-left: 6px; }
+
+        /* HERO SECTION */
+        .hero {
+            text-align: center; padding: 2rem 1.5rem; 
+            background: linear-gradient(180deg, var(--color-blanco) 0%, var(--bg-oscuro) 100%);
+        }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif; color: var(--color-azul-logo);
+            font-size: clamp(1.8rem, 5vw, 2.5rem); margin-bottom: 10px;
+        }
+        .hero p { color: #64748B; font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+        /* CONTENEDOR DE MÓDULOS (GRID) */
+        .modulos-container {
+            max-width: 1000px; margin: 0 auto; padding: 20px; width: 100%;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px;
+        }
+
+        .modulo-card {
+            background: var(--color-blanco); border-radius: 16px; padding: 30px 20px;
+            box-shadow: var(--sombra-suave); border: 1px solid rgba(0,0,0,0.03); 
+            text-align: center; transition: transform 0.2s, box-shadow 0.2s;
+            display: flex; flex-direction: column; align-items: center; height: 100%;
+        }
+        .modulo-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0, 133, 202, 0.15); }
+
+        .modulo-icon {
+            width: 70px; height: 70px; background-color: var(--color-robot-claro);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            margin: 0 auto 20px auto; font-size: 2.2rem;
+        }
+        
+        .modulo-card h3 { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); margin-bottom: 10px; font-size: 1.3rem; }
+        .modulo-card p { color: #64748B; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5; flex-grow: 1; }
+
+        .btn-modulo {
+            background-color: var(--color-azul-logo); color: white; border: none;
+            padding: 12px 20px; border-radius: 8px; font-family: 'Outfit', sans-serif;
+            font-weight: 600; font-size: 1rem; cursor: pointer; width: 100%; text-decoration: none;
+            display: inline-block; transition: background-color 0.2s;
+        }
+        .btn-modulo:hover { background-color: #006b9e; }
+
+        .btn-modulo-verde { background-color: var(--color-verde-logo); }
+        .btn-modulo-verde:hover { background-color: #7cb332; } 
+
+        @media (max-width: 600px) {
+            body { zoom: 100%; } /* En celulares es mejor quitar el zoom para que se lea bien */
+            header { padding: 10px; gap: 8px; }
+            .logo-container { justify-content: center; width: 100%; gap: 6px; }
+            .logo-img { height: 35px; } 
+            .text-verde, .text-azul { font-size: 1.25rem; margin-left: 2px; }
+            .hero { padding: 1.5rem 1rem 1rem 1rem; }
+            .hero h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body> 
+    
+    <header>
+        <div class="logo-container">
+            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
+            <div class="logo-text">
+                <span class="text-verde">SaberBot</span>
+                <span class="text-azul">Casalimpia</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>Command Center Operativo</h1>
+        <p>Selecciona el módulo de monitoreo y control al que deseas ingresar.</p>
+    </section>
+
+    <div class="modulos-container">
+        
+        <!-- MÓDULO 1: ROBOTS DE LIMPIEZA -->
+        <div class="modulo-card">
+            <div class="modulo-icon">🤖</div>
+            <h3>Robots de Limpieza</h3>
+            <p>Monitoreo del estado, gestión y visualización del desempeño de los robots Pudu.</p>
+            <a href="informe_robotslimpieza_pudu.html" class="btn-modulo btn-modulo-verde">Ver Informe de Robots</a>
+        </div>
+
+        <!-- MÓDULO 2: MARCACIONES BIOMÉTRICOS -->
+        <div class="modulo-card">
+            <div class="modulo-icon">👆</div>
+            <h3>Marcaciones Biométricos</h3>
+            <p>Control y visualización de los registros de ingreso y salida marcados por el personal en tiempo real.</p>
+            <a href="#" class="btn-modulo">Ingresar al Módulo</a>
+        </div>
+
+        <!-- MÓDULO 3: SEGUIMIENTO DE RUTINAS -->
+        <div class="modulo-card">
+            <div class="modulo-icon">📋</div>
+            <h3>Seguimiento de Rutinas</h3>
+            <p>Verificación del cumplimiento de las rutinas operativas asignadas en las diferentes instalaciones.</p>
+            <a href="#" class="btn-modulo">Ingresar al Módulo</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
