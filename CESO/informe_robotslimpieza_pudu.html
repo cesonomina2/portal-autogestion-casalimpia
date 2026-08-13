@@ -37,6 +37,23 @@
         .text-azul { color: var(--color-azul-logo); font-size: 1.6rem; margin-left: 2px; }
         .header-title { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 600; color: #64748B; background: #E2E8F0; padding: 5px 15px; border-radius: 50px; }
 
+        /* ESTILOS DEL BOTÓN VOLVER */
+        .btn-volver {
+            background-color: transparent; 
+            color: var(--color-azul-logo); 
+            border: 2px solid var(--color-azul-logo);
+            padding: 8px 20px; 
+            border-radius: 8px; 
+            font-family: 'Outfit', sans-serif; 
+            font-weight: 600;
+            text-decoration: none; 
+            transition: 0.2s;
+        }
+        .btn-volver:hover { 
+            background-color: var(--color-azul-logo); 
+            color: white; 
+        }
+
         /* TABS */
         .tabs-container { background: white; border-bottom: 1px solid #CBD5E1; display: flex; justify-content: center; gap: 15px; padding-top: 10px; flex-wrap: wrap;}
         .tab-btn { background: none; border: none; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 600; color: #64748B; padding: 10px 15px; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
@@ -134,7 +151,12 @@
             <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
             <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Casalimpia</span></div>
         </div>
-        <div class="header-title">Informe de Rendimiento (Supabase)</div>
+        
+        <!-- Agrupamos el título y el botón para que mantengan un buen diseño -->
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="header-title">Informe de Rendimiento (Supabase)</div>
+            <a href="comandcenter.html" class="btn-volver">← Volver al Menú</a>
+        </div>
     </header>
 
     <div class="tabs-container">
