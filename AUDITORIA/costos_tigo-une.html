@@ -37,7 +37,7 @@
 
         .container { max-width: 1550px; margin: 30px auto; padding: 0 15px; display: flex; flex-direction: column; gap: 15px; }
 
-        .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 15px; margin-bottom: 5px; }
+        .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; margin-bottom: 5px; }
         .upload-card { background: white; padding: 20px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); border-left: 4px solid var(--color-azul-logo); position: relative;}
         .upload-card h3 { font-size: 1rem; color: var(--color-azul-logo); margin-bottom: 10px; font-weight: 700;}
         .upload-card input[type="file"] { width: 100%; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 5px; cursor: pointer; background: #f8fafc; margin-bottom: 12px; font-family: 'Montserrat';}
@@ -47,7 +47,7 @@
         .btn-procesar { background-color: var(--color-verde-logo); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 1.1rem; font-family: 'Montserrat', sans-serif; font-weight: 700; cursor: pointer; width: 100%; transition: 0.3s; box-shadow: 0 4px 10px rgba(141, 198, 63, 0.3); margin-bottom: 15px;}
         .btn-procesar:hover { background-color: #76A633; transform: translateY(-2px); }
         
-        /* BARRA RESUMEN OSCURA IDÉNTICA A PYTHON */
+        /* BARRA RESUMEN OSCURA */
         .summary-bar { background-color: var(--color-dark); color: white; border-radius: 8px; padding: 25px; display: flex; justify-content: space-around; align-items: center; margin-bottom: 5px; box-shadow: var(--sombra); flex-wrap: wrap; gap: 15px;}
         .summary-item { text-align: center; flex: 1; border-right: 1px solid #334155;}
         .summary-item:last-child { border-right: none; }
@@ -162,10 +162,16 @@
                 <input type="file" id="fileDian" accept=".xlsx, .xls">
                 <small>💡 Si se adjunta, cruzará automáticamente NIT y Folio fiscal.</small>
             </div>
+            <div class="upload-card" style="border-left-color: #83b431;">
+                <span class="badge-opcional" style="background:#eaf5d8; color:#4b6e19;">V2.0</span>
+                <h3 style="color: #83b431;">7. Rindegastos</h3>
+                <input type="file" id="fileRindegastos" accept=".xlsx, .xls">
+                <small>💡 Si se adjunta, cruzará en 2do orden los RQs no identificados en Cuadro Control (Legalizaciones / Cajas menores).</small>
+            </div>
         </div>
 
         <button class="btn-procesar" id="btnProcesar" onclick="ejecutarCruce()">🚀 Procesar Cruce de Datos</button>
-        <div id="loading">⚡ Relizando cruces... Por favor espere.</div>
+        <div id="loading">⚡ Realizando cruces... Por favor espere.</div>
 
         <div id="resultadosWrapper">
             <h2 style="color: var(--color-verde-logo); font-weight: 800; font-size: 1.5rem; margin-top: 10px; margin-bottom: 10px;">2. 📊 Resultado</h2>
@@ -282,6 +288,13 @@
             return s;
         }
 
+        // LIMPIEZA RINDEGASTOS: Remueve cualquier texto/espacios dejando ÚNICAMENTE dígitos
+        function clean_only_numbers(val) {
+            if (val === null || val === undefined) return "";
+            let s = String(val).replace(/\D/g, "");
+            return s;
+        }
+
         function es_requerimiento_valido(val) {
             let s = clean_key(val);
             if (!s || s === "0") return false;
@@ -347,7 +360,7 @@
 
         function leerExcelArray(file) {
             return new Promise((resolve, reject) => {
-                if (!file) { resolve({ json: [], sheets: [] }); return; }
+                if (!file) { resolve({ workbook: null }); return; }
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const data = new Uint8Array(e.target.result);
@@ -366,7 +379,8 @@
                 f100: document.getElementById('fileF100').files[0],
                 cuadro: document.getElementById('fileCuadro').files[0],
                 fnova: document.getElementById('fileFNova').files[0],
-                dian: document.getElementById('fileDian').files[0]
+                dian: document.getElementById('fileDian').files[0],
+                rindegastos: document.getElementById('fileRindegastos').files[0]
             };
 
             if(!files.costos || !files.rev || !files.cuadro || !files.fnova || !files.f100) {
@@ -378,17 +392,18 @@
             document.getElementById('loading').style.display = 'block';
 
             try {
-                const [wbCostos, wbRev, wbF100, wbCuadro, wbNova, wbDian] = await Promise.all([
+                const [wbCostos, wbRev, wbF100, wbCuadro, wbNova, wbDian, wbRindegastos] = await Promise.all([
                     leerExcelArray(files.costos),
                     leerExcelArray(files.rev),
                     leerExcelArray(files.f100), 
                     leerExcelArray(files.cuadro),
                     leerExcelArray(files.fnova),
-                    leerExcelArray(files.dian)
+                    leerExcelArray(files.dian),
+                    leerExcelArray(files.rindegastos)
                 ]);
 
                 const getSheetData = (wbWrapper, sheetNameFunc) => {
-                    if(!wbWrapper.workbook) return [];
+                    if(!wbWrapper || !wbWrapper.workbook) return [];
                     let w = wbWrapper.workbook;
                     let targetSheet = sheetNameFunc(w.SheetNames);
                     return XLSX.utils.sheet_to_json(w.Sheets[targetSheet], { header: 1, defval: "" });
@@ -399,8 +414,8 @@
                 const arrCuadro = getSheetData(wbCuadro, names => names[0]);
                 const arrNova = getSheetData(wbNova, names => names[0]);
                 const arrDian = getSheetData(wbDian, names => names[0]);
+                const arrRindegastos = getSheetData(wbRindegastos, names => names[0]);
                 
-                // CANDADO 2: Buscador estricto del F-100 replicando Python
                 const arrF100 = getSheetData(wbF100, names => {
                     let found = names.find(n => n.includes("F-100 G. TIGO"));
                     return found ? found : names[0];
@@ -408,6 +423,7 @@
 
                 cabecerasOriginalesCostos = arrCostos[0] || [];
 
+                // 1. PROCESAR F-100
                 let f100RqSet = new Set();
                 let headF100 = arrF100[0] || [];
                 let obsF100Idx = headF100.findIndex(x => {
@@ -423,6 +439,7 @@
                     if(rqEncontrado) f100RqSet.add(clean_key(rqEncontrado));
                 }
 
+                // 2. PROCESAR REVERSIONES
                 let mapRev = {};
                 let headRev = arrRev[0] || [];
                 let rqRevIdx = getColIdx(headRev, ["RQ", "REQUERIMIENTO"]);
@@ -444,6 +461,7 @@
                     }
                 }
 
+                // 3. PROCESAR FACTURAS NOVA
                 let mapNova = {};
                 let headNova = arrNova[0] || [];
                 let nvNit = getColIdx(headNova, ["IDENTIFICACION", "PROVEEDOR"]);
@@ -465,6 +483,7 @@
                     if(fpKeyNova) mapNova[fpKeyNova] = numFactura;
                 }
 
+                // 4. PROCESAR CUADRO CONTROL (PRIMERA BÚSQUEDA)
                 let mapCuadro = {};
                 let mapFacturaClienteVal = {}; 
                 let conteoCuadro = {};
@@ -488,6 +507,27 @@
                     }
                 }
 
+                // 5. PROCESAR RINDEGASTOS (SEGUNDA BÚSQUEDA - FALLBACK)
+                let mapRindegastos = {};
+                if (arrRindegastos.length > 0) {
+                    let headRinde = arrRindegastos[0] || [];
+                    let rdNit = getColIdx(headRinde, ["NITPROVEEDOR", "NIT"]);
+                    let rdFac = getColIdx(headRinde, ["FACTURA"]);
+                    let rdRq = getColIdx(headRinde, ["RQ", "REQUERIMIENTO"]);
+
+                    for (let i = 1; i < arrRindegastos.length; i++) {
+                        let nitRinde = clean_key(arrRindegastos[i][rdNit]);
+                        let facRindeNum = clean_only_numbers(arrRindegastos[i][rdFac]); // Deja sólo dígitos
+                        let rqRinde = clean_key(arrRindegastos[i][rdRq]);
+
+                        if (nitRinde && facRindeNum && rqRinde) {
+                            let concatRindeKey = `${nitRinde}-${facRindeNum}`;
+                            mapRindegastos[concatRindeKey] = rqRinde;
+                        }
+                    }
+                }
+
+                // 6. PROCESAR DIAN
                 let dianSet = new Set();
                 let cant_alertas_dian = 0;
                 if (arrDian.length > 0) {
@@ -501,6 +541,7 @@
                     }
                 }
 
+                // 7. CRUCE PRINCIPAL DE COSTOS NOVASOFT
                 let filasCostosIntermedias = [];
                 let agrupado_status = {};
 
@@ -537,7 +578,16 @@
                         let FP = mapNova[fpKeyCostos] || ""; 
                         
                         let concatReq = FP ? `${nit}-${FP}` : null;
-                        let rqCruzado = mapCuadro[concatReq] || "0";
+
+                        // PASO CLAVE: BUSQUEDA EN 2 NIVELES (1° Cuadro Control, 2° Rindegastos)
+                        let rqCruzado = "0";
+                        if (concatReq) {
+                            if (mapCuadro[concatReq]) {
+                                rqCruzado = mapCuadro[concatReq];
+                            } else if (mapRindegastos[concatReq]) {
+                                rqCruzado = mapRindegastos[concatReq]; // Fallback a Rindegastos
+                            }
+                        }
                         
                         let val_fac = 0;
                         let fvCruzada = "";
@@ -607,7 +657,6 @@
                     let obs = status_map[rq_str] || "SIN REQUERIMIENTO";
                     let estado_original;
 
-                    // CANDADO 1: Cortocircuito y regla Valor Cliente
                     if (!es_requerimiento_valido(rq_str)) {
                         estado_original = "SIN REQUERIMIENTO";
                     } else if (!rowObj.FV || rowObj.FV === "0" || rowObj.FV === "0.0") {
@@ -632,7 +681,6 @@
                         estado_final = ESTADO_F100;
                     }
 
-                    // CANDADO 3: Alerta DIAN forzada si no hay FP
                     let estadoDian = "N/A";
                     if (arrDian.length > 0) {
                         let concatReqDian = (rowObj.nit && rowObj.FP) ? `${rowObj.nit}-${rowObj.FP}` : null;
@@ -644,7 +692,6 @@
                         }
                     }
 
-                    // CANDADO 4: El cero absoluto (Si no cruza, no infla la utilidad)
                     let utFinal = 0;
                     let rent = 0;
                     if (rowObj.rqCruzado !== "0" && mapRev[rowObj.rqCruzado]) {
@@ -663,7 +710,7 @@
                     else if (estado_final === ESTADO_SIN_COBRO) { stats.sinCobro++; stats.valSinCobro += rowObj.debito; }
                     else if (estado_final === ESTADO_PERDIDA) { 
                         stats.perdida++; 
-                        rawPerdidaAcumulada += utFinal; // Suma matemática lineal (Respeta negativos y positivos)
+                        rawPerdidaAcumulada += utFinal;
                     }
                     else if (estado_final === ESTADO_SIN_REQ) { stats.sinReq++; stats.valSinReq += rowObj.debito; }
 
@@ -674,7 +721,6 @@
                     resultadosGlobales.push(rowObj);
                 }
 
-                // Absoluto final para la tarjeta de A Pérdida
                 let valorPerdidaFinal = Math.abs(rawPerdidaAcumulada);
                 let valor_total_alertas = valorPerdidaFinal + stats.valSinCobro + stats.valSinReq;
                 let pct_alertas = stats.montoTotal > 0 ? (valor_total_alertas / stats.montoTotal) * 100 : 0;
@@ -703,7 +749,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert("Ocurrió un error. Verifique que los archivos sean correctos.");
+                alert("Ocurrió un error al procesar. Verifique los archivos cargados.");
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('btnProcesar').style.display = 'block';
             }
