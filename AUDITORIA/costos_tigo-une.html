@@ -288,11 +288,9 @@
             return s;
         }
 
-        // LIMPIEZA RINDEGASTOS: Remueve cualquier texto/espacios dejando ÚNICAMENTE dígitos
         function clean_only_numbers(val) {
             if (val === null || val === undefined) return "";
-            let s = String(val).replace(/\D/g, "");
-            return s;
+            return String(val).replace(/\D/g, "");
         }
 
         function es_requerimiento_valido(val) {
@@ -423,7 +421,7 @@
 
                 cabecerasOriginalesCostos = arrCostos[0] || [];
 
-                // 1. PROCESAR F-100
+                // 1. F-100
                 let f100RqSet = new Set();
                 let headF100 = arrF100[0] || [];
                 let obsF100Idx = headF100.findIndex(x => {
@@ -439,7 +437,7 @@
                     if(rqEncontrado) f100RqSet.add(clean_key(rqEncontrado));
                 }
 
-                // 2. PROCESAR REVERSIONES
+                // 2. REVERSIONES
                 let mapRev = {};
                 let headRev = arrRev[0] || [];
                 let rqRevIdx = getColIdx(headRev, ["RQ", "REQUERIMIENTO"]);
@@ -461,7 +459,7 @@
                     }
                 }
 
-                // 3. PROCESAR FACTURAS NOVA
+                // 3. FACTURAS NOVA
                 let mapNova = {};
                 let headNova = arrNova[0] || [];
                 let nvNit = getColIdx(headNova, ["IDENTIFICACION", "PROVEEDOR"]);
@@ -483,8 +481,8 @@
                     if(fpKeyNova) mapNova[fpKeyNova] = numFactura;
                 }
 
-                // 4. PROCESAR CUADRO CONTROL (PRIMERA BÚSQUEDA)
-                let mapCuadro = {};
+                // 4. CUADRO CONTROL (MULTI-RQ)
+                let mapCuadroMulti = {};
                 let mapFacturaClienteVal = {}; 
                 let conteoCuadro = {};
                 let headCuad = arrCuadro[0] || [];
@@ -501,14 +499,16 @@
                     
                     if (nit || facOriginal) {
                         let concatKey = `${nit}-${facOriginal}`;
-                        mapCuadro[concatKey] = rq;
+                        if(!mapCuadroMulti[concatKey]) mapCuadroMulti[concatKey] = [];
+                        if(rq && !mapCuadroMulti[concatKey].includes(rq)) mapCuadroMulti[concatKey].push(rq);
+                        
                         mapFacturaClienteVal[concatKey] = (mapFacturaClienteVal[concatKey] || 0) + valCli;
                         conteoCuadro[concatKey] = (conteoCuadro[concatKey] || 0) + 1;
                     }
                 }
 
-                // 5. PROCESAR RINDEGASTOS (SEGUNDA BÚSQUEDA - FALLBACK)
-                let mapRindegastos = {};
+                // 5. RINDEGASTOS (MULTI-RQ)
+                let mapRindegastosMulti = {};
                 if (arrRindegastos.length > 0) {
                     let headRinde = arrRindegastos[0] || [];
                     let rdNit = getColIdx(headRinde, ["NITPROVEEDOR", "NIT"]);
@@ -517,17 +517,18 @@
 
                     for (let i = 1; i < arrRindegastos.length; i++) {
                         let nitRinde = clean_key(arrRindegastos[i][rdNit]);
-                        let facRindeNum = clean_only_numbers(arrRindegastos[i][rdFac]); // Deja sólo dígitos
+                        let facRindeNum = clean_only_numbers(arrRindegastos[i][rdFac]);
                         let rqRinde = clean_key(arrRindegastos[i][rdRq]);
 
                         if (nitRinde && facRindeNum && rqRinde) {
                             let concatRindeKey = `${nitRinde}-${facRindeNum}`;
-                            mapRindegastos[concatRindeKey] = rqRinde;
+                            if(!mapRindegastosMulti[concatRindeKey]) mapRindegastosMulti[concatRindeKey] = [];
+                            if(!mapRindegastosMulti[concatRindeKey].includes(rqRinde)) mapRindegastosMulti[concatRindeKey].push(rqRinde);
                         }
                     }
                 }
 
-                // 6. PROCESAR DIAN
+                // 6. DIAN
                 let dianSet = new Set();
                 let cant_alertas_dian = 0;
                 if (arrDian.length > 0) {
@@ -541,9 +542,9 @@
                     }
                 }
 
-                // 7. CRUCE PRINCIPAL DE COSTOS NOVASOFT
+                // 7. EXPANSIÓN Y EVALUACIÓN CONSOLIDADA POR FACTURA PROVEEDOR
                 let filasCostosIntermedias = [];
-                let agrupado_status = {};
+                let agrupadoConcat = {};
 
                 let cCc = getColIdx(cabecerasOriginalesCostos, ["CODIGOCENTRO", "CENTROCOSTOS", "CENTRODECOSTOS"]);
                 let cLin = getColIdx(cabecerasOriginalesCostos, ["NOMBRELINEA", "CODIGOLINEA", "LINEA"]);
@@ -567,7 +568,7 @@
 
                     if (validCC || validLinea) {
                         let nit = clean_key(r[cNit]);
-                        let debito = parseCurrency(r[cDeb]);
+                        let debitoOriginal = parseCurrency(r[cDeb]);
                         
                         let datePart = normalizeDate(r[cFec]);
                         let cleanDate = datePart.split(" ")[0]; 
@@ -576,75 +577,74 @@
 
                         let fpKeyCostos = createBridgeKey(nit, bridgeDate, r[cNum], r[cTip], r[cSub]);
                         let FP = mapNova[fpKeyCostos] || ""; 
-                        
                         let concatReq = FP ? `${nit}-${FP}` : null;
 
-                        // PASO CLAVE: BUSQUEDA EN 2 NIVELES (1° Cuadro Control, 2° Rindegastos)
-                        let rqCruzado = "0";
+                        let listaRqs = [];
                         if (concatReq) {
-                            if (mapCuadro[concatReq]) {
-                                rqCruzado = mapCuadro[concatReq];
-                            } else if (mapRindegastos[concatReq]) {
-                                rqCruzado = mapRindegastos[concatReq]; // Fallback a Rindegastos
+                            if (mapCuadroMulti[concatReq] && mapCuadroMulti[concatReq].length > 0) {
+                                listaRqs = mapCuadroMulti[concatReq];
+                            } else if (mapRindegastosMulti[concatReq] && mapRindegastosMulti[concatReq].length > 0) {
+                                listaRqs = mapRindegastosMulti[concatReq];
                             }
                         }
-                        
-                        let val_fac = 0;
-                        let fvCruzada = "";
-                        
-                        if (rqCruzado && rqCruzado !== "0" && mapRev[rqCruzado]) {
-                            val_fac = mapRev[rqCruzado].valorTotal;
-                            let fvArr = Array.from(mapRev[rqCruzado].fvSet);
-                            fvCruzada = fvArr.length > 0 ? fvArr.join(" / ") : "";
-                        }
 
-                        let rowObj = {
-                            _originalData: r,
-                            cc_raw: cc,
-                            linea_raw: linea,
-                            docCausacion: clean_key(r[cNum]),
-                            nit: nit,
-                            debito: debito,
-                            fpConcat: fpKeyCostos,
-                            FP: FP,
-                            FV: fvCruzada,
-                            concatReq: concatReq,
-                            rqCruzado: rqCruzado,
-                            val_fac: val_fac,
-                            cant_rq: conteoCuadro[concatReq] || 0
-                        };
-                        
-                        filasCostosIntermedias.push(rowObj);
+                        if (listaRqs.length === 0) listaRqs = ["0"];
 
-                        let groupKey = es_requerimiento_valido(rqCruzado) ? rqCruzado : "0";
-                        if (!agrupado_status[groupKey]) {
-                            agrupado_status[groupKey] = { debitos: 0, val_fac: 0, conteo: 0, fvRef: "0" };
-                        }
-                        agrupado_status[groupKey].debitos += debito;
-                        agrupado_status[groupKey].val_fac += val_fac;
-                        agrupado_status[groupKey].conteo += 1;
-                        
-                        if (fvCruzada && fvCruzada !== "0" && fvCruzada !== "0.0") {
-                            agrupado_status[groupKey].fvRef = fvCruzada;
+                        for (let idx = 0; idx < listaRqs.length; idx++) {
+                            let rqCruzado = listaRqs[idx];
+                            let debitoFila = idx === 0 ? debitoOriginal : 0; // Débito $0 en duplicadas
+                            
+                            let val_fac = 0;
+                            let fvCruzada = "";
+                            
+                            // REGLA SOLICITADA: Si RQ no es válido (o "0"), NO trae datos de reversión
+                            if (es_requerimiento_valido(rqCruzado) && mapRev[rqCruzado]) {
+                                val_fac = mapRev[rqCruzado].valorTotal;
+                                let fvArr = Array.from(mapRev[rqCruzado].fvSet);
+                                fvCruzada = fvArr.length > 0 ? fvArr.join(" / ") : "";
+                            }
+
+                            let rowObj = {
+                                _originalData: r,
+                                cc_raw: cc,
+                                linea_raw: linea,
+                                docCausacion: clean_key(r[cNum]),
+                                nit: nit,
+                                debito: debitoFila,
+                                fpConcat: fpKeyCostos,
+                                FP: FP,
+                                FV: fvCruzada,
+                                concatReq: concatReq,
+                                rqCruzado: rqCruzado,
+                                val_fac: val_fac,
+                                cant_rq: conteoCuadro[concatReq] || listaRqs.length
+                            };
+
+                            filasCostosIntermedias.push(rowObj);
+
+                            let groupKey = concatReq || "SIN_KEY";
+                            if (!agrupadoConcat[groupKey]) {
+                                agrupadoConcat[groupKey] = { totalDebito: 0, totalValFac: 0 };
+                            }
+                            agrupadoConcat[groupKey].totalDebito += debitoFila;
+                            agrupadoConcat[groupKey].totalValFac += val_fac;
                         }
                     }
                 }
 
-                let status_map = {};
-                for (let rq in agrupado_status) {
-                    let d = agrupado_status[rq];
-                    let divisor = d.conteo > 0 ? d.conteo : 1;
-                    let val_real = d.val_fac / divisor;
-                    let ut = val_real - d.debitos;
+                let statusMapConcat = {};
+                for (let ckey in agrupadoConcat) {
+                    let d = agrupadoConcat[ckey];
+                    let util = d.totalValFac - d.totalDebito;
 
-                    if (rq === "0") {
-                        status_map[rq] = "SIN REQUERIMIENTO";
-                    } else if (d.fvRef === "0" || d.fvRef === "0.0" || d.fvRef === "") {
-                        status_map[rq] = "SIN FACTURAR AL CLIENTE";
-                    } else if (ut <= 0) {
-                        status_map[rq] = "A PERDIDA";
+                    if (ckey === "SIN_KEY") {
+                        statusMapConcat[ckey] = "SIN REQUERIMIENTO";
+                    } else if (d.totalValFac === 0) {
+                        statusMapConcat[ckey] = "SIN FACTURAR AL CLIENTE";
+                    } else if (util <= 0) {
+                        statusMapConcat[ckey] = "A PERDIDA";
                     } else {
-                        status_map[rq] = "SIN NOVEDAD";
+                        statusMapConcat[ckey] = "SIN NOVEDAD";
                     }
                 }
 
@@ -653,8 +653,9 @@
                 let rawPerdidaAcumulada = 0;
 
                 for (let rowObj of filasCostosIntermedias) {
+                    let ckey = rowObj.concatReq || "SIN_KEY";
                     let rq_str = es_requerimiento_valido(rowObj.rqCruzado) ? rowObj.rqCruzado : "0";
-                    let obs = status_map[rq_str] || "SIN REQUERIMIENTO";
+                    let obs = statusMapConcat[ckey] || "SIN REQUERIMIENTO";
                     let estado_original;
 
                     if (!es_requerimiento_valido(rq_str)) {
@@ -694,14 +695,12 @@
 
                     let utFinal = 0;
                     let rent = 0;
-                    if (rowObj.rqCruzado !== "0" && mapRev[rowObj.rqCruzado]) {
+                    if (es_requerimiento_valido(rowObj.rqCruzado) && mapRev[rowObj.rqCruzado]) {
                         utFinal = rowObj.val_fac - rowObj.debito;
                         rent = rowObj.debito !== 0 ? (utFinal / rowObj.debito) : 0;
                     } else {
-                        utFinal = 0; 
+                        utFinal = -rowObj.debito;
                         rent = 0;
-                        rowObj.val_fac = 0;
-                        rowObj.FV = "0"; 
                     }
 
                     stats.montoTotal += rowObj.debito;
