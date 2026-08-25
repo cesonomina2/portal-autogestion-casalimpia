@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Visión General | Command Center Casalimpia</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
+        
+        :root {
+            --color-azul-logo: #0085CA; --color-verde-logo: #8DC63F; 
+            --color-blanco: #ffffff; --bg-oscuro: #E2E8F0;
+            --color-texto: #334155; --borde: #CBD5E1;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background-color: var(--bg-oscuro); 
+            color: var(--color-texto); 
+            height: 100vh; /* Obliga al body a medir exacto el 100% de la pantalla */
+            width: 100vw;
+            overflow: hidden; /* CORTA EL SCROLL */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header { 
+            background-color: var(--color-blanco); padding: 5px 2%; display: flex; 
+            justify-content: space-between; align-items: center; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08); 
+            border-bottom: 3px solid var(--color-azul-logo); 
+            height: 60px; flex-shrink: 0; /* Evita que el header se encoja */
+        }
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .logo-img { height: 35px; width: auto; }
+        .logo-text { font-family: 'Outfit', sans-serif; font-weight: 700; display: flex; align-items: center; font-size: 1.2rem;}
+        .text-verde { color: var(--color-verde-logo); }
+        .text-azul { color: var(--color-azul-logo); margin-left: 2px; }
+        
+        .header-title { 
+            font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; 
+            color: var(--color-azul-logo); background: #E0F2FE; padding: 4px 15px; border-radius: 50px; 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .btn-volver {
+            background-color: transparent; color: var(--color-azul-logo); border: 2px solid var(--color-azul-logo);
+            padding: 4px 12px; border-radius: 6px; font-family: 'Outfit', sans-serif; font-weight: 700;
+            text-decoration: none; transition: 0.2s; font-size: 0.85rem;
+        }
+        .btn-volver:hover { background-color: var(--color-azul-logo); color: white; }
+
+        /* CONTENEDOR DE GRID */
+        .dashboard-container {
+            flex: 1; /* Toma todo el espacio sobrante debajo del header */
+            min-height: 0; /* Fundamental para que no se desborde */
+            padding: 10px;
+            display: grid; 
+            grid-template-columns: repeat(4, minmax(0, 1fr)); /* minmax(0,1fr) evita que columnas colapsen */
+            gap: 10px;
+        }
+
+        /* ESTRUCTURA DEL PILAR */
+        .pilar {
+            display: flex; flex-direction: column; gap: 8px; 
+            height: 100%; min-height: 0; min-width: 0;
+        }
+        
+        .pilar-header {
+            background: var(--color-blanco); padding: 8px; border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center;
+            flex-shrink: 0;
+        }
+        .pilar-header h2 { font-family: 'Outfit', sans-serif; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px;}
+        .pilar-header.robot h2 { color: #475569; }
+        .pilar-header.biometria h2 { color: #0085CA; }
+        .pilar-header.rutinas h2 { color: #059669; }
+        .pilar-header.vacantes h2 { color: #D97706; }
+
+        /* FILTROS */
+        .filtros-box {
+            background: var(--color-blanco); padding: 6px 8px; border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; gap: 4px;
+            flex-shrink: 0;
+        }
+        .filtro-select {
+            width: 100%; padding: 3px 4px; border-radius: 4px; border: 1px solid var(--borde);
+            font-family: 'Roboto', sans-serif; font-size: 0.75rem; color: var(--color-texto); 
+            background-color: #F8FAFC; cursor: pointer; font-weight: 500;
+        }
+
+        /* TARJETAS ELÁSTICAS */
+        .dash-card {
+            background: var(--color-blanco); padding: 10px; border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;
+            display: flex; flex-direction: column; position: relative; 
+            flex: 1 1 0; /* CRECEN Y SE ENCOGEN PARA LLENAR EL HUECO EXACTO */
+            min-height: 0; /* EVITA EL DESBORDAMIENTO */
+            justify-content: space-between; transition: 0.3s;
+        }
+        .dash-card.updating { opacity: 0.5; transform: scale(0.98); }
+        .dash-card::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            border-top-left-radius: 8px; border-top-right-radius: 8px;
+        }
+        .dash-card.border-robot::before { background-color: #64748B; }
+        .dash-card.border-biometria::before { background-color: #0085CA; }
+        .dash-card.border-rutinas::before { background-color: #059669; }
+        .dash-card.border-vacantes::before { background-color: #D97706; }
+
+        .dash-card-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 5px;
+            flex-shrink: 0;
+        }
+
+        .badge { padding: 2px 6px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; gap: 3px;}
+        .badge::before { content: "●"; font-size: 0.5rem; }
+        .badge.en-meta { background: #D1FAE5; color: #065F46; }
+        .badge.atencion { background: #FEF3C7; color: #92400E; }
+        .badge.critico { background: #FEE2E2; color: #991B1B; }
+
+        /* NÚMEROS Y VALORES DINÁMICOS (Se ajustan al espacio) */
+        .value-container { text-align: center; flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;}
+        
+        /* Uso clamp() para que la fuente tenga un mínimo y un máximo dependiendo de la pantalla */
+        .dash-value { font-size: clamp(2rem, 3vw, 4rem); font-weight: 800; font-family: 'Outfit', sans-serif; color: #0F172A; line-height: 1; }
+        .dash-value span { font-size: clamp(0.9rem, 1vw, 1.2rem); font-weight: 500; color: #64748B; font-family: 'Roboto', sans-serif; }
+        .dash-value.red { color: #DC2626; }
+        .dash-value.green { color: #059669; }
+        
+        .dash-subtext { font-size: 0.75rem; color: #64748B; margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--borde); display: flex; justify-content: space-between; flex-shrink: 0;}
+        
+        /* GRÁFICOS FLEXIBLES */
+        .chart-container { flex: 1 1 0; min-height: 0; width: 100%; position: relative; display: flex; justify-content: center; align-items: center;}
+        .chart-inner-text { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); font-family: 'Outfit'; font-size: clamp(1.5rem, 2vw, 2.2rem); font-weight: 800; color: #0F172A; }
+        
+        /* RANKING ELÁSTICO */
+        .ranking-list { display: flex; flex-direction: column; gap: 4px; flex: 1 1 0; min-height: 0; justify-content: space-evenly;}
+        .ranking-item { display: flex; flex-direction: column; gap: 2px; }
+        .ranking-header { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #334155;}
+        .bar-bg { width: 100%; height: 5px; background: #E2E8F0; border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 10px; transition: 0.5s width; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
+            <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Casalimpia</span></div>
+        </div>
+        <div class="header-title">Command Center Operativo</div>
+        <a href="comandcenter.html" class="btn-volver">← Volver al Menú</a>
+    </header>
+
+    <div class="dashboard-container">
+        
+        <!-- ================= PILAR 1: ROBOTS ================= -->
+        <div class="pilar" id="pilar-robots">
+            <div class="pilar-header robot"><h2>🤖 Operación Robótica</h2></div>
+            
+            <div class="filtros-box">
+                <select class="filtro-select" id="filtro-robot-cliente" onchange="simularDatosPilar('robots')">
+                    <option value="all">🏢 Todos los Clientes (Global)</option>
+                    <option value="vanti">VANTI S.A. ESP</option>
+                    <option value="marval">CONSTRUCCIONES MARVAL</option>
+                </select>
+                <div style="display: flex; gap: 5px;">
+                    <select class="filtro-select" onchange="simularDatosPilar('robots')"><option>📍 Todas las Sedes</option><option>Sede Principal</option></select>
+                    <select class="filtro-select" onchange="simularDatosPilar('robots')"><option>🤖 Todos los Robots</option><option>Pudu-01</option></select>
+                </div>
+            </div>
+
+            <div class="dash-card border-robot">
+                <div class="dash-card-header">Robots Activos <span id="r-badge-1" class="badge en-meta">En meta</span></div>
+                <div class="value-container">
+                    <div class="dash-value" id="r-val-activos">18 <span>/ 20</span></div>
+                </div>
+                <div class="dash-subtext"><span id="r-txt-prog">Robots programados hoy</span></div>
+            </div>
+
+            <div class="dash-card border-robot">
+                <div class="dash-card-header">Kilometraje Hoy <span class="badge en-meta">Óptimo</span></div>
+                <div class="value-container" style="flex-direction: row; align-items: baseline; gap: 5px;">
+                    <div class="dash-value" id="r-val-km">64.5</div><span style="font-size: 1.2rem; font-weight: 500; color: #64748B;">km</span>
+                </div>
+                <div class="chart-container"><canvas id="chartKm"></canvas></div>
+            </div>
+
+            <div class="dash-card border-robot">
+                <div class="dash-card-header">Alertas Hardware <span id="r-badge-alerta" class="badge critico">Crítico</span></div>
+                <div class="value-container">
+                    <div class="dash-value red" id="r-val-alertas">2</div>
+                </div>
+                <div class="dash-subtext" id="r-txt-alerta1"><span>• Robot-Beta (Batería 5%)</span></div>
+            </div>
+        </div>
+
+        <!-- ================= PILAR 2: BIOMETRÍA ================= -->
+        <div class="pilar" id="pilar-biometria">
+            <div class="pilar-header biometria"><h2>👆 Biometría y Asistencia</h2></div>
+            
+            <div class="filtros-box">
+                <select class="filtro-select ceco-dropdown" id="filtro-bio" onchange="simularDatosPilar('biometria')">
+                    <option value="all">🏢 Consolidado Nacional</option>
+                </select>
+            </div>
+
+            <div class="dash-card border-biometria">
+                <div class="dash-card-header">Cobertura Turnos <span id="b-badge-1" class="badge en-meta">En meta</span></div>
+                <div class="chart-container">
+                    <canvas id="chartBiometria"></canvas>
+                    <div class="chart-inner-text" id="b-val-porcentaje">92%</div>
+                </div>
+                <div class="dash-subtext"><span>Meta ≥ 90.0%</span></div>
+            </div>
+
+            <div class="dash-card border-biometria">
+                <div class="dash-card-header">Personal Real <span id="b-badge-2" class="badge atencion">Atención</span></div>
+                <div class="value-container">
+                    <div class="dash-value" id="b-val-personal">628</div>
+                </div>
+                <div class="dash-subtext"><span id="b-txt-personal">De 640 programados</span></div>
+            </div>
+
+            <div class="dash-card border-biometria">
+                <div class="dash-card-header">Novedades <span id="b-badge-3" class="badge critico">Crítico</span></div>
+                <div class="value-container" style="flex-direction: row; justify-content: space-evenly; width: 100%;">
+                    <div><div class="dash-value" id="b-val-tarde">12</div><div style="font-size: 0.7rem; font-weight: bold; color:#64748B;">Llegadas Tarde</div></div>
+                    <div><div class="dash-value red" id="b-val-ausencia">3</div><div style="font-size: 0.7rem; font-weight: bold; color:#64748B;">Ausencias</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PILAR 3: RUTINAS ================= -->
+        <div class="pilar" id="pilar-rutinas">
+            <div class="pilar-header rutinas"><h2>📋 Cumplimiento Rutinas</h2></div>
+            
+            <div class="filtros-box">
+                <select class="filtro-select ceco-dropdown" id="filtro-rutinas" onchange="simularDatosPilar('rutinas')">
+                    <option value="all">🏢 Consolidado Nacional</option>
+                </select>
+            </div>
+
+            <div class="dash-card border-rutinas">
+                <div class="dash-card-header">Adherencia <span id="ru-badge-1" class="badge atencion">Atención</span></div>
+                <div class="chart-container">
+                    <canvas id="chartRutinas"></canvas>
+                    <div class="chart-inner-text" id="ru-val-porcentaje">85%</div>
+                </div>
+                <div class="dash-subtext"><span>Meta ≥ 95.0%</span></div>
+            </div>
+
+            <div class="dash-card border-rutinas">
+                <div class="dash-card-header">Estado Listas <span class="badge en-meta">Óptimo</span></div>
+                <div class="value-container">
+                    <div class="dash-value green" id="ru-val-listas">256</div>
+                </div>
+                <div class="dash-subtext"><span id="ru-txt-listas">Listas completadas hoy</span></div>
+            </div>
+
+            <div class="dash-card border-rutinas">
+                <div class="dash-card-header">Tiempos Críticos <span id="ru-badge-2" class="badge critico">Alerta</span></div>
+                <div class="ranking-list" id="ru-lista-zonas">
+                    <div class="ranking-item"><div class="ranking-header"><span>Baños Sede Norte</span><span style="color:#DC2626">55 min</span></div><div class="bar-bg"><div class="bar-fill" style="width: 100%; background: #DC2626;"></div></div></div>
+                    <div class="ranking-item"><div class="ranking-header"><span>Recepción A</span><span style="color:#D97706">48 min</span></div><div class="bar-bg"><div class="bar-fill" style="width: 80%; background: #D97706;"></div></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PILAR 4: VACANTES ================= -->
+        <div class="pilar" id="pilar-vacantes">
+            <div class="pilar-header vacantes"><h2>👥 Vacantes</h2></div>
+            
+            <div class="filtros-box">
+                <select class="filtro-select ceco-dropdown" id="filtro-vacantes" onchange="simularDatosPilar('vacantes')">
+                    <option value="all">🏢 Consolidado Nacional</option>
+                </select>
+            </div>
+
+            <div class="dash-card border-vacantes">
+                <div class="dash-card-header">Plazas por Cubrir <span id="v-badge-1" class="badge critico">Crítico</span></div>
+                <div class="value-container">
+                    <div class="dash-value red" id="v-val-vacantes">15</div>
+                </div>
+                <div class="dash-subtext"><span>Objetivo: 0 vacantes activas</span></div>
+            </div>
+
+            <div class="dash-card border-vacantes" style="flex: 2;"> <!-- Le damos más espacio al ranking -->
+                <div class="dash-card-header">Top CECOs Críticos <span class="badge atencion">Atención</span></div>
+                <div class="ranking-list" id="v-ranking">
+                    <div class="ranking-item"><div class="ranking-header"><span>VANTI S.A. ESP</span><span>5</span></div><div class="bar-bg"><div class="bar-fill" style="width: 100%; background: #DC2626;"></div></div></div>
+                    <div class="ranking-item"><div class="ranking-header"><span>SALUD TOTAL EPS</span><span>4</span></div><div class="bar-bg"><div class="bar-fill" style="width: 80%; background: #D97706;"></div></div></div>
+                    <div class="ranking-item"><div class="ranking-header"><span>MARVAL S.A.S</span><span>2</span></div><div class="bar-bg"><div class="bar-fill" style="width: 40%; background: #F59E0B;"></div></div></div>
+                    <div class="ranking-item"><div class="ranking-header"><span>FUNDACIÓN HOSPITAL</span><span>1</span></div><div class="bar-bg"><div class="bar-fill" style="width: 20%; background: #F59E0B;"></div></div></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. CARGA DE CECOS
+        const listaCecos = [
+            "01342 FUNDACION UNIVERSITARIA DEL AREA ANDINA", "01344 GAS NATURAL CUNDIBOYACENSE S.A.", 
+            "01345 VANTI S.A. ESP", "01348 GREEN OFFICE CORPORATIVO", "01362 FUNDACION HOSPITAL DE LA MISERICORDIA",
+            "01366 IMOCOM S.A.S.", "01396 CLINICOS PROGRAMAS DE ATENCION", "01398 CONSTRUCCIONES MARVAL S.A.S",
+            "01466 SALUD TOTAL EPS-S S.A", "01481 SIEMENS ENERGY", "01496 PRIMAX COLOMBIA S A"
+        ];
+
+        document.querySelectorAll('.ceco-dropdown').forEach(select => {
+            listaCecos.forEach(ceco => {
+                let opt = document.createElement('option');
+                opt.value = ceco; opt.textContent = ceco;
+                select.appendChild(opt);
+            });
+        });
+
+        // 2. INICIALIZACIÓN DE GRÁFICOS
+        let chartInstKm, chartInstBio, chartInstRut;
+        
+        function initCharts() {
+            chartInstKm = new Chart(document.getElementById('chartKm').getContext('2d'), {
+                type: 'line',
+                data: { labels: ['6am','8am','10am','12pm','2pm'], datasets: [{ data: [10, 20, 40, 55, 64.5], borderColor: '#0085CA', backgroundColor: 'rgba(0, 133, 202, 0.1)', fill: true, tension: 0.4, pointRadius: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false, min: 0 } }, layout: { padding: 0 } }
+            });
+
+            const dOpt = { responsive: true, maintainAspectRatio: false, circumference: 180, rotation: -90, cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, layout: { padding: 0 } };
+
+            chartInstBio = new Chart(document.getElementById('chartBiometria').getContext('2d'), {
+                type: 'doughnut', data: { datasets: [{ data: [92, 8], backgroundColor: ['#0085CA', '#E2E8F0'], borderWidth: 0, borderRadius: [10, 0] }] }, options: dOpt
+            });
+
+            chartInstRut = new Chart(document.getElementById('chartRutinas').getContext('2d'), {
+                type: 'doughnut', data: { datasets: [{ data: [85, 15], backgroundColor: ['#059669', '#E2E8F0'], borderWidth: 0, borderRadius: [10, 0] }] }, options: dOpt
+            });
+        }
+        initCharts();
+
+        // 3. DATOS DINÁMICOS
+        function simularDatosPilar(pilar) {
+            const container = document.getElementById(`pilar-${pilar}`);
+            container.querySelectorAll('.dash-card').forEach(card => card.classList.add('updating'));
+            
+            setTimeout(() => {
+                const esGlobal = container.querySelector('.filtros-box select').value === 'all';
+                
+                if(pilar === 'robots') {
+                    let maxR = esGlobal ? 20 : Math.floor(Math.random() * 3) + 2;
+                    let actR = esGlobal ? 18 : maxR - Math.floor(Math.random() * 2);
+                    let km = esGlobal ? 64.5 : (Math.random() * 15 + 5).toFixed(1);
+                    
+                    document.getElementById('r-val-activos').innerHTML = `${actR} <span>/ ${maxR}</span>`;
+                    document.getElementById('r-val-km').innerHTML = `${km}`;
+                    document.getElementById('r-val-alertas').innerText = esGlobal ? 2 : (actR === maxR ? 0 : 1);
+                    document.getElementById('r-txt-alerta1').innerHTML = esGlobal ? "<span>• Robot-Beta (Batería 5%)</span>" : (actR === maxR ? "<span>Sin alertas</span>" : "<span>• Atasco en pasillo</span>");
+                    
+                    chartInstKm.data.datasets[0].data = [km*0.2, km*0.5, km*0.8, km*0.9, km];
+                    chartInstKm.update();
+                }
+
+                if(pilar === 'biometria') {
+                    let pct = esGlobal ? 92 : Math.floor(Math.random() * 15) + 85;
+                    let total = esGlobal ? 640 : Math.floor(Math.random() * 40) + 10;
+                    let asist = Math.floor(total * (pct/100));
+                    
+                    document.getElementById('b-val-porcentaje').innerText = pct + '%';
+                    document.getElementById('b-val-personal').innerText = asist;
+                    document.getElementById('b-txt-personal').innerText = `De ${total} programados`;
+                    document.getElementById('b-val-tarde').innerText = esGlobal ? 12 : Math.floor(Math.random() * 3);
+                    document.getElementById('b-val-ausencia').innerText = total - asist;
+
+                    chartInstBio.data.datasets[0].data = [pct, 100 - pct];
+                    chartInstBio.data.datasets[0].backgroundColor[0] = pct >= 90 ? '#0085CA' : (pct >= 80 ? '#D97706' : '#DC2626');
+                    chartInstBio.update();
+                }
+
+                if(pilar === 'rutinas') {
+                    let pct = esGlobal ? 85 : Math.floor(Math.random() * 20) + 80;
+                    let listas = esGlobal ? 256 : Math.floor(Math.random() * 30) + 5;
+                    
+                    document.getElementById('ru-val-porcentaje').innerText = pct + '%';
+                    document.getElementById('ru-val-listas').innerText = listas;
+                    
+                    if(!esGlobal) {
+                        document.getElementById('ru-lista-zonas').innerHTML = `
+                            <div class="ranking-item"><div class="ranking-header"><span>Área Seleccionada</span><span style="color:#DC2626">52 min</span></div><div class="bar-bg"><div class="bar-fill" style="width: 90%; background: #DC2626;"></div></div></div>
+                        `;
+                    }
+
+                    chartInstRut.data.datasets[0].data = [pct, 100 - pct];
+                    chartInstRut.data.datasets[0].backgroundColor[0] = pct >= 95 ? '#059669' : (pct >= 85 ? '#D97706' : '#DC2626');
+                    chartInstRut.update();
+                }
+
+                if(pilar === 'vacantes') {
+                    let vac = esGlobal ? 15 : Math.floor(Math.random() * 4);
+                    let cecoName = container.querySelector('.filtros-box select').value;
+                    
+                    document.getElementById('v-val-vacantes').innerText = vac;
+                    
+                    if(!esGlobal) {
+                        document.getElementById('v-ranking').innerHTML = vac > 0 ? `
+                            <div class="ranking-item"><div class="ranking-header"><span>${cecoName.substring(6,25)}...</span><span>${vac}</span></div><div class="bar-bg"><div class="bar-fill" style="width: 100%; background: #DC2626;"></div></div></div>
+                        ` : '<div style="text-align:center; color:#059669; font-weight:bold; margin-top:20px;">✓ Sin vacantes críticas</div>';
+                    }
+                }
+
+                container.querySelectorAll('.dash-card').forEach(card => card.classList.remove('updating'));
+            }, 400); 
+        }
+    </script>
+</body>
+</html>

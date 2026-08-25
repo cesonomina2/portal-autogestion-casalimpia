@@ -27,34 +27,43 @@
             min-height: 100vh; 
             display: flex; 
             flex-direction: column;
-            /* Aquí aplicamos el zoom al 80% */
             zoom: 80%; 
         }
 
-        /* En Firefox antiguo 'zoom' puede no estar soportado, este es un respaldo visual */
         @-moz-document url-prefix() {
             body {
                 transform: scale(0.8);
                 transform-origin: top center;
-                width: 125%; /* Compensa la reducción del scale */
+                width: 125%;
             }
         }
 
-        /* HEADER */
+        /* HEADER OPTIMIZADO */
         header {
             background-color: var(--color-blanco); 
             padding: 1rem 5%; 
             display: flex;
-            justify-content: center; 
+            justify-content: space-between; /* Distribuye los 3 bloques */
             align-items: center; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             border-bottom: 4px solid var(--color-azul-logo); 
             position: sticky; 
             top: 0; 
             z-index: 100; 
-            flex-wrap: wrap; 
-            gap: 15px;
         }
+
+        /* TÉCNICA DE 3 COLUMNAS PARA CENTRAR EL TÍTULO Y ALINEAR EL LOGO */
+        .header-left { flex: 1; display: flex; justify-content: flex-start; }
+        
+        .header-center { flex: 1; display: flex; justify-content: center; text-align: center; white-space: nowrap;}
+        .header-center h1 {
+            font-family: 'Outfit', sans-serif; 
+            color: var(--color-azul-logo);
+            font-size: clamp(1.4rem, 4vw, 2rem); /* Tamaño dinámico */
+            margin: 0;
+        }
+
+        .header-right { flex: 1; } /* Espacio vacío para balancear el centro */
 
         .logo-container { display: flex; align-items: center; gap: 10px; }
         .logo-img { height: 60px; width: auto; }
@@ -62,20 +71,9 @@
         .text-verde { color: var(--color-verde-logo); font-size: 1.6rem; }
         .text-azul { color: var(--color-azul-logo); font-size: 1.6rem; margin-left: 6px; }
 
-        /* HERO SECTION */
-        .hero {
-            text-align: center; padding: 2rem 1.5rem; 
-            background: linear-gradient(180deg, var(--color-blanco) 0%, var(--bg-oscuro) 100%);
-        }
-        .hero h1 {
-            font-family: 'Outfit', sans-serif; color: var(--color-azul-logo);
-            font-size: clamp(1.8rem, 5vw, 2.5rem); margin-bottom: 10px;
-        }
-        .hero p { color: #64748B; font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
-
         /* CONTENEDOR DE MÓDULOS (GRID) */
         .modulos-container {
-            max-width: 1000px; margin: 0 auto; padding: 20px; width: 100%;
+            max-width: 1000px; margin: 40px auto 20px auto; padding: 0 20px; width: 100%;
             display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px;
         }
 
@@ -107,33 +105,92 @@
         .btn-modulo-verde { background-color: var(--color-verde-logo); }
         .btn-modulo-verde:hover { background-color: #7cb332; } 
 
+        /* BOTÓN PANTALLA CENTRAL */
+        .contenedor-monitoreo {
+            max-width: 1000px; margin: 0 auto 40px auto; padding: 0 20px; width: 100%;
+        }
+        
+        .btn-monitoreo-central {
+            background: linear-gradient(135deg, var(--color-azul-logo) 0%, #005f9e 100%);
+            color: white;
+            text-decoration: none;
+            padding: 25px 30px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            box-shadow: 0 8px 25px rgba(0, 133, 202, 0.25);
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        
+        .btn-monitoreo-central:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 133, 202, 0.4);
+        }
+        
+        .btn-monitoreo-central .icono { font-size: 3.5rem; }
+        
+        .btn-monitoreo-central .texto { text-align: left; }
+        
+        .btn-monitoreo-central .texto h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        .btn-monitoreo-central .texto p {
+            font-size: 1rem;
+            opacity: 0.9;
+            color: #E0F2FE;
+        }
+
+        @media (max-width: 900px) {
+            header { flex-direction: column; gap: 15px; padding: 15px 5%; }
+            .header-left, .header-center, .header-right { display: flex; justify-content: center; flex: none; width: 100%; }
+            .header-right { display: none; } /* Ocultamos el bloque vacío en móviles */
+        }
+
         @media (max-width: 600px) {
-            body { zoom: 100%; } /* En celulares es mejor quitar el zoom para que se lea bien */
-            header { padding: 10px; gap: 8px; }
-            .logo-container { justify-content: center; width: 100%; gap: 6px; }
+            body { zoom: 100%; } 
             .logo-img { height: 35px; } 
             .text-verde, .text-azul { font-size: 1.25rem; margin-left: 2px; }
-            .hero { padding: 1.5rem 1rem 1rem 1rem; }
-            .hero h1 { font-size: 1.6rem; }
+            .header-center h1 { font-size: 1.4rem; white-space: normal;}
+            
+            .btn-monitoreo-central {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px 15px;
+                gap: 15px;
+            }
+            .btn-monitoreo-central .texto { text-align: center; }
         }
     </style>
 </head>
 <body> 
     
     <header>
-        <div class="logo-container">
-            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
-            <div class="logo-text">
-                <span class="text-verde">SaberBot</span>
-                <span class="text-azul">Casalimpia</span>
+        <!-- BLOQUE IZQUIERDO: LOGO -->
+        <div class="header-left">
+            <div class="logo-container">
+                <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
+                <div class="logo-text">
+                    <span class="text-verde">SaberBot</span>
+                    <span class="text-azul">Casalimpia</span>
+                </div>
             </div>
         </div>
-    </header>
 
-    <section class="hero">
-        <h1>Command Center Operativo</h1>
-        <p>Selecciona el módulo de monitoreo y control al que deseas ingresar.</p>
-    </section>
+        <!-- BLOQUE CENTRAL: TÍTULO -->
+        <div class="header-center">
+            <h1>Command Center Operativo</h1>
+        </div>
+
+        <!-- BLOQUE DERECHO: VACÍO (Mantiene el equilibrio) -->
+        <div class="header-right"></div>
+    </header>
 
     <div class="modulos-container">
         
@@ -161,6 +218,17 @@
             <a href="rutinas.html" class="btn-modulo">Ingresar al Módulo</a>
         </div>
 
+    </div>
+
+    <!-- NUEVO MÓDULO 4: PANTALLA CENTRAL (TIPO BANNER ANCHO) -->
+    <div class="contenedor-monitoreo">
+        <a href="dashboard_general.html" class="btn-monitoreo-central">
+            <span class="icono">🖥️</span>
+            <div class="texto">
+                <h3>Pantalla de Monitoreo Central</h3>
+                <p>Visualizar el panel general unificado de todos los pilares operativos en tiempo real.</p>
+            </div>
+        </a>
     </div>
 
 </body>
