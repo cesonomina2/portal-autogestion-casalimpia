@@ -120,6 +120,13 @@
 
         .chart-container { position: relative; height: 320px; width: 100%; }
 
+        /* NUEVO: Contenedor para que el gráfico ocupe el 35% y la tabla el 65% */
+        .grid-productividad { display: grid; grid-template-columns: 35% 1fr; gap: 20px; }
+
+        @media (max-width: 992px) {
+            .grid-productividad { grid-template-columns: 1fr; }
+        }
+
         @media (max-width: 768px) {
             .filtros-banner { flex-direction: column; align-items: stretch; }
             .btn-limpiar { align-self: stretch; }
@@ -231,8 +238,8 @@
                 <h2 class="seccion-titulo" style="margin: 0; border: none;">Ranking de Volumen y Productividad Extra</h2>
             </div>
 
-            <!-- Nueva Sección de Productividad Extra -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px;">
+            <!-- Nueva Sección de Productividad Extra (Distribución 35/65) -->
+            <div class="grid-productividad">
                 <div class="panel">
                     <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Top Productividad Extra (%)</h3>
                     <div class="chart-container">
@@ -248,7 +255,6 @@
                                     <th>Mes</th>
                                     <th>Responsable</th>
                                     <th>Total Facturas</th>
-                                    <th>Línea Base</th>
                                     <th>Adicionales</th>
                                     <th>% Rendimiento Extra</th>
                                 </tr>
@@ -493,7 +499,7 @@
             actualizarDashboard();
             generarTablaCruzada();
             generarTablaResumen(); 
-            generarProductividadExtra(); // NUEVA FUNCIÓN AÑADIDA
+            generarProductividadExtra(); 
             generarTablaDetalle();
 
             actualizarDashboardErrores();
@@ -520,11 +526,13 @@
                 let tipologia = d['TIPOLOGIA'] || '';
                 
                 totalErrores += cant;
+                
                 if(tipologia === 'NO SUBSANABLE') {
                     totalNoSub += cant;
                 } else {
                     totalSub += cant;
                 }
+
                 motivosCount[motivo] = (motivosCount[motivo] || 0) + cant;
             });
 
@@ -657,11 +665,10 @@
             document.getElementById('baterias-container').innerHTML = htmlBaterias;
         }
 
-        // --- NUEVA LÓGICA DE PRODUCTIVIDAD EXTRA ---
+        // --- LÓGICA DE PRODUCTIVIDAD EXTRA ---
         function generarProductividadExtra() {
             let facturasPorMesYPersona = {};
             
-            // Agrupar cantidad total de facturas por mes y responsable
             datosFiltradosActuales.forEach(d => {
                 let mes = d['MES'] || 'N/A';
                 let resp = d['RESPONSABLE CAUSACION'] || 'N/A';
@@ -675,18 +682,15 @@
 
             let arrayProductividad = [];
 
-            // Encontrar la línea base (el mínimo) de cada mes y calcular excedentes
             for(let mes in facturasPorMesYPersona) {
                 let personas = facturasPorMesYPersona[mes];
                 let values = Object.values(personas);
-                let minBase = Math.min(...values); // El piso del mes
+                let minBase = Math.min(...values); 
 
                 for(let resp in personas) {
                     let totalFacturas = personas[resp];
                     let extras = totalFacturas - minBase;
                     
-                    // Cálculo % rendimiento extra. Si el mínimo es 0, usamos 1 para evitar infinito,
-                    // o ponemos 0% si el extra también es 0.
                     let pct = 0;
                     if(minBase > 0) {
                         pct = (extras / minBase) * 100;
@@ -705,10 +709,8 @@
                 }
             }
 
-            // Ordenar de mayor a menor productividad
             arrayProductividad.sort((a,b) => b.pct - a.pct);
 
-            // Generar Tabla HTML
             let tbodyProd = "";
             arrayProductividad.forEach(d => {
                 let badgePct = d.pct > 0 
@@ -719,14 +721,12 @@
                     <td>${d.mes}</td>
                     <td><strong>${d.resp}</strong></td>
                     <td>${d.total}</td>
-                    <td style="color:#64748B;">${d.base}</td>
                     <td><strong>+${d.extras}</strong></td>
                     <td>${badgePct}</td>
                 </tr>`;
             });
-            document.getElementById('tbody-productividad').innerHTML = tbodyProd || "<tr><td colspan='6'>No hay datos.</td></tr>";
+            document.getElementById('tbody-productividad').innerHTML = tbodyProd || "<tr><td colspan='5'>No hay datos.</td></tr>";
 
-            // Renderizar Gráfica (Top 10 para no saturar visualmente)
             const ctxProd = document.getElementById('chartProductividad').getContext('2d');
             if(chartProductividadInstancia) chartProductividadInstancia.destroy();
             
