@@ -7,6 +7,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
@@ -72,7 +73,7 @@
         .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         .kpi-card { padding: 25px 20px; border-radius: 8px; box-shadow: var(--sombra); text-align: center; border: none; }
         
-        .kpi-card.total { background-color: var(--color-azul-logo); }      
+        .kpi-card.total { background-color: #0085CA; }      
         .kpi-card.cumple { background-color: var(--color-verde-logo); }     
         .kpi-card.nocumple { background-color: var(--color-rojo-alerta); }  
         .kpi-card.porcentaje { background-color: #F59E0B; } 
@@ -115,6 +116,9 @@
 
         .badge-error { background-color: #FEE2E2; color: #991B1B; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
         .badge-subsanable { color: #166534; background-color: #DCFCE7; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; border: 1px solid #86EFAC;}
+        .badge-verde { color: #166534; background-color: #DCFCE7; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; }
+
+        .chart-container { position: relative; height: 320px; width: 100%; }
 
         @media (max-width: 768px) {
             .filtros-banner { flex-direction: column; align-items: stretch; }
@@ -182,6 +186,7 @@
                 <h2 class="seccion-titulo" style="margin: 0; border: none;">Cumplimiento Operativo</h2>
             </div>
 
+            <!-- Tablas de Cumplimiento -->
             <div>
                 <div class="panel" style="margin-bottom: 20px;">
                     <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Resumen Consolidado de Cumplimiento (Cortes 1, 2 y 3)</h3>
@@ -221,6 +226,39 @@
                     </div>
                 </div>
             </div>
+
+            <div class="herramientas-tabla" style="margin-top: 20px;">
+                <h2 class="seccion-titulo" style="margin: 0; border: none;">Ranking de Volumen y Productividad Extra</h2>
+            </div>
+
+            <!-- Nueva Sección de Productividad Extra -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px;">
+                <div class="panel">
+                    <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Top Productividad Extra (%)</h3>
+                    <div class="chart-container">
+                        <canvas id="chartProductividad"></canvas>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Detalle de Rendimiento sobre Línea Base</h3>
+                    <div class="table-responsive" style="max-height: 320px;">
+                        <table id="tabla-productividad" class="tabla-corta">
+                            <thead>
+                                <tr>
+                                    <th>Mes</th>
+                                    <th>Responsable</th>
+                                    <th>Total Facturas</th>
+                                    <th>Línea Base</th>
+                                    <th>Adicionales</th>
+                                    <th>% Rendimiento Extra</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-productividad"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- TAB 2: DATA DETALLADA -->
@@ -262,7 +300,6 @@
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
                 
-                <!-- Errores por Responsable (con Calidad) -->
                 <div class="panel">
                     <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Errores por Responsable y Calidad del Mes</h3>
                     <div class="table-responsive">
@@ -281,7 +318,6 @@
                     </div>
                 </div>
 
-                <!-- Errores por Motivo -->
                 <div class="panel">
                     <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Consolidado por Motivo</h3>
                     <div class="table-responsive">
@@ -298,7 +334,6 @@
                 </div>
             </div>
 
-            <!-- Tabla Maestra de Errores -->
             <div class="panel">
                 <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Registro Detallado de Errores</h3>
                 <div class="table-responsive">
@@ -322,19 +357,17 @@
     </div>
 
     <script>
-        // ENLACE 1: DATOS PRINCIPALES DE CAUSACIÓN
+        // ENLACES CSV
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1759455245&single=true&output=csv"; 
+        const GOOGLE_SHEET_ERRORES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=297495094&single=true&output=csv"; 
         
-        // ENLACE 2: DATOS DE ERRORES Y AJUSTES
-        const GOOGLE_SHEET_ERRORES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1512340927&single=true&output=csv"; 
-        
-        // Variables Base Datos
         let datosGlobales = [];
         let datosFiltradosActuales = []; 
         let datosErroresGlobales = [];
         let datosErroresFiltrados = [];
 
         let mesChoices, corteChoices, respChoices;
+        let chartProductividadInstancia = null;
 
         function cambiarPestana(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -346,9 +379,7 @@
         function parseCustomDate(dateStr) {
             if (!dateStr) return null;
             let parts = String(dateStr).split('/');
-            if (parts.length === 3) {
-                return new Date(parts[2], parts[1] - 1, parts[0]);
-            }
+            if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
             return new Date(dateStr);
         }
 
@@ -363,7 +394,6 @@
         function inicializarDashboard() {
             inicializarChoicesJS();
             
-            // Cargar Pestaña 1 (Causación)
             Papa.parse(GOOGLE_SHEET_CSV_URL, {
                 download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
@@ -371,7 +401,6 @@
                 }
             });
 
-            // Cargar Pestaña 2 (Errores)
             if(GOOGLE_SHEET_ERRORES_CSV_URL && GOOGLE_SHEET_ERRORES_CSV_URL.startsWith("http")) {
                 Papa.parse(GOOGLE_SHEET_ERRORES_CSV_URL, {
                     download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
@@ -414,7 +443,6 @@
                 for (let key in row) objLimpiado[key.trim()] = row[key];
                 
                 objLimpiado['CANTIDAD ERROR'] = parseInt(objLimpiado['CANTIDAD ERROR']) || 0;
-                // Extraer tipología
                 objLimpiado['TIPOLOGIA'] = (objLimpiado['TIPOLOGIA'] || '').toUpperCase().trim();
                 return objLimpiado;
             }).filter(d => d['RESPONSABLE CAUSACION']);
@@ -447,7 +475,6 @@
             const selResp = respChoices.getValue(true);
             const txt = document.getElementById('filtro-texto').value.toLowerCase();
 
-            // Filtrar Base Principal
             datosFiltradosActuales = datosGlobales.filter(d => {
                 let mMes = selMes.length === 0 || selMes.includes(String(d['MES']));
                 let mCorte = selCorte.length === 0 || selCorte.includes(String(d['CORTE']));
@@ -456,7 +483,6 @@
                 return mMes && mCorte && mResp && mTexto;
             });
             
-            // Filtrar Base Errores
             datosErroresFiltrados = datosErroresGlobales.filter(d => {
                 let mMes = selMes.length === 0 || selMes.includes(String(d['MES']));
                 let mResp = selResp.length === 0 || selResp.includes(String(d['RESPONSABLE CAUSACION']));
@@ -467,6 +493,7 @@
             actualizarDashboard();
             generarTablaCruzada();
             generarTablaResumen(); 
+            generarProductividadExtra(); // NUEVA FUNCIÓN AÑADIDA
             generarTablaDetalle();
 
             actualizarDashboardErrores();
@@ -493,17 +520,14 @@
                 let tipologia = d['TIPOLOGIA'] || '';
                 
                 totalErrores += cant;
-                
                 if(tipologia === 'NO SUBSANABLE') {
                     totalNoSub += cant;
                 } else {
                     totalSub += cant;
                 }
-
                 motivosCount[motivo] = (motivosCount[motivo] || 0) + cant;
             });
 
-            // KPIs
             document.getElementById('kpi-err-total').innerText = totalErrores;
             document.getElementById('kpi-err-sub').innerText = totalSub;
             document.getElementById('kpi-err-nosub').innerText = totalNoSub;
@@ -512,7 +536,6 @@
             let topMotivo = Object.keys(motivosCount).sort((a,b) => motivosCount[b] - motivosCount[a])[0] || '-';
             document.getElementById('kpi-err-motivo').innerText = topMotivo;
 
-            // Tabla 1: Errores por Responsable y Calidad
             let sumRespMes = {};
             datosErroresFiltrados.forEach(d => {
                 let key = `${d['RESPONSABLE CAUSACION'] || 'N/A'}|${d['MES'] || 'N/A'}`;
@@ -526,23 +549,16 @@
                 }
             });
 
-            // Ordenamiento por persona y mes
             let arrRespMes = Object.keys(sumRespMes).map(k => {
                 let parts = k.split('|');
                 let sub = sumRespMes[k].sub;
                 let noSub = sumRespMes[k].noSub;
                 let pct = 0;
                 
-                // Lógica de cumplimiento
-                if (noSub > 0) {
-                    pct = 0;
-                } else if (sub <= 15) {
-                    pct = 100;
-                } else if (sub >= 16 && sub <= 20) {
-                    pct = 50;
-                } else {
-                    pct = 0; // Más de 20
-                }
+                if (noSub > 0) pct = 0;
+                else if (sub <= 15) pct = 100;
+                else if (sub >= 16 && sub <= 20) pct = 50;
+                else pct = 0; 
 
                 return { resp: parts[0], mes: parts[1], sub, noSub, pct };
             }).sort((a,b) => a.resp.localeCompare(b.resp) || a.mes.localeCompare(b.mes));
@@ -560,7 +576,6 @@
             });
             document.getElementById('tbody-err-resp').innerHTML = tbodyResp || "<tr><td colspan='5'>No hay registros.</td></tr>";
 
-            // Tabla 2: Errores por Motivo
             let arrMotivos = Object.keys(motivosCount).map(k => ({ motivo: k, cant: motivosCount[k] })).sort((a,b) => b.cant - a.cant);
             let tbodyMotivo = "";
             arrMotivos.forEach(m => {
@@ -568,9 +583,7 @@
             });
             document.getElementById('tbody-err-motivo').innerHTML = tbodyMotivo || "<tr><td colspan='2'>No hay registros.</td></tr>";
 
-            // Tabla 3: Detalle Maestra (Ordenada Alfabéticamente)
             let tbodyMaestraErr = "";
-            
             let erroresOrdenados = [...datosErroresFiltrados].sort((a,b) => {
                 let rA = a['RESPONSABLE CAUSACION'] || '';
                 let rB = b['RESPONSABLE CAUSACION'] || '';
@@ -642,6 +655,101 @@
                 </div>`;
             });
             document.getElementById('baterias-container').innerHTML = htmlBaterias;
+        }
+
+        // --- NUEVA LÓGICA DE PRODUCTIVIDAD EXTRA ---
+        function generarProductividadExtra() {
+            let facturasPorMesYPersona = {};
+            
+            // Agrupar cantidad total de facturas por mes y responsable
+            datosFiltradosActuales.forEach(d => {
+                let mes = d['MES'] || 'N/A';
+                let resp = d['RESPONSABLE CAUSACION'] || 'N/A';
+                let facturas = d['CANTIDAD FACTURAS'] || 0;
+                
+                if(!facturasPorMesYPersona[mes]) facturasPorMesYPersona[mes] = {};
+                if(!facturasPorMesYPersona[mes][resp]) facturasPorMesYPersona[mes][resp] = 0;
+                
+                facturasPorMesYPersona[mes][resp] += facturas;
+            });
+
+            let arrayProductividad = [];
+
+            // Encontrar la línea base (el mínimo) de cada mes y calcular excedentes
+            for(let mes in facturasPorMesYPersona) {
+                let personas = facturasPorMesYPersona[mes];
+                let values = Object.values(personas);
+                let minBase = Math.min(...values); // El piso del mes
+
+                for(let resp in personas) {
+                    let totalFacturas = personas[resp];
+                    let extras = totalFacturas - minBase;
+                    
+                    // Cálculo % rendimiento extra. Si el mínimo es 0, usamos 1 para evitar infinito,
+                    // o ponemos 0% si el extra también es 0.
+                    let pct = 0;
+                    if(minBase > 0) {
+                        pct = (extras / minBase) * 100;
+                    } else if (extras > 0) {
+                        pct = 100; 
+                    }
+                    
+                    arrayProductividad.push({
+                        mes: mes,
+                        resp: resp,
+                        total: totalFacturas,
+                        base: minBase,
+                        extras: extras,
+                        pct: pct
+                    });
+                }
+            }
+
+            // Ordenar de mayor a menor productividad
+            arrayProductividad.sort((a,b) => b.pct - a.pct);
+
+            // Generar Tabla HTML
+            let tbodyProd = "";
+            arrayProductividad.forEach(d => {
+                let badgePct = d.pct > 0 
+                    ? `<span class="badge-verde">+${d.pct.toFixed(1)}%</span>` 
+                    : `<span style="color:#64748B; font-size:0.85rem;">Línea Base</span>`;
+
+                tbodyProd += `<tr>
+                    <td>${d.mes}</td>
+                    <td><strong>${d.resp}</strong></td>
+                    <td>${d.total}</td>
+                    <td style="color:#64748B;">${d.base}</td>
+                    <td><strong>+${d.extras}</strong></td>
+                    <td>${badgePct}</td>
+                </tr>`;
+            });
+            document.getElementById('tbody-productividad').innerHTML = tbodyProd || "<tr><td colspan='6'>No hay datos.</td></tr>";
+
+            // Renderizar Gráfica (Top 10 para no saturar visualmente)
+            const ctxProd = document.getElementById('chartProductividad').getContext('2d');
+            if(chartProductividadInstancia) chartProductividadInstancia.destroy();
+            
+            let chartData = arrayProductividad.slice(0, 10);
+            
+            chartProductividadInstancia = new Chart(ctxProd, {
+                type: 'bar',
+                data: {
+                    labels: chartData.map(d => d.resp + ' (' + d.mes + ')'),
+                    datasets: [{
+                        label: '% Productividad Extra',
+                        data: chartData.map(d => d.pct.toFixed(1)),
+                        backgroundColor: '#8DC63F',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
         }
 
         function generarTablaCruzada() {
