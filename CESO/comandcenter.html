@@ -43,7 +43,7 @@
             background-color: var(--color-blanco); 
             padding: 1rem 5%; 
             display: flex;
-            justify-content: space-between; /* Distribuye los 3 bloques */
+            justify-content: space-between;
             align-items: center; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             border-bottom: 4px solid var(--color-azul-logo); 
@@ -52,18 +52,17 @@
             z-index: 100; 
         }
 
-        /* TÉCNICA DE 3 COLUMNAS PARA CENTRAR EL TÍTULO Y ALINEAR EL LOGO */
         .header-left { flex: 1; display: flex; justify-content: flex-start; }
         
         .header-center { flex: 1; display: flex; justify-content: center; text-align: center; white-space: nowrap;}
         .header-center h1 {
             font-family: 'Outfit', sans-serif; 
             color: var(--color-azul-logo);
-            font-size: clamp(1.4rem, 4vw, 2rem); /* Tamaño dinámico */
+            font-size: clamp(1.4rem, 4vw, 2rem);
             margin: 0;
         }
 
-        .header-right { flex: 1; } /* Espacio vacío para balancear el centro */
+        .header-right { flex: 1; }
 
         .logo-container { display: flex; align-items: center; gap: 10px; }
         .logo-img { height: 60px; width: auto; }
@@ -150,7 +149,7 @@
         @media (max-width: 900px) {
             header { flex-direction: column; gap: 15px; padding: 15px 5%; }
             .header-left, .header-center, .header-right { display: flex; justify-content: center; flex: none; width: 100%; }
-            .header-right { display: none; } /* Ocultamos el bloque vacío en móviles */
+            .header-right { display: none; }
         }
 
         @media (max-width: 600px) {
@@ -172,7 +171,6 @@
 <body> 
     
     <header>
-        <!-- BLOQUE IZQUIERDO: LOGO -->
         <div class="header-left">
             <div class="logo-container">
                 <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
@@ -183,12 +181,10 @@
             </div>
         </div>
 
-        <!-- BLOQUE CENTRAL: TÍTULO -->
         <div class="header-center">
             <h1>Command Center Operativo</h1>
         </div>
 
-        <!-- BLOQUE DERECHO: VACÍO (Mantiene el equilibrio) -->
         <div class="header-right"></div>
     </header>
 
@@ -218,9 +214,17 @@
             <a href="rutinas.html" class="btn-modulo">Ingresar al Módulo</a>
         </div>
 
+        <!-- MÓDULO 4: CONTROL DE VACANTES -->
+        <div class="modulo-card">
+            <div class="modulo-icon">👥</div>
+            <h3>Control de Vacantes</h3>
+            <p>Monitoreo de tiempos de respuesta, vacantes pendientes y novedades de contratación a nivel nacional.</p>
+            <a href="vacantes.html" class="btn-modulo">Ingresar al Módulo</a>
+        </div>
+
     </div>
 
-    <!-- NUEVO MÓDULO 4: PANTALLA CENTRAL (TIPO BANNER ANCHO) -->
+    <!-- PANTALLA CENTRAL (TIPO BANNER ANCHO) -->
     <div class="contenedor-monitoreo">
         <a href="dashboard_general.html" class="btn-monitoreo-central">
             <span class="icono">🖥️</span>
