@@ -103,7 +103,7 @@
         .table-responsive { overflow: auto; max-height: 450px; border: 1px solid #E2E8F0; border-radius: 8px; }
         
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        table.tabla-corta { min-width: 100%; } /* Evita scroll horizontal innecesario */
+        table.tabla-corta { min-width: 100%; } 
 
         thead { position: sticky; top: 0; background: #F1F5F9; z-index: 10; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; white-space: nowrap; font-size: 0.85rem;}
@@ -119,8 +119,6 @@
         .badge-verde { color: #166534; background-color: #DCFCE7; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; }
 
         .chart-container { position: relative; height: 320px; width: 100%; }
-
-        /* NUEVO: Contenedor para que el gráfico ocupe el 35% y la tabla el 65% */
         .grid-productividad { display: grid; grid-template-columns: 35% 1fr; gap: 20px; }
 
         @media (max-width: 992px) {
@@ -238,7 +236,7 @@
                 <h2 class="seccion-titulo" style="margin: 0; border: none;">Ranking de Volumen y Productividad Extra</h2>
             </div>
 
-            <!-- Nueva Sección de Productividad Extra (Distribución 35/65) -->
+            <!-- Sección de Productividad Extra -->
             <div class="grid-productividad">
                 <div class="panel">
                     <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Top Productividad Extra (%)</h3>
@@ -247,16 +245,18 @@
                     </div>
                 </div>
                 <div class="panel">
-                    <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Detalle de Rendimiento sobre Línea Base</h3>
+                    <h3 style="font-family: 'Outfit'; margin-bottom: 15px; color: var(--color-texto);">Detalle de Rendimiento (Proyección a 30 días)</h3>
                     <div class="table-responsive" style="max-height: 320px;">
                         <table id="tabla-productividad" class="tabla-corta">
                             <thead>
                                 <tr>
                                     <th>Mes</th>
                                     <th>Responsable</th>
-                                    <th>Total Facturas</th>
+                                    <th>Total Real</th>
+                                    <th>Días Off</th>
+                                    <th>Proy. 30d</th>
                                     <th>Adicionales</th>
-                                    <th>% Rendimiento Extra</th>
+                                    <th>% Extra</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-productividad"></tbody>
@@ -365,12 +365,14 @@
     <script>
         // ENLACES CSV
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1759455245&single=true&output=csv"; 
-        const GOOGLE_SHEET_ERRORES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=1512340927&single=true&output=csv"; 
+        const GOOGLE_SHEET_ERRORES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=297495094&single=true&output=csv"; 
+        const GOOGLE_SHEET_DIAS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQItcjit2Ssqk4nEJ7-Ye7cdXeKInCNHbcHFeFt0YnPUHGGJhCA2b5T0aDdq8sMC49E9vMZFfVkJc5Z/pub?gid=443099645&single=true&output=csv"; 
         
         let datosGlobales = [];
         let datosFiltradosActuales = []; 
         let datosErroresGlobales = [];
         let datosErroresFiltrados = [];
+        let diasCompensatoriosMap = {};
 
         let mesChoices, corteChoices, respChoices;
         let chartProductividadInstancia = null;
@@ -416,6 +418,15 @@
                 });
             }
 
+            if(GOOGLE_SHEET_DIAS_CSV_URL && GOOGLE_SHEET_DIAS_CSV_URL.startsWith("http")) {
+                Papa.parse(GOOGLE_SHEET_DIAS_CSV_URL, {
+                    download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
+                    complete: function(results) {
+                        if(results.data && results.data.length > 0) procesarDatosDias(results.data);
+                    }
+                });
+            }
+
             document.getElementById('filtro-texto').addEventListener('input', aplicarFiltros);
         }
 
@@ -454,6 +465,21 @@
             }).filter(d => d['RESPONSABLE CAUSACION']);
 
             actualizarFiltrosUI();
+            aplicarFiltros();
+        }
+
+        function procesarDatosDias(data) {
+            diasCompensatoriosMap = {};
+            data.forEach(row => {
+                let mes = (row['MES'] || row['Mes'] || '').toString().trim().toUpperCase();
+                let resp = (row['RESPONSABLE CAUSACION'] || row['Responsable'] || row['RESPONSABLE'] || '').toString().trim().toUpperCase();
+                let diasOff = parseInt(row['DÍAS COMPENSATORIOS'] || row['DIAS COMPENSATORIOS'] || row['DIAS COMPENSADOS'] || row['DÍAS COMPENSADOS'] || row['DÍAS LABORADOS'] || 0) || 0;
+                
+                if (mes && resp) {
+                    if(!diasCompensatoriosMap[mes]) diasCompensatoriosMap[mes] = {};
+                    diasCompensatoriosMap[mes][resp] = Math.max(diasCompensatoriosMap[mes][resp] || 0, diasOff);
+                }
+            });
             aplicarFiltros();
         }
 
@@ -665,31 +691,53 @@
             document.getElementById('baterias-container').innerHTML = htmlBaterias;
         }
 
-        // --- LÓGICA DE PRODUCTIVIDAD EXTRA ---
+        // --- LÓGICA DE PRODUCTIVIDAD EXTRA CON CRUCE DE DÍAS ---
         function generarProductividadExtra() {
-            let facturasPorMesYPersona = {};
+            let statsPorMesYPersona = {};
             
             datosFiltradosActuales.forEach(d => {
                 let mes = d['MES'] || 'N/A';
                 let resp = d['RESPONSABLE CAUSACION'] || 'N/A';
                 let facturas = d['CANTIDAD FACTURAS'] || 0;
                 
-                if(!facturasPorMesYPersona[mes]) facturasPorMesYPersona[mes] = {};
-                if(!facturasPorMesYPersona[mes][resp]) facturasPorMesYPersona[mes][resp] = 0;
+                if(!statsPorMesYPersona[mes]) statsPorMesYPersona[mes] = {};
+                if(!statsPorMesYPersona[mes][resp]) statsPorMesYPersona[mes][resp] = { total: 0 };
                 
-                facturasPorMesYPersona[mes][resp] += facturas;
+                statsPorMesYPersona[mes][resp].total += facturas;
             });
 
             let arrayProductividad = [];
 
-            for(let mes in facturasPorMesYPersona) {
-                let personas = facturasPorMesYPersona[mes];
-                let values = Object.values(personas);
-                let minBase = Math.min(...values); 
+            for(let mes in statsPorMesYPersona) {
+                let personas = statsPorMesYPersona[mes];
+                let proyecciones = [];
+                let mesKey = String(mes).trim().toUpperCase();
+                
+                for(let resp in personas) {
+                    let totalFacturas = personas[resp].total;
+                    let respKey = String(resp).trim().toUpperCase();
+                    
+                    let diasOff = 0;
+                    if(diasCompensatoriosMap[mesKey] && diasCompensatoriosMap[mesKey][respKey]) {
+                        diasOff = diasCompensatoriosMap[mesKey][respKey];
+                    }
+
+                    let diasReales = 30 - diasOff;
+                    if(diasReales < 1) diasReales = 1; 
+                    
+                    let promedioDiario = totalFacturas / diasReales;
+                    let proyeccion30 = promedioDiario * 30;
+                    
+                    personas[resp].proyeccion = proyeccion30;
+                    personas[resp].diasOff = diasOff;
+                    proyecciones.push(proyeccion30);
+                }
+                
+                let minBase = Math.min(...proyecciones); 
 
                 for(let resp in personas) {
-                    let totalFacturas = personas[resp];
-                    let extras = totalFacturas - minBase;
+                    let p = personas[resp];
+                    let extras = p.proyeccion - minBase;
                     
                     let pct = 0;
                     if(minBase > 0) {
@@ -701,8 +749,9 @@
                     arrayProductividad.push({
                         mes: mes,
                         resp: resp,
-                        total: totalFacturas,
-                        base: minBase,
+                        reales: p.total,
+                        diasOff: p.diasOff,
+                        proyeccion: p.proyeccion,
                         extras: extras,
                         pct: pct
                     });
@@ -720,12 +769,14 @@
                 tbodyProd += `<tr>
                     <td>${d.mes}</td>
                     <td><strong>${d.resp}</strong></td>
-                    <td>${d.total}</td>
-                    <td><strong>+${d.extras}</strong></td>
+                    <td>${d.reales}</td>
+                    <td><span style="color:#94A3B8; font-weight:bold;">${d.diasOff > 0 ? d.diasOff : '-'}</span></td>
+                    <td>${Math.round(d.proyeccion)}</td>
+                    <td><strong>+${Math.round(d.extras)}</strong></td>
                     <td>${badgePct}</td>
                 </tr>`;
             });
-            document.getElementById('tbody-productividad').innerHTML = tbodyProd || "<tr><td colspan='5'>No hay datos.</td></tr>";
+            document.getElementById('tbody-productividad').innerHTML = tbodyProd || "<tr><td colspan='7'>No hay datos.</td></tr>";
 
             const ctxProd = document.getElementById('chartProductividad').getContext('2d');
             if(chartProductividadInstancia) chartProductividadInstancia.destroy();
