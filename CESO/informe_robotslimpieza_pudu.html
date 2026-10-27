@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard CC1 | Casalimpia</title>
+    <title>Command Center CC1 | Casalimpia</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <!-- Librería oficial de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
@@ -19,128 +15,195 @@
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
         
         :root {
-            --color-azul-logo: #0085CA; --color-verde-logo: #8DC63F; 
-            --color-blanco: #ffffff; --color-gris-bg: #F1F5F9;
-            --color-texto: #334155; --sombra: 0 4px 6px rgba(0, 0, 0, 0.05);
-            --borde: 1px solid #E2E8F0;
+            --color-azul-logo: #0085CA; 
+            --color-verde-logo: #8DC63F; 
+            
+            /* Colores Dark Theme */
+            --bg-dark: #0F1523; 
+            --bg-panel: #1A2333; 
+            --text-main: #FFFFFF;
+            --text-muted: #94A3B8;
+            --border-dark: #2A3649;
+            --accent-green: #00E396; 
+            --accent-blue: #008FFB;
+            --accent-orange: #FEB019;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Roboto', sans-serif; background-color: var(--color-gris-bg); color: var(--color-texto); }
+        
+        /* ETIQUETA PARA FORZAR EL ZOOM AL 75% SIEMPRE */
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            zoom: 0.75; 
+        }
 
-        /* HEADER */
-        header { background-color: var(--color-blanco); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--sombra); border-bottom: 4px solid var(--color-azul-logo); flex-wrap: wrap; gap: 15px; position: sticky; top: 0; z-index: 100; }
+        /* =========================================
+           1. HEADER CLARO (BANNER CORPORATIVO)
+           ========================================= */
+        header { 
+            background-color: #FFFFFF; 
+            padding: 15px 5%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-top: 5px solid var(--color-azul-logo);
+            border-bottom: 5px solid var(--color-azul-logo);
+            flex-wrap: wrap; gap: 15px; position: sticky; top: 0; z-index: 100; 
+        }
         .logo-container { display: flex; align-items: center; gap: 15px; }
         .logo-img { height: 50px; width: auto; }
         .logo-text { font-family: 'Outfit', sans-serif; font-weight: 700; display: flex; align-items: center; }
         .text-verde { color: var(--color-verde-logo); font-size: 1.6rem; }
         .text-azul { color: var(--color-azul-logo); font-size: 1.6rem; margin-left: 2px; }
-        .header-title { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 600; color: #64748B; background: #E2E8F0; padding: 5px 15px; border-radius: 50px; }
-
-        /* ESTILOS DEL BOTÓN VOLVER */
+        
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .header-title { 
+            font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; 
+            color: #475569; background: #E2E8F0; padding: 8px 20px; border-radius: 50px; 
+        }
         .btn-volver {
-            background-color: transparent; 
-            color: var(--color-azul-logo); 
-            border: 2px solid var(--color-azul-logo);
-            padding: 8px 20px; 
-            border-radius: 8px; 
-            font-family: 'Outfit', sans-serif; 
-            font-weight: 600;
-            text-decoration: none; 
-            transition: 0.2s;
+            background-color: transparent; color: var(--color-azul-logo); 
+            border: 2px solid var(--color-azul-logo); padding: 8px 20px; 
+            border-radius: 50px; font-family: 'Outfit', sans-serif; font-weight: 700;
+            text-decoration: none; transition: 0.2s;
         }
-        .btn-volver:hover { 
-            background-color: var(--color-azul-logo); 
-            color: white; 
+        .btn-volver:hover { background-color: var(--color-azul-logo); color: white; }
+
+        /* =========================================
+           2. LOADING SCREEN
+           ========================================= */
+        #loading-screen { text-align: center; padding: 60px; font-family: 'Outfit', sans-serif; font-size: 1.5rem; color: var(--accent-green); }
+
+        /* =========================================
+           3. CONTENEDOR DASHBOARD OSCURO
+           ========================================= */
+        .dashboard-wrapper { max-width: 95%; margin: 0 auto; padding: 20px; display: none; flex-direction: column; gap: 20px; }
+
+        /* FILTROS (BARRA OSCURA) */
+        .filters-bar { 
+            background-color: var(--bg-panel); border-radius: 12px; padding: 15px 25px; 
+            display: flex; align-items: flex-end; flex-wrap: wrap; gap: 15px; 
+            border: 1px solid var(--border-dark);
         }
+        .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
+        .input-group label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); font-family: 'Outfit', sans-serif;}
+        .input-group input[type="date"] { 
+            padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-dark); 
+            background: var(--bg-dark); color: white; font-family: 'Roboto', sans-serif; outline: none; color-scheme: dark;
+        }
+        .btn-limpiar { 
+            background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); 
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; height: 42px;
+        }
+        .btn-limpiar:hover { border-color: white; color: white; }
 
-        /* TABS */
-        .tabs-container { background: white; border-bottom: 1px solid #CBD5E1; display: flex; justify-content: center; gap: 15px; padding-top: 10px; flex-wrap: wrap;}
-        .tab-btn { background: none; border: none; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 600; color: #64748B; padding: 10px 15px; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; }
-        .tab-btn:hover { color: var(--color-azul-logo); }
-        .tab-btn.active { color: var(--color-azul-logo); border-bottom: 3px solid var(--color-azul-logo); }
-        .tab-content { display: none; padding: 20px 0; }
-        .tab-content.active { display: flex; flex-direction: column; gap: 20px; }
-        .container { max-width: 1600px; margin: 0 auto; padding: 0 15px; display: flex; flex-direction: column; gap: 20px; }
-
-        /* LOADING INDICATOR */
-        #loading-screen { text-align: center; padding: 40px; font-family: 'Outfit', sans-serif; font-size: 1.2rem; color: var(--color-azul-logo); }
-
-        /* FILTROS GLOBALES */
-        .filtros-banner { background-color: var(--color-azul-logo); border-radius: 10px; padding: 15px 20px; display: flex; align-items: flex-start; flex-wrap: wrap; gap: 15px; color: white; box-shadow: var(--sombra); margin-top: 20px; }
-        .filtros-banner h2 { font-family: 'Outfit', sans-serif; margin-right: 10px; font-size: 1.4rem; margin-top: 2px;}
-        .input-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 180px; }
-        .input-group label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #E0F2FE; }
-        .input-group input[type="date"] { padding: 8px 12px; border-radius: 5px; border: none; outline: none; font-family: 'Roboto', sans-serif; color: var(--color-texto); width: 100%; height: 38px; }
-        
         .choices { margin-bottom: 0; width: 100%; }
-        .choices__inner { min-height: 38px; max-height: 85px; overflow-y: auto; padding: 2px 8px; border-radius: 5px; background-color: white; border: none; font-family: 'Roboto', sans-serif; font-size: 0.9rem; }
-        .choices__input { color: #334155 !important; background-color: transparent !important; margin-bottom: 0; }
-        .choices__list--dropdown .choices__item { color: #334155; font-size: 0.9rem; }
-        .choices__list--multiple .choices__item { background-color: var(--color-azul-logo); border: 1px solid #005f9e; border-radius: 20px; color: white; padding: 3px 10px; margin: 2px 4px 2px 0; font-size: 0.75rem; display: inline-block; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
-        .choices__list--multiple .choices__item[data-deletable] { padding-right: 25px; }
-        .btn-limpiar { background-color: transparent; border: 1px solid white; color: white; padding: 8px 15px; border-radius: 50px; cursor: pointer; font-weight: 600; transition: 0.3s; align-self: flex-start; margin-top: 20px; }
-        .btn-limpiar:hover { background-color: white; color: var(--color-azul-logo); }
+        .choices__inner { 
+            background-color: var(--bg-dark) !important; border: 1px solid var(--border-dark) !important; 
+            border-radius: 8px !important; min-height: 42px; padding: 4px 8px; 
+        }
+        .choices__input { color: white !important; background-color: transparent !important; }
+        .choices__list--dropdown { background-color: var(--bg-panel) !important; border: 1px solid var(--border-dark) !important; color: white !important;}
+        .choices__list--dropdown .choices__item { color: white; }
+        .choices__list--multiple .choices__item { 
+            background-color: var(--color-azul-logo); border: none; border-radius: 6px; 
+        }
 
-        /* KPIs CARDS */
-        .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .kpi-card { padding: 20px; border-radius: 8px; box-shadow: var(--sombra); text-align: center; border: none; }
-        .kpi-card.area { background-color: #0085CA; }
-        .kpi-card.tareas { background-color: #C25973; }
-        .kpi-card.robots { background-color: #64748B; }
-        .kpi-card.duracion { background-color: #8DC63F; }
-        .kpi-card .kpi-title { font-size: 0.8rem; color: rgba(255, 255, 255, 0.9); text-transform: uppercase; font-weight: 700; margin-bottom: 10px; }
-        .kpi-card .kpi-value { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 700; color: #ffffff; }
+        /* GRID PRINCIPAL OPTIMIZADO */
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: 350px 1fr; 
+            gap: 20px; 
+        }
 
-        /* GRÁFICOS */
-        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .chart-card { background: var(--color-blanco); padding: 15px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); display: flex; flex-direction: column; cursor: pointer; transition: transform 0.2s; position: relative;}
-        .chart-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-        .chart-card h3 { font-size: 0.9rem; color: var(--color-texto); text-align: center; margin-bottom: 10px; font-family: 'Outfit', sans-serif; }
-        .chart-container { position: relative; height: 220px; width: 100%; pointer-events: none; } 
-        .expand-icon { position: absolute; top: 10px; right: 10px; background: #E2E8F0; padding: 4px; border-radius: 4px; font-size: 12px; color: #64748B;}
+        .panel { 
+            background-color: var(--bg-panel); border-radius: 12px; padding: 20px; 
+            border: 1px solid var(--border-dark); display: flex; flex-direction: column;
+        }
+        .full-width-panel { grid-column: 1 / -1; }
 
-        /* MODAL */
-        #modal-grafico { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 1200px; height: 80vh; display: flex; flex-direction: column; position: relative; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .modal-header h2 { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); font-size: 1.5rem; }
-        .btn-cerrar { background: #EF4444; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .modal-body { flex: 1; position: relative; width: 100%; height: 100%; }
+        .panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;}
+        .panel-title { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
+        .panel-subtitle { font-size: 0.75rem; color: var(--text-muted); }
 
-        /* TABLAS Y DETALLES */
-        .seccion-titulo { font-family: 'Outfit', sans-serif; color: var(--color-azul-logo); border-bottom: 2px solid var(--color-verde-logo); padding-bottom: 5px; margin: 20px 0 10px 0; }
-        .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: var(--sombra); border: var(--borde); }
+        /* SELECTORES DE MÉTRICA (PÍLDORAS) */
+        .metric-selectors { display: flex; gap: 8px; background: var(--bg-dark); padding: 4px; border-radius: 50px; border: 1px solid var(--border-dark);}
+        .metric-btn { 
+            background: transparent; color: var(--text-muted); border: none; 
+            padding: 6px 15px; border-radius: 50px; font-size: 0.85rem; font-family: 'Outfit'; font-weight: 600;
+            cursor: pointer; transition: 0.3s; 
+        }
+        .metric-btn.active { background: var(--color-azul-logo); color: white; }
         
-        .ficha-tecnica-grid { display: grid; grid-template-columns: 1fr 3fr; gap: 20px; align-items: start;}
-        .info-robot { background: #F8FAFC; padding: 15px; border-radius: 8px; border: 1px solid #E2E8F0; }
-        .info-robot p { margin-bottom: 8px; font-size: 0.9rem; }
-        .info-robot strong { color: var(--color-azul-logo); }
+        /* Botones específicos para apagar/prender líneas (Toggle) */
+        .toggle-btn { opacity: 0.5; }
+        .toggle-btn.active { opacity: 1; }
+        .toggle-btn.btn-horas.active { background: var(--accent-blue); color: white; }
+        .toggle-btn.btn-tareas.active { background: var(--accent-green); color: var(--bg-dark); }
+        .toggle-btn.btn-km.active { background: var(--accent-orange); color: var(--bg-dark); }
 
-        .table-responsive { overflow-x: auto; max-height: 500px; border: 1px solid #E2E8F0; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        thead { position: sticky; top: 0; background: #F1F5F9; z-index: 10; }
-        th, td { padding: 10px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; white-space: nowrap; font-size: 0.85rem;}
-        th { font-weight: 700; color: #475569; text-transform: uppercase; }
-        tbody tr:hover { background-color: #F8FAFC; }
+        /* BLOQUE 1: KPIs (Izquierda) */
+        .kpi-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .kpi-main { grid-column: span 2; background: rgba(0, 143, 251, 0.05); border: 1px solid rgba(0, 143, 251, 0.2); text-align: center; padding: 30px 20px;}
+        .kpi-main .kpi-title { font-size: 1.2rem; font-family: 'Outfit'; color: var(--text-main); margin-bottom: 10px; font-weight: 700;}
+        .kpi-main .kpi-val { font-size: 4rem; font-weight: 800; font-family: 'Outfit'; color: var(--accent-blue); line-height: 1;}
+        
+        .kpi-sub { text-align: center; padding: 20px 10px; background: rgba(255,255,255,0.02); border-radius: 8px;}
+        .kpi-sub .kpi-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;}
+        .kpi-sub .kpi-val { font-size: 2rem; font-weight: 700; font-family: 'Outfit'; color: white;}
+        .kpi-sub .kpi-val.green { color: var(--accent-green); }
+        .kpi-sub .kpi-val.orange { color: var(--accent-orange); }
 
-        .herramientas-tabla { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;}
-        .buscador { padding: 10px; border: 1px solid #CBD5E1; border-radius: 6px; width: 100%; max-width: 400px; font-family: 'Roboto'; outline: none;}
-        .btn-excel { background: #10B981; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px;}
-        .btn-pdf { background: #EF4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px;}
+        /* BLOQUE 2: GRÁFICO BARRAS (Centro/Derecha) */
+        .chart-container { position: relative; height: 350px; width: 100%; }
+
+        /* BLOQUE 3: DONA Y LEYENDA (Ancho completo) */
+        .donut-layout { display: flex; gap: 30px; height: 350px; width: 100%; align-items: center;}
+        .chart-container-donut { position: relative; height: 100%; width: 40%; display: flex; justify-content: center;}
         
-        #informe-a-pdf { background: white; padding: 30px; border-radius: 8px; display: flex; flex-direction: column; gap: 20px; }
+        /* LEYENDA HTML CON SCROLL */
+        .custom-legend { 
+            width: 60%; height: 100%; overflow-y: auto; padding-right: 15px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 12px; align-content: start;
+        }
+        .custom-legend::-webkit-scrollbar { width: 6px; }
+        .custom-legend::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 10px; }
+        .legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #E2E8F0; }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+        .legend-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* BLOQUE 4: TABLA RENDIMIENTO */
+        .table-panel { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { font-family: 'Outfit', sans-serif; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; padding: 15px; border-bottom: 1px solid var(--border-dark); }
+        td { padding: 15px; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #E2E8F0; }
+        tr:hover { background-color: rgba(255,255,255,0.02); }
         
-        .pdf-export-mode { padding: 10px !important; background: white !important; }
-        .pdf-export-mode .table-responsive { max-height: none !important; overflow: visible !important; border: none !important; }
-        .pdf-export-mode table { min-width: 0 !important; width: 100% !important; table-layout: auto !important; }
+        .robot-name { display: flex; align-items: center; gap: 10px; font-weight: 600; font-family: 'Outfit'; color: white;}
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--border-dark); display: flex; align-items: center; justify-content: center; font-size: 15px;}
         
-        @media (max-width: 1200px) { .ficha-tecnica-grid { grid-template-columns: 1fr; } }
+        .badge-activo { background: rgba(0, 227, 150, 0.15); color: var(--accent-green); padding: 5px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(0,227,150,0.3);}
+        .metric-pill { background: rgba(255, 255, 255, 0.1); padding: 5px 12px; border-radius: 4px; font-family: 'Outfit'; font-weight: 600;}
+
+        @media (max-width: 1024px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .kpi-container { grid-template-columns: repeat(3, 1fr); }
+            .kpi-main { grid-column: span 3; }
+            .donut-layout { flex-direction: column; height: auto; }
+            .chart-container-donut { width: 100%; height: 300px; }
+            .custom-legend { width: 100%; height: 200px; }
+        }
         @media (max-width: 768px) {
-            .charts-grid { grid-template-columns: 1fr; }
+            body { zoom: 1; }
+            .kpi-container { grid-template-columns: 1fr; }
+            .kpi-main { grid-column: span 1; }
             .header-title { display: none; }
-            .tabs-container { flex-direction: column; gap: 5px; padding: 10px; }
-            .filtros-banner { flex-direction: column; align-items: stretch; }
+            .filters-bar { flex-direction: column; align-items: stretch; }
+            .panel-header { flex-direction: column; }
         }
     </style>
 </head>
@@ -151,203 +214,163 @@
             <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
             <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Casalimpia</span></div>
         </div>
-        
-        <!-- Agrupamos el título y el botón para que mantengan un buen diseño -->
-        <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="header-actions">
             <div class="header-title">Informe de Rendimiento (Supabase)</div>
             <a href="comandcenter.html" class="btn-volver">← Volver al Menú</a>
         </div>
     </header>
 
-    <div class="tabs-container">
-        <button class="tab-btn active" onclick="cambiarPestana('dashboard', this)">Dashboard General</button>
-        <button class="tab-btn" onclick="cambiarPestana('detalles', this)">Informes Detallados</button>
-        <button class="tab-btn" onclick="cambiarPestana('resumen', this)">Resumen Ejecutivo</button>
+    <div id="loading-screen">
+        ⏳ Inicializando Command Center...
     </div>
 
-    <div class="container">
+    <div class="dashboard-wrapper" id="dashboard-main">
         
-        <div id="loading-screen">
-            ⏳ Conectando con PuduTech a través de Supabase...
-        </div>
-
-        <div class="filtros-banner" id="filtros-container" style="display: none;">
-            <h2>Filtros</h2>
-            <div class="input-group" style="min-width: 140px;">
+        <div class="filters-bar">
+            <div class="input-group" style="max-width: 150px;">
                 <label>Desde</label>
                 <input type="date" id="fecha-desde">
             </div>
-            <div class="input-group" style="min-width: 140px;">
+            <div class="input-group" style="max-width: 150px;">
                 <label>Hasta</label>
                 <input type="date" id="fecha-hasta">
             </div>
             <div class="input-group">
-                <label>Tiendas</label>
+                <label>Tiendas Activas</label>
                 <select id="filtro-tienda" multiple></select>
             </div>
             <div class="input-group">
-                <label>Robots (Apodo)</label>
+                <label>Flota (Robots)</label>
                 <select id="filtro-robot" multiple></select>
             </div>
-            <button class="btn-limpiar" onclick="resetFilters()">Limpiar</button>
+            <button class="btn-limpiar" onclick="resetFilters()">Limpiar Filtros</button>
         </div>
 
-        <div id="tab-dashboard" class="tab-content active" style="display: none;">
-            <div class="kpis-grid">
-                <div class="kpi-card area"><div class="kpi-title">Kilometraje Total (km)</div><div class="kpi-value" id="kpi-kilometraje">0</div></div>
-                <div class="kpi-card tareas"><div class="kpi-title">Número de tareas</div><div class="kpi-value" id="kpi-tareas">0</div></div>
-                <div class="kpi-card robots"><div class="kpi-title">Robots Activos</div><div class="kpi-value" id="kpi-robots">0</div></div>
-                <div class="kpi-card duracion"><div class="kpi-title">Duración Operativa (h)</div><div class="kpi-value" id="kpi-duracion">0</div></div>
-            </div>
-
-            <div class="charts-grid">
-                <div class="chart-card" onclick="abrirModalGrafico('chartKmRobot', 'bar', '#0085CA', 'Kilometraje por Robot (km)')">
-                    <span class="expand-icon">🔍 Ampliar</span>
-                    <h3>Kilometraje por Robot (km)</h3><div class="chart-container"><canvas id="chartKmRobot"></canvas></div>
-                </div>
-                <div class="chart-card" onclick="abrirModalGrafico('chartDuracionRobot', 'bar', '#8DC63F', 'Duración por Robot (h)')">
-                    <span class="expand-icon">🔍 Ampliar</span>
-                    <h3>Duración por Robot (h)</h3><div class="chart-container"><canvas id="chartDuracionRobot"></canvas></div>
-                </div>
-                <div class="chart-card" onclick="abrirModalGrafico('chartTareasRobot', 'bar', '#C25973', 'Tareas por Robot')">
-                    <span class="expand-icon">🔍 Ampliar</span>
-                    <h3>Tareas por Robot</h3><div class="chart-container"><canvas id="chartTareasRobot"></canvas></div>
-                </div>
-                <div class="chart-card" onclick="abrirModalGrafico('chartKmTiempo', 'line', '#0085CA', 'Tendencia de Kilometraje Diario')">
-                    <span class="expand-icon">🔍 Ampliar</span>
-                    <h3>Tendencia de Kilometraje Diario</h3><div class="chart-container"><canvas id="chartKmTiempo"></canvas></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-detalles" class="tab-content">
-            <h2 class="seccion-titulo">1. Ficha Técnica e Historial por Robot</h2>
-            <div class="panel ficha-tecnica-grid">
-                <div class="info-robot">
-                    <label style="font-size: 0.8rem; font-weight: bold;">Selecciona un Robot:</label>
-                    <select id="select-ficha-robot" class="buscador" style="margin-bottom: 15px;" onchange="actualizarFichaTecnica()"></select>
-                    <div id="ficha-datos"></div>
-                </div>
-                <div class="table-responsive" style="max-height: 250px;">
-                    <table id="tabla-historial-robot">
-                        <thead><tr><th>Fecha</th><th>Tienda</th><th>Kilometraje (km)</th><th>Tareas</th><th>Duración (h)</th></tr></thead>
-                        <tbody id="tbody-historial"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <h2 class="seccion-titulo">2. Tabla Maestra de Rendimientos</h2>
-            <div class="panel">
-                <div class="herramientas-tabla">
-                    <input type="text" id="buscador-tabla" class="buscador" placeholder="Buscar (ej. Tienda, Apodo)..." oninput="renderTable()">
-                    <button class="btn-excel" onclick="exportarExcel()">Exportar a Excel</button>
-                </div>
-                <div class="table-responsive">
-                    <table id="tabla-maestra">
-                        <thead>
-                            <tr>
-                                <th>Fecha (Task Time)</th><th>Tienda</th><th>Modelo</th><th>Robot (Apodo)</th>
-                                <th>MAC</th><th>Kilometraje (km)</th><th>Tareas</th><th>Duración (h)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody-maestra"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-resumen" class="tab-content">
-            <div class="herramientas-tabla">
-                <h2 class="seccion-titulo" style="margin: 0;">Informe Ejecutivo de Rendimiento</h2>
-                <button class="btn-pdf" onclick="generarPDF()">Descargar en PDF</button>
-            </div>
+        <div class="dashboard-grid">
             
-            <div id="informe-a-pdf">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--color-azul-logo); padding-bottom: 10px;">
-                    <h2 style="font-family: 'Outfit'; color: var(--color-azul-logo); font-size: 1.8rem; margin:0;">REPORTE DE OPERACIÓN - PUDU</h2>
-                    <h4 id="pdf-rango-fechas" style="color: #64748B; margin:0;">Período</h4>
+            <!-- KPIs -->
+            <div class="panel kpi-container">
+                <div class="panel kpi-main">
+                    <div class="kpi-title">Tiempo Total Operativo</div>
+                    <div class="kpi-val" id="kpi-duracion">0h 0m</div>
                 </div>
+                <div class="kpi-sub">
+                    <div class="kpi-title">Tareas Completadas</div>
+                    <div class="kpi-val green" id="kpi-tareas">0</div>
+                </div>
+                <div class="kpi-sub">
+                    <div class="kpi-title">Robots en Línea</div>
+                    <div class="kpi-val" id="kpi-robots">0</div>
+                </div>
+                <div class="kpi-sub" style="grid-column: span 2;">
+                    <div class="kpi-title">Kilometraje Operativo (km)</div>
+                    <div class="kpi-val orange" id="kpi-kilometraje">0.00</div>
+                </div>
+            </div>
 
-                <h3 class="seccion-titulo" style="font-size: 1.1rem; margin-top: 15px;">1. Métricas Globales de Flota</h3>
-                <div class="kpis-grid" id="kpis-globales-resumen"></div>
-
-                <h3 class="seccion-titulo" style="font-size: 1.1rem; margin-top: 15px;">2. Rendimiento Cronológico Diario</h3>
-                <div class="panel" style="padding: 0; box-shadow: none; border: none;">
-                    <div class="table-responsive">
-                        <table id="tabla-cronologica">
-                            <thead><tr><th>Fecha</th><th>Robots Activos</th><th>Kilometraje (km)</th><th>Total Tareas</th><th>Duración Operativa</th></tr></thead>
-                            <tbody id="tbody-cronologica"></tbody>
-                        </table>
+            <!-- TENDENCIA COMPARATIVA (CON TOGGLES) -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Tendencia Operativa Comparativa</div>
+                        <div class="panel-subtitle" id="sub-fechas">Haz clic en los botones para ocultar/mostrar métricas</div>
+                    </div>
+                    <div class="metric-selectors">
+                        <button class="metric-btn toggle-btn btn-horas active" onclick="toggleDataset(0, this)">Horas</button>
+                        <button class="metric-btn toggle-btn btn-tareas active" onclick="toggleDataset(1, this)">Tareas</button>
+                        <button class="metric-btn toggle-btn btn-km active" onclick="toggleDataset(2, this)">Kilómetros</button>
                     </div>
                 </div>
+                <div class="chart-container">
+                    <canvas id="chartTendencia"></canvas>
+                </div>
             </div>
-        </div>
 
-    </div>
-
-    <div id="modal-grafico">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modal-titulo">Título del Gráfico</h2>
-                <button class="btn-cerrar" onclick="cerrarModalGrafico()">X Cerrar</button>
+            <!-- DISTRIBUCIÓN (DONA + SELECTOR) -->
+            <div class="panel full-width-panel">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Distribución por Tienda</div>
+                        <div class="panel-subtitle">Elige qué métrica deseas visualizar en la gráfica</div>
+                    </div>
+                    <div class="metric-selectors">
+                        <button class="metric-btn active" style="background-color: var(--accent-blue); color: white;" onclick="cambiarMetricaDona('duracion', this, 'var(--accent-blue)')">Horas</button>
+                        <button class="metric-btn" onclick="cambiarMetricaDona('tareas', this, 'var(--accent-green)')">Tareas</button>
+                        <button class="metric-btn" onclick="cambiarMetricaDona('km', this, 'var(--accent-orange)')">Kilómetros</button>
+                    </div>
+                </div>
+                <div class="donut-layout">
+                    <div class="chart-container-donut">
+                        <canvas id="chartDona"></canvas>
+                    </div>
+                    <div class="custom-legend" id="leyenda-dona"></div>
+                </div>
             </div>
-            <div class="modal-body"><canvas id="canvas-modal"></canvas></div>
+
+            <!-- TABLA RENDIMIENTO -->
+            <div class="panel table-panel full-width-panel">
+                <div class="panel-title">Desempeño por Robot</div>
+                <div class="panel-subtitle">Métricas consolidadas del período seleccionado</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Robot</th>
+                            <th>Estado</th>
+                            <th>Tienda Principal</th>
+                            <th>Total Tareas</th>
+                            <th>Horas Operativas</th>
+                            <th>Kilómetros</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-rendimiento"></tbody>
+                </table>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // ---------------------------------------------------------
-        // 1. CONFIGURACIÓN DE SUPABASE
-        // ---------------------------------------------------------
         const SUPABASE_URL = 'https://tyhdwpdefiatmxihycae.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_LH1iVez6V1qmj8Lk_YVZFA_Y2nYwdKw';
-        
-        // CORRECCIÓN: Nombramos la variable clienteSupabase para evitar choques con el CDN
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
+        Chart.defaults.color = '#94A3B8';
+        Chart.defaults.font.family = "'Roboto', sans-serif";
+        Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
+        Chart.defaults.plugins.tooltip.backgroundColor = '#1A2333';
+        Chart.defaults.plugins.tooltip.borderColor = '#2A3649';
+        Chart.defaults.plugins.tooltip.borderWidth = 1;
+
+        const palette = [
+            '#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0', '#00D9E9', '#FF66C3', 
+            '#9D00FF', '#FF8C00', '#32CD32', '#1E90FF', '#FF1493', '#00FA9A', '#DAA520', 
+            '#8A2BE2', '#FF4500', '#2E8B57', '#4169E1', '#DC143C', '#20B2AA'
+        ];
+
         let datosGlobales = [];
-        let datosFiltradosActuales = []; 
-        let graficosInstancias = {};
-        let dataGraficosBase = {}; 
-        let chartModalInstancia = null;
-
+        let datosFiltrados = []; 
+        let graficoTendencia = null;
+        let graficoDona = null;
         let tiendaChoices, robotChoices;
+        let metricaDonaActiva = 'duracion'; 
 
-        function formatHorasMinutos(horasDecimales) {
-            if (!horasDecimales || isNaN(horasDecimales)) return "0h 0m";
-            const h = Math.floor(horasDecimales);
-            const m = Math.round((horasDecimales - h) * 60);
+        function formatHoras(horasDec) {
+            if (!horasDec || isNaN(horasDec)) return "0h 0m";
+            const h = Math.floor(horasDec);
+            const m = Math.round((horasDec - h) * 60);
             return `${h}h ${m}m`;
         }
+        function extraerFecha(ts) { return ts ? ts.split('T')[0] : "N/A"; }
         
-        function extraerFecha(timestampStr) {
-            if (!timestampStr) return "N/A";
-            return timestampStr.split('T')[0];
+        function getAvatar(nombre) {
+            const letra = (nombre || 'R').charAt(0).toUpperCase();
+            const color = palette[letra.charCodeAt(0) % palette.length];
+            return `<div class="avatar" style="background:${color}">${letra}</div>`;
         }
 
-        function cambiarPestana(tabId, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('tab-' + tabId).style.display = 'flex';
-            document.getElementById('tab-' + tabId).classList.add('active');
-            btnElement.classList.add('active');
-            
-            if (tabId === 'detalles') actualizarPestanaDetalles();
-            if (tabId === 'resumen') actualizarPestanaResumen();
-            
-            ['dashboard', 'detalles', 'resumen'].forEach(id => {
-                if (id !== tabId) document.getElementById('tab-' + id).style.display = 'none';
-            });
-        }
-
-        // ---------------------------------------------------------
-        // 2. CONEXIÓN A SUPABASE Y EXTRACCIÓN DE DATOS (VISTA)
-        // ---------------------------------------------------------
-        async function inicializarDashboard() {
-            inicializarChoicesJS();
-            
+        async function init() {
+            initChoices();
             try {
-                // CORRECCIÓN: Usamos clienteSupabase aquí también
                 const { data, error } = await clienteSupabase
                     .from('5-vista_dashboard_rendimiento')
                     .select('*')
@@ -357,317 +380,269 @@
 
                 if (data && data.length > 0) {
                     document.getElementById('loading-screen').style.display = 'none';
-                    document.getElementById('filtros-container').style.display = 'flex';
-                    document.getElementById('tab-dashboard').style.display = 'flex';
-                    procesarDatos(data);
+                    document.getElementById('dashboard-main').style.display = 'flex';
+                    procesarDatosIniciales(data);
                 } else {
-                    document.getElementById('loading-screen').innerHTML = '⚠️ No se encontraron datos en la vista.';
+                    document.getElementById('loading-screen').innerHTML = '⚠️ No hay datos en Supabase.';
                 }
             } catch (err) {
-                console.error("Error consultando Supabase:", err);
-                document.getElementById('loading-screen').innerHTML = '❌ Error al conectar con la base de datos. Revisa la consola.';
+                console.error(err);
+                document.getElementById('loading-screen').innerHTML = '❌ Error de conexión.';
             }
 
             document.getElementById('fecha-desde').addEventListener('change', aplicarFiltros);
             document.getElementById('fecha-hasta').addEventListener('change', aplicarFiltros);
         }
 
-        function inicializarChoicesJS() {
-            tiendaChoices = new Choices('#filtro-tienda', { removeItemButton: true, searchEnabled: true, placeholderValue: 'Todas las Tiendas' });
-            robotChoices = new Choices('#filtro-robot', { removeItemButton: true, searchEnabled: true, placeholderValue: 'Todos los Robots' });
-
-            document.getElementById('filtro-tienda').addEventListener('change', () => { actualizarDropdownRobots(); aplicarFiltros(); });
+        function initChoices() {
+            tiendaChoices = new Choices('#filtro-tienda', { removeItemButton: true, placeholderValue: 'Seleccionar Tiendas', itemSelectText: '' });
+            robotChoices = new Choices('#filtro-robot', { removeItemButton: true, placeholderValue: 'Seleccionar Robots', itemSelectText: '' });
+            document.getElementById('filtro-tienda').addEventListener('change', () => { actualizarFiltroRobots(); aplicarFiltros(); });
             document.getElementById('filtro-robot').addEventListener('change', aplicarFiltros);
         }
 
-        function procesarDatos(data) {
+        function procesarDatosIniciales(data) {
             datosGlobales = data; 
-            const fechas = datosGlobales.map(d => extraerFecha(d.task_time)).filter(f => f !== 'N/A').sort();
+            const fechas = [...new Set(data.map(d => extraerFecha(d.task_time)))].filter(f => f !== 'N/A').sort();
             if(fechas.length > 0) {
-                document.getElementById('fecha-desde').value = fechas[0];
-                document.getElementById('fecha-hasta').value = fechas[fechas.length - 1];
+                let fFin = new Date(fechas[fechas.length - 1]);
+                let fIni = new Date(fFin);
+                fIni.setDate(fIni.getDate() - 30);
+                document.getElementById('fecha-hasta').value = fFin.toISOString().split('T')[0];
+                document.getElementById('fecha-desde').value = fIni.toISOString().split('T')[0];
             }
-            poblarFiltrosIniciales();
+            const tiendas = [...new Set(data.map(d => d.shop_name))].filter(Boolean).sort();
+            tiendaChoices.setChoices(tiendas.map(t => ({ value: t, label: t })), 'value', 'label', true);
+            actualizarFiltroRobots();
             aplicarFiltros(); 
         }
 
-        function poblarFiltrosIniciales() {
-            const tiendas = [...new Set(datosGlobales.map(d => d.shop_name))].filter(Boolean).sort();
-            tiendaChoices.setChoices(tiendas.map(t => ({ value: t, label: t })), 'value', 'label', true);
-            actualizarDropdownRobots();
-        }
-
-        function actualizarDropdownRobots() {
+        function actualizarFiltroRobots() {
             const selectedTiendas = tiendaChoices.getValue(true); 
             let robots = selectedTiendas.length === 0 ? 
                 [...new Set(datosGlobales.map(d => d.apodo_robot))].filter(Boolean).sort() :
                 [...new Set(datosGlobales.filter(d => selectedTiendas.includes(d.shop_name)).map(d => d.apodo_robot))].filter(Boolean).sort();
-            
             const selectedRobots = robotChoices.getValue(true);
             robotChoices.setChoices(robots.map(r => ({ value: r, label: r, selected: selectedRobots.includes(r) })), 'value', 'label', true);
-        }
-
-        function aplicarFiltros() {
-            const selectedTiendas = tiendaChoices.getValue(true);
-            const selectedRobots = robotChoices.getValue(true);
-            const fDesde = document.getElementById('fecha-desde').value;
-            const fHasta = document.getElementById('fecha-hasta').value;
-
-            datosFiltradosActuales = datosGlobales.filter(d => {
-                let matchTienda = selectedTiendas.length === 0 || selectedTiendas.includes(d.shop_name);
-                let matchRobot = selectedRobots.length === 0 || selectedRobots.includes(d.apodo_robot);
-                let matchFecha = true;
-                let fechaCorta = extraerFecha(d.task_time);
-                if (fDesde && fechaCorta < fDesde) matchFecha = false;
-                if (fHasta && fechaCorta > fHasta) matchFecha = false;
-                return matchTienda && matchRobot && matchFecha;
-            });
-            
-            actualizarDashboard(datosFiltradosActuales);
-            if (document.getElementById('tab-detalles').classList.contains('active')) actualizarPestanaDetalles();
-            if (document.getElementById('tab-resumen').classList.contains('active')) actualizarPestanaResumen();
         }
 
         function resetFilters() {
             tiendaChoices.removeActiveItems();
             robotChoices.removeActiveItems();
-            
-            const fechas = datosGlobales.map(d => extraerFecha(d.task_time)).filter(f => f !== 'N/A').sort();
-            if(fechas.length > 0) {
-                document.getElementById('fecha-desde').value = fechas[0];
-                document.getElementById('fecha-hasta').value = fechas[fechas.length - 1];
-            }
-            actualizarDropdownRobots();
-            aplicarFiltros();
+            procesarDatosIniciales(datosGlobales);
         }
 
-        function actualizarDashboard(datos) {
-            let sumKm = 0, sumTareas = 0, sumDuracion = 0;
-            let robotsUnicos = new Set();
+        function aplicarFiltros() {
+            const tiendas = tiendaChoices.getValue(true);
+            const robots = robotChoices.getValue(true);
+            const fDesde = document.getElementById('fecha-desde').value;
+            const fHasta = document.getElementById('fecha-hasta').value;
 
-            datos.forEach(d => {
+            document.getElementById('sub-fechas').innerText = `${fDesde || 'Inicio'} al ${fHasta || 'Fin'}`;
+
+            datosFiltrados = datosGlobales.filter(d => {
+                let matchT = tiendas.length === 0 || tiendas.includes(d.shop_name);
+                let matchR = robots.length === 0 || robots.includes(d.apodo_robot);
+                let f = extraerFecha(d.task_time);
+                let matchF = true;
+                if (fDesde && f < fDesde) matchF = false;
+                if (fHasta && f > fHasta) matchF = false;
+                return matchT && matchR && matchF;
+            });
+            
+            actualizarKPIs();
+            renderTable();
+            renderChartTendencia();
+            renderChartDona();
+        }
+
+        function actualizarKPIs() {
+            let sumKm = 0, sumTareas = 0, sumDuracion = 0;
+            let robotsSet = new Set();
+            datosFiltrados.forEach(d => {
                 sumKm += parseFloat(d.mileage) || 0;
                 sumTareas += parseInt(d.task_count) || 0;
                 sumDuracion += parseFloat(d.duration) || 0;
-                if(d.apodo_robot) robotsUnicos.add(d.apodo_robot);
+                if(d.apodo_robot) robotsSet.add(d.apodo_robot);
             });
-
-            document.getElementById('kpi-kilometraje').innerText = sumKm.toLocaleString('es-CO', {maximumFractionDigits: 2});
+            document.getElementById('kpi-duracion').innerText = formatHoras(sumDuracion);
             document.getElementById('kpi-tareas').innerText = sumTareas.toLocaleString('es-CO');
-            document.getElementById('kpi-robots').innerText = robotsUnicos.size;
-            document.getElementById('kpi-duracion').innerText = sumDuracion.toLocaleString('es-CO', {maximumFractionDigits: 2});
-
-            const agruparPor = (data, clave, sumador, esFecha = false) => {
-                return data.reduce((acc, curr) => {
-                    let key = curr[clave] || 'N/A';
-                    if (esFecha) key = extraerFecha(key);
-                    acc[key] = (acc[key] || 0) + (parseFloat(curr[sumador]) || 0);
-                    return acc;
-                }, {});
-            };
-
-            const porRobot_Km = agruparPor(datos, 'apodo_robot', 'mileage');
-            const porRobot_Duracion = agruparPor(datos, 'apodo_robot', 'duration');
-            const porRobot_Tareas = agruparPor(datos, 'apodo_robot', 'task_count');
-
-            const datosOrdenados = [...datos].sort((a, b) => new Date(a.task_time) - new Date(b.task_time));
-            const porTiempo_Km = agruparPor(datosOrdenados, 'task_time', 'mileage', true);
-            const porTiempo_Duracion = agruparPor(datosOrdenados, 'task_time', 'duration', true);
-            const porTiempo_Tareas = agruparPor(datosOrdenados, 'task_time', 'task_count', true);
-
-            dibujarGrafico('chartKmRobot', 'bar', porRobot_Km, '#0085CA');
-            dibujarGrafico('chartDuracionRobot', 'bar', porRobot_Duracion, '#8DC63F');
-            dibujarGrafico('chartTareasRobot', 'bar', porRobot_Tareas, '#C25973');
-            dibujarGrafico('chartKmTiempo', 'line', porTiempo_Km, '#0085CA');
-        }
-
-        function dibujarGrafico(idCanvas, tipo, dataObj, color) {
-            dataGraficosBase[idCanvas] = dataObj; 
-            const ctx = document.getElementById(idCanvas).getContext('2d');
-            if(graficosInstancias[idCanvas]) graficosInstancias[idCanvas].destroy(); 
-
-            graficosInstancias[idCanvas] = new Chart(ctx, {
-                type: tipo,
-                data: { labels: Object.keys(dataObj), datasets: [{ label: 'Total', data: Object.values(dataObj), backgroundColor: color, borderColor: color, borderWidth: 2, fill: tipo === 'line' ? false : true, tension: 0.3 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 } } }, y: { beginAtZero: true } } }
-            });
-        }
-
-        function abrirModalGrafico(idCanvasOriginal, tipo, color, titulo) {
-            document.getElementById('modal-titulo').innerText = titulo;
-            document.getElementById('modal-grafico').style.display = 'flex';
-            const dataObj = dataGraficosBase[idCanvasOriginal];
-            const ctx = document.getElementById('canvas-modal').getContext('2d');
-            if(chartModalInstancia) chartModalInstancia.destroy();
-
-            chartModalInstancia = new Chart(ctx, {
-                type: tipo,
-                data: { labels: Object.keys(dataObj), datasets: [{ label: titulo, data: Object.values(dataObj), backgroundColor: color, borderColor: color, borderWidth: 2, fill: tipo === 'line' ? false : true, tension: 0.3 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-            });
-        }
-        function cerrarModalGrafico() { document.getElementById('modal-grafico').style.display = 'none'; }
-
-        // --- PESTAÑA 2: INFORMES DETALLADOS ---
-        function actualizarPestanaDetalles() {
-            llenarFichaRobots();
-            renderTable();
-        }
-
-        function llenarFichaRobots() {
-            const robots = [...new Set(datosFiltradosActuales.map(d => d.apodo_robot))].filter(Boolean).sort();
-            const select = document.getElementById('select-ficha-robot');
-            select.innerHTML = "";
-            robots.forEach(r => select.innerHTML += `<option value="${r}">${r}</option>`);
-            actualizarFichaTecnica(); 
-        }
-
-        function actualizarFichaTecnica() {
-            const apodo = document.getElementById('select-ficha-robot').value;
-            const filaRobot = datosGlobales.find(d => d.apodo_robot === apodo);
-            if(!filaRobot) return;
-
-            document.getElementById('ficha-datos').innerHTML = `
-                <p><strong>Apodo / SN:</strong> ${filaRobot.apodo_robot || 'N/A'}</p>
-                <p><strong>Modelo:</strong> ${filaRobot.product_code || 'N/A'}</p>
-                <p><strong>MAC:</strong> ${filaRobot.mac || 'N/A'}</p>
-            `;
-
-            const historial = datosFiltradosActuales.filter(d => d.apodo_robot === apodo).sort((a,b) => new Date(b.task_time) - new Date(a.task_time));
-            let tbody = "";
-            historial.forEach(h => {
-                const km = parseFloat(h.mileage) || 0;
-                const dur = parseFloat(h.duration) || 0;
-
-                tbody += `<tr>
-                    <td>${extraerFecha(h.task_time)}</td>
-                    <td>${h.shop_name}</td>
-                    <td>${km.toFixed(2)}</td>
-                    <td>${h.task_count || 0}</td>
-                    <td>${formatHorasMinutos(dur)}</td>
-                </tr>`;
-            });
-            document.getElementById('tbody-historial').innerHTML = tbody || "<tr><td colspan='5'>No hay datos.</td></tr>";
+            document.getElementById('kpi-robots').innerText = robotsSet.size;
+            document.getElementById('kpi-kilometraje').innerText = sumKm.toFixed(2);
         }
 
         function renderTable() {
-            const query = document.getElementById('buscador-tabla').value.toLowerCase();
-            let tbody = ""; let procesados = 0;
-            
-            for(let i = 0; i < datosFiltradosActuales.length; i++) {
-                let d = datosFiltradosActuales[i];
-                if (Object.values(d).join(" ").toLowerCase().includes(query)) {
-                    const km = parseFloat(d.mileage) || 0;
-                    const dur = parseFloat(d.duration) || 0;
-
-                    tbody += `<tr>
-                        <td>${extraerFecha(d.task_time)}</td>
-                        <td>${d.shop_name || ''}</td>
-                        <td>${d.product_code || ''}</td>
-                        <td>${d.apodo_robot || ''}</td>
-                        <td>${d.mac || ''}</td>
-                        <td>${km.toFixed(2)}</td>
-                        <td>${d.task_count || 0}</td>
-                        <td>${formatHorasMinutos(dur)}</td>
-                    </tr>`;
-                    procesados++;
-                }
-                if (procesados >= 200) break;
-            }
-            document.getElementById('tbody-maestra').innerHTML = tbody || "<tr><td colspan='8'>No hay datos.</td></tr>";
-        }
-
-        function exportarExcel() {
-            const query = document.getElementById('buscador-tabla').value.toLowerCase();
-            let dataAExportar = datosFiltradosActuales.filter(d => Object.values(d).join(" ").toLowerCase().includes(query));
-            let datosLimpios = dataAExportar.map(d => {
-                return {
-                    "Fecha": extraerFecha(d.task_time), 
-                    "Tienda": d.shop_name, 
-                    "Robot": d.apodo_robot,
-                    "Modelo": d.product_code,
-                    "Kilometraje (km)": parseFloat(d.mileage) || 0, 
-                    "Total Tareas": d.task_count || 0,
-                    "Duración": formatHorasMinutos(parseFloat(d.duration) || 0)
-                };
+            let agrupar = {};
+            datosFiltrados.forEach(d => {
+                let r = d.apodo_robot || 'Desconocido';
+                if(!agrupar[r]) agrupar[r] = { tienda: d.shop_name, tareas: 0, duracion: 0, km: 0 };
+                agrupar[r].tareas += parseInt(d.task_count) || 0;
+                agrupar[r].duracion += parseFloat(d.duration) || 0;
+                agrupar[r].km += parseFloat(d.mileage) || 0;
+                agrupar[r].tienda = d.shop_name; 
             });
-            const worksheet = XLSX.utils.json_to_sheet(datosLimpios);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Rendimiento");
-            XLSX.writeFile(workbook, "Rendimientos_Casalimpia.xlsx");
-        }
-
-        // --- PESTAÑA 3: RESUMEN EJECUTIVO PARA PDF ---
-        function actualizarPestanaResumen() {
-            if(datosFiltradosActuales.length === 0) return;
-
-            let statsGlobales = { km:0, tareas:0, duracion:0, robots: new Set() };
-            let cronoStats = {}; 
-
-            datosFiltradosActuales.forEach(d => {
-                const km = parseFloat(d.mileage) || 0;
-                const tareas = parseInt(d.task_count) || 0;
-                const dur = parseFloat(d.duration) || 0;
-                const robot = d.apodo_robot;
-                const fecha = extraerFecha(d.task_time);
-
-                statsGlobales.km += km;
-                statsGlobales.tareas += tareas;
-                statsGlobales.duracion += dur;
-                statsGlobales.robots.add(robot);
-
-                if(!cronoStats[fecha]) cronoStats[fecha] = { km:0, tareas:0, duracion:0, robots: new Set() };
-                cronoStats[fecha].km += km;
-                cronoStats[fecha].tareas += tareas;
-                cronoStats[fecha].duracion += dur;
-                cronoStats[fecha].robots.add(robot);
-            });
-
-            let fDesde = document.getElementById('fecha-desde').value || "Inicio";
-            let fHasta = document.getElementById('fecha-hasta').value || "Fin";
-            document.getElementById('pdf-rango-fechas').innerText = `Período: ${fDesde} al ${fHasta}`;
-
-            document.getElementById('kpis-globales-resumen').innerHTML = `
-                <div class="kpi-card area"><div class="kpi-title">Kilometraje (km)</div><div class="kpi-value">${statsGlobales.km.toLocaleString('es-CO', {maximumFractionDigits: 2})}</div></div>
-                <div class="kpi-card tareas"><div class="kpi-title">Tareas Totales</div><div class="kpi-value">${statsGlobales.tareas.toLocaleString('es-CO')}</div></div>
-                <div class="kpi-card robots"><div class="kpi-title">Robots Operativos</div><div class="kpi-value">${statsGlobales.robots.size}</div></div>
-                <div class="kpi-card duracion"><div class="kpi-title">Tiempo Total</div><div class="kpi-value">${formatHorasMinutos(statsGlobales.duracion)}</div></div>
-            `;
-
-            let tbodyCrono = "";
-            let fechasArray = Object.keys(cronoStats).sort();
-            fechasArray.forEach(f => {
-                let st = cronoStats[f];
-                tbodyCrono += `<tr>
-                    <td>${f}</td>
-                    <td>${st.robots.size}</td>
-                    <td>${st.km.toLocaleString('es-CO', {maximumFractionDigits:2})} km</td>
-                    <td>${st.tareas.toLocaleString('es-CO')}</td>
-                    <td>${formatHorasMinutos(st.duracion)}</td>
+            let arr = Object.keys(agrupar).map(k => ({ nombre: k, ...agrupar[k] })).sort((a,b) => b.duracion - a.duracion);
+            let html = "";
+            arr.forEach(r => {
+                html += `<tr>
+                    <td><div class="robot-name">${getAvatar(r.nombre)} ${r.nombre}</div></td>
+                    <td><span class="badge-activo">● Activo</span></td>
+                    <td>${r.tienda || 'N/A'}</td>
+                    <td>${r.tareas.toLocaleString()}</td>
+                    <td><span class="metric-pill">${formatHoras(r.duracion)}</span></td>
+                    <td>${r.km.toFixed(2)}</td>
                 </tr>`;
             });
-            document.getElementById('tbody-cronologica').innerHTML = tbodyCrono;
+            document.getElementById('tbody-rendimiento').innerHTML = html || "<tr><td colspan='6'>No hay datos.</td></tr>";
         }
 
-        function generarPDF() {
-            const elemento = document.getElementById('informe-a-pdf');
-            elemento.classList.add('pdf-export-mode');
+        // ==========================================
+        // GRÁFICO 1: TENDENCIA DIARIA (TOGGLES ACTIVOS)
+        // ==========================================
+        function toggleDataset(index, btnElement) {
+            const isVisible = graficoTendencia.isDatasetVisible(index);
+            if (isVisible) {
+                graficoTendencia.hide(index);
+                btnElement.classList.remove('active');
+            } else {
+                graficoTendencia.show(index);
+                btnElement.classList.add('active');
+            }
+        }
 
-            const opciones = {
-                margin:       15,
-                filename:     'Reporte_Rendimiento_Pudu.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }, 
-                pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr' } 
-            };
+        function renderChartTendencia() {
+            let porDia = {};
+            datosFiltrados.sort((a,b) => new Date(a.task_time) - new Date(b.task_time)).forEach(d => {
+                let f = extraerFecha(d.task_time);
+                if(!porDia[f]) porDia[f] = { horas: 0, tareas: 0, km: 0 };
+                porDia[f].horas += parseFloat(d.duration) || 0; 
+                porDia[f].tareas += parseInt(d.task_count) || 0; 
+                porDia[f].km += parseFloat(d.mileage) || 0; 
+            });
 
-            html2pdf().set(opciones).from(elemento).save().then(() => {
-                elemento.classList.remove('pdf-export-mode');
+            const labels = Object.keys(porDia);
+            const dataHoras = labels.map(l => porDia[l].horas);
+            const dataTareas = labels.map(l => porDia[l].tareas);
+            const dataKm = labels.map(l => porDia[l].km);
+
+            const ctx = document.getElementById('chartTendencia').getContext('2d');
+            
+            let visibilityState = [true, true, true];
+            if(graficoTendencia) {
+                visibilityState[0] = graficoTendencia.isDatasetVisible(0);
+                visibilityState[1] = graficoTendencia.isDatasetVisible(1);
+                visibilityState[2] = graficoTendencia.isDatasetVisible(2);
+                graficoTendencia.destroy();
+            }
+
+            graficoTendencia = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Horas', type: 'bar', data: dataHoras, backgroundColor: '#008FFB', yAxisID: 'y', maxBarThickness: 15, borderRadius: 4, hidden: !visibilityState[0] },
+                        { label: 'Tareas', type: 'line', data: dataTareas, borderColor: '#00E396', backgroundColor: '#00E396', borderWidth: 2, tension: 0.3, yAxisID: 'y1', hidden: !visibilityState[1] },
+                        { label: 'Kilómetros', type: 'line', data: dataKm, borderColor: '#FEB019', backgroundColor: '#FEB019', borderWidth: 2, tension: 0.3, yAxisID: 'y', hidden: !visibilityState[2] }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { display: false } }, 
+                    scales: { 
+                        x: { grid: { display: false } },
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Horas / Km' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Tareas' }, grid: { drawOnChartArea: false } }
+                    }
+                }
             });
         }
 
-        window.onload = inicializarDashboard;
+        // ==========================================
+        // GRÁFICO 2: DONA CON SELECTOR DE COLOR CORREGIDO
+        // ==========================================
+        function cambiarMetricaDona(metrica, btnElement, colorActivo) {
+            // CORRECCIÓN: Buscamos el contenedor más cercano de los botones
+            const container = btnElement.closest('.metric-selectors');
+            container.querySelectorAll('.metric-btn').forEach(btn => {
+                btn.style.backgroundColor = 'transparent';
+                btn.style.color = 'var(--text-muted)';
+            });
+            
+            btnElement.style.backgroundColor = colorActivo;
+            if (metrica === 'tareas') btnElement.style.color = 'var(--bg-dark)';
+            else btnElement.style.color = 'white';
+            
+            metricaDonaActiva = metrica;
+            renderChartDona();
+        }
+
+        function renderChartDona() {
+            let porTienda = {};
+            datosFiltrados.forEach(d => {
+                let t = d.shop_name || 'Sin Tienda';
+                if(!porTienda[t]) porTienda[t] = 0;
+                
+                if (metricaDonaActiva === 'duracion') porTienda[t] += parseFloat(d.duration) || 0;
+                else if (metricaDonaActiva === 'tareas') porTienda[t] += parseInt(d.task_count) || 0;
+                else if (metricaDonaActiva === 'km') porTienda[t] += parseFloat(d.mileage) || 0;
+            });
+
+            const sortedLabels = Object.keys(porTienda).sort((a,b) => porTienda[b] - porTienda[a]);
+            const sortedData = sortedLabels.map(l => porTienda[l]);
+
+            const ctx = document.getElementById('chartDona').getContext('2d');
+            if(graficoDona) graficoDona.destroy();
+            graficoDona = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sortedLabels,
+                    datasets: [{
+                        data: sortedData,
+                        backgroundColor: palette,
+                        borderWidth: 0, hoverOffset: 5
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '75%',
+                    plugins: {
+                        legend: { display: false }, 
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    let val = ctx.raw;
+                                    if(metricaDonaActiva === 'duracion') return ` ${ctx.label}: ${formatHoras(val)}`;
+                                    if(metricaDonaActiva === 'km') return ` ${ctx.label}: ${val.toFixed(2)} km`;
+                                    return ` ${ctx.label}: ${val.toLocaleString()} tareas`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const leyendaContainer = document.getElementById('leyenda-dona');
+            leyendaContainer.innerHTML = '';
+            
+            sortedLabels.forEach((label, i) => {
+                const color = palette[i % palette.length];
+                let val = sortedData[i];
+                let displayVal = "";
+                
+                if (metricaDonaActiva === 'duracion') displayVal = formatHoras(val);
+                else if (metricaDonaActiva === 'km') displayVal = val.toFixed(2) + ' km';
+                else displayVal = val.toLocaleString();
+
+                leyendaContainer.innerHTML += `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: ${color};"></div>
+                        <div class="legend-text" title="${label}"><strong>${label}</strong> <span style="color:var(--text-muted)">(${displayVal})</span></div>
+                    </div>
+                `;
+            });
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
