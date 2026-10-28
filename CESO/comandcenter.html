@@ -20,23 +20,25 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
+        /* LÓGICA 75% SIN SCROLL GLOBAL (IGUAL AL DASHBOARD) */
+        html { overflow: hidden; width: 100vw; height: 100vh; }
+        
+        body { 
             font-family: 'Roboto', sans-serif; 
-            background-color: var(--bg-oscuro);
+            background-color: var(--bg-oscuro); 
             color: var(--color-gris-texto); 
-            min-height: 100vh; 
-            display: flex; 
+            transform: scale(0.75); 
+            transform-origin: top left; 
+            width: 133.333vw; 
+            height: 133.333vh; 
+            margin: 0;
+            overflow: hidden; 
+            display: flex;
             flex-direction: column;
-            zoom: 80%; 
         }
 
-        @-moz-document url-prefix() {
-            body {
-                transform: scale(0.8);
-                transform-origin: top center;
-                width: 125%;
-            }
-        }
+        /* ELIMINAMOS REGLAS ZOOM ANTERIORES PARA EVITAR CONFLICTOS */
+        @-moz-document url-prefix() {}
 
         /* HEADER OPTIMIZADO */
         header {
@@ -50,6 +52,7 @@
             position: sticky; 
             top: 0; 
             z-index: 100; 
+            flex-shrink: 0;
         }
 
         .header-left { flex: 1; display: flex; justify-content: flex-start; }
@@ -70,10 +73,19 @@
         .text-verde { color: var(--color-verde-logo); font-size: 1.6rem; }
         .text-azul { color: var(--color-azul-logo); font-size: 1.6rem; margin-left: 6px; }
 
-        /* CONTENEDOR DE MÓDULOS (GRID) */
+        /* SCROLL INTERNO PARA EL CONTENIDO POR SI LA PANTALLA ES PEQUEÑA */
+        .contenido-principal {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 40px;
+        }
+
+        /* CONTENEDOR DE MÓDULOS (4 COLUMNAS FIJAS SIN SALTO DE LÍNEA) */
         .modulos-container {
-            max-width: 1000px; margin: 40px auto 20px auto; padding: 0 20px; width: 100%;
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px;
+            max-width: 90%; margin: 40px auto 20px auto; padding: 0 20px; width: 100%;
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); /* FORZAMOS 4 COLUMNAS EN 1 SOLA FILA */
+            gap: 25px;
         }
 
         .modulo-card {
@@ -106,7 +118,7 @@
 
         /* BOTÓN PANTALLA CENTRAL */
         .contenedor-monitoreo {
-            max-width: 1000px; margin: 0 auto 40px auto; padding: 0 20px; width: 100%;
+            max-width: 90%; margin: 0 auto 40px auto; padding: 0 20px; width: 100%;
         }
         
         .btn-monitoreo-central {
@@ -146,24 +158,26 @@
             color: #E0F2FE;
         }
 
-        @media (max-width: 900px) {
-            header { flex-direction: column; gap: 15px; padding: 15px 5%; }
-            .header-left, .header-center, .header-right { display: flex; justify-content: center; flex: none; width: 100%; }
-            .header-right { display: none; }
+        /* MEDIA QUERIES PARA PANTALLAS CHICAS */
+        @media (max-width: 1024px) {
+            /* Permitimos salto de línea solo si la pantalla es muy estrecha */
+            .modulos-container { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (max-width: 600px) {
-            body { zoom: 100%; } 
+            /* Revertimos el escalado en móviles */
+            body { transform: scale(1); width: 100%; min-height: 100vh; }
+            .modulos-container { grid-template-columns: 1fr; }
+            
+            header { flex-direction: column; gap: 15px; padding: 15px 5%; }
+            .header-left, .header-center, .header-right { display: flex; justify-content: center; flex: none; width: 100%; }
+            .header-right { display: none; }
+            
             .logo-img { height: 35px; } 
             .text-verde, .text-azul { font-size: 1.25rem; margin-left: 2px; }
             .header-center h1 { font-size: 1.4rem; white-space: normal;}
             
-            .btn-monitoreo-central {
-                flex-direction: column;
-                text-align: center;
-                padding: 20px 15px;
-                gap: 15px;
-            }
+            .btn-monitoreo-central { flex-direction: column; text-align: center; padding: 20px 15px; gap: 15px; }
             .btn-monitoreo-central .texto { text-align: center; }
         }
     </style>
@@ -188,51 +202,53 @@
         <div class="header-right"></div>
     </header>
 
-    <div class="modulos-container">
-        
-        <!-- MÓDULO 1: ROBOTS DE LIMPIEZA -->
-        <div class="modulo-card">
-            <div class="modulo-icon">🤖</div>
-            <h3>Robots de Limpieza</h3>
-            <p>Monitoreo del estado, gestión y visualización del desempeño de los robots Pudu.</p>
-            <a href="informe_robotslimpieza_pudu.html" class="btn-modulo btn-modulo-verde">Ver Informe de Robots</a>
-        </div>
-
-        <!-- MÓDULO 2: MARCACIONES BIOMÉTRICOS -->
-        <div class="modulo-card">
-            <div class="modulo-icon">👆</div>
-            <h3>Marcaciones Biométricos</h3>
-            <p>Control y visualización de los registros de ingreso y salida marcados por el personal en tiempo real.</p>
-            <a href="biometricos.html" class="btn-modulo">Ingresar al Módulo</a>
-        </div>
-
-        <!-- MÓDULO 3: SEGUIMIENTO DE RUTINAS -->
-        <div class="modulo-card">
-            <div class="modulo-icon">📋</div>
-            <h3>Seguimiento de Rutinas</h3>
-            <p>Verificación del cumplimiento de las rutinas operativas asignadas en las diferentes instalaciones.</p>
-            <a href="rutinas.html" class="btn-modulo">Ingresar al Módulo</a>
-        </div>
-
-        <!-- MÓDULO 4: CONTROL DE VACANTES -->
-        <div class="modulo-card">
-            <div class="modulo-icon">👥</div>
-            <h3>Control de Vacantes</h3>
-            <p>Monitoreo de tiempos de respuesta, vacantes pendientes y novedades de contratación a nivel nacional.</p>
-            <a href="vacantes.html" class="btn-modulo">Ingresar al Módulo</a>
-        </div>
-
-    </div>
-
-    <!-- PANTALLA CENTRAL (TIPO BANNER ANCHO) -->
-    <div class="contenedor-monitoreo">
-        <a href="dashboard_general.html" class="btn-monitoreo-central">
-            <span class="icono">🖥️</span>
-            <div class="texto">
-                <h3>Pantalla de Monitoreo Central</h3>
-                <p>Visualizar el panel general unificado de todos los pilares operativos en tiempo real.</p>
+    <div class="contenido-principal">
+        <div class="modulos-container">
+            
+            <!-- MÓDULO 1: ROBOTS DE LIMPIEZA -->
+            <div class="modulo-card">
+                <div class="modulo-icon">🤖</div>
+                <h3>Robots de Limpieza</h3>
+                <p>Monitoreo del estado, gestión y visualización del desempeño de los robots Pudu.</p>
+                <a href="informe_robotslimpieza_pudu.html" class="btn-modulo btn-modulo-verde">Ver Informe de Robots</a>
             </div>
-        </a>
+
+            <!-- MÓDULO 2: MARCACIONES BIOMÉTRICOS -->
+            <div class="modulo-card">
+                <div class="modulo-icon">👆</div>
+                <h3>Marcaciones Biométricos</h3>
+                <p>Control y visualización de los registros de ingreso y salida marcados por el personal en tiempo real.</p>
+                <a href="biometricos.html" class="btn-modulo">Ingresar al Módulo</a>
+            </div>
+
+            <!-- MÓDULO 3: SEGUIMIENTO DE RUTINAS -->
+            <div class="modulo-card">
+                <div class="modulo-icon">📋</div>
+                <h3>Seguimiento de Rutinas</h3>
+                <p>Verificación del cumplimiento de las rutinas operativas asignadas en las diferentes instalaciones.</p>
+                <a href="rutinas.html" class="btn-modulo">Ingresar al Módulo</a>
+            </div>
+
+            <!-- MÓDULO 4: CONTROL DE VACANTES -->
+            <div class="modulo-card">
+                <div class="modulo-icon">👥</div>
+                <h3>Control de Vacantes</h3>
+                <p>Monitoreo de tiempos de respuesta, vacantes pendientes y novedades de contratación a nivel nacional.</p>
+                <a href="vacantes.html" class="btn-modulo">Ingresar al Módulo</a>
+            </div>
+
+        </div>
+
+        <!-- PANTALLA CENTRAL (TIPO BANNER ANCHO) -->
+        <div class="contenedor-monitoreo">
+            <a href="PRUEBA-1.html" class="btn-monitoreo-central">
+                <span class="icono">🖥️</span>
+                <div class="texto">
+                    <h3>Pantalla de Monitoreo Central</h3>
+                    <p>Visualizar el panel general unificado de todos los pilares operativos en tiempo real.</p>
+                </div>
+            </a>
+        </div>
     </div>
 
 </body>
