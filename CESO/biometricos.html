@@ -27,11 +27,23 @@
             --st-falta: #FF4560;
             --st-incompleto: #FEB019;
             --st-noprogramado: #008FFB;
+            --st-connovedad: #775DD0;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-dark); color: var(--text-main); zoom: 0.75; }
+        /* Solución del Zoom: Escala la página matemáticamente sin romper las coordenadas del mouse */
+        html { overflow-x: hidden; }
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            transform: scale(0.75); 
+            transform-origin: top left; 
+            width: 133.33%; 
+            min-height: 133.33vh; 
+            margin: 0;
+        }
 
         header { background-color: #FFFFFF; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-top: 5px solid var(--color-azul-logo); border-bottom: 5px solid var(--color-azul-logo); flex-wrap: wrap; gap: 15px; position: sticky; top: 0; z-index: 100; }
         .logo-container { display: flex; align-items: center; gap: 15px; }
@@ -49,18 +61,23 @@
 
         .dashboard-wrapper { max-width: 95%; margin: 0 auto; padding: 20px; display: none; flex-direction: column; gap: 20px; }
 
-        .filters-bar { background-color: var(--bg-panel); border-radius: 12px; padding: 15px 25px; display: flex; align-items: flex-end; flex-wrap: wrap; gap: 15px; border: 1px solid var(--border-dark); }
-        .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
-        .input-group label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); font-family: 'Outfit', sans-serif;}
-        .input-group input[type="date"] { padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-dark); background: var(--bg-dark); color: white; font-family: 'Roboto', sans-serif; outline: none; color-scheme: dark; }
-        .btn-limpiar { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; height: 42px; }
+        /* Barra de Filtros */
+        .filters-bar { background-color: var(--bg-panel); border-radius: 12px; padding: 15px 20px; display: flex; align-items: flex-end; flex-wrap: wrap; gap: 15px; border: 1px solid var(--border-dark); }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); font-family: 'Outfit', sans-serif; white-space: nowrap;}
+        .input-group input[type="date"] { padding: 10px; border-radius: 8px; border: 1px solid var(--border-dark); background: var(--bg-dark); color: white; font-family: 'Roboto', sans-serif; outline: none; color-scheme: dark; width: 130px;}
+        
+        .btn-buscar { background: var(--color-azul-logo); color: white; border: none; padding: 0; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; font-size: 1.2rem; transition: 0.3s; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+        .btn-buscar:hover { background: #006CA6; }
+        .btn-limpiar { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 0 15px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; height: 42px; flex-shrink: 0;}
         .btn-limpiar:hover { border-color: white; color: white; }
 
         .choices { margin-bottom: 0; width: 100%; }
         .choices__inner { background-color: var(--bg-dark) !important; border: 1px solid var(--border-dark) !important; border-radius: 8px !important; min-height: 42px; padding: 4px 8px; }
         .choices__input { color: white !important; background-color: transparent !important; }
         .choices__list--dropdown { background-color: var(--bg-panel) !important; border: 1px solid var(--border-dark) !important; color: white !important;}
-        .choices__list--dropdown .choices__item { color: white; }
+        .choices__list--dropdown .choices__item { color: white; transition: 0.1s; }
+        .choices__list--dropdown .choices__item--selectable.is-highlighted { background-color: var(--color-verde-logo) !important; color: var(--bg-dark) !important; font-weight: 700;}
         .choices__list--multiple .choices__item { background-color: var(--color-azul-logo); border: none; border-radius: 6px; }
 
         .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
@@ -72,38 +89,45 @@
 
         /* KPIs */
         .kpi-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
-        .kpi-box { text-align: center; padding: 20px 10px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid var(--border-dark);}
-        .kpi-main { background: rgba(0, 143, 251, 0.05); border: 1px solid rgba(0, 143, 251, 0.2); }
-        .kpi-box .kpi-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; font-family: 'Outfit';}
-        .kpi-box .kpi-val { font-size: 2.2rem; font-weight: 700; font-family: 'Outfit'; color: white;}
-        .val-main { color: var(--text-main) !important; font-size: 2.8rem !important; }
+        .kpi-box { text-align: left; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid var(--border-dark); position: relative;}
+        .kpi-main { background: rgba(0, 227, 150, 0.05); border: 1px solid rgba(0, 227, 150, 0.2); text-align: center; }
+        .kpi-box .kpi-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; font-family: 'Outfit'; text-transform: uppercase;}
+        .kpi-box .kpi-val { font-size: 1.8rem; font-weight: 700; font-family: 'Outfit'; color: white; margin-bottom: 5px;}
+        .kpi-box .kpi-sub { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+        .val-main { color: var(--st-cumplido) !important; font-size: 3rem !important; margin-bottom: 0 !important;}
         .val-red { color: var(--st-falta) !important; }
-        .val-orange { color: var(--st-incompleto) !important; }
         .val-blue { color: var(--st-noprogramado) !important; }
 
-        /* Gráficas */
         .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         .chart-container { position: relative; height: 350px; width: 100%; }
         
-        /* Tabla */
+        /* Tabla y Buscador */
         .table-panel { overflow-x: auto; padding-bottom: 0; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th { font-family: 'Outfit', sans-serif; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; padding: 15px; border-bottom: 1px solid var(--border-dark); }
         td { padding: 15px; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #E2E8F0; }
         tr:hover { background-color: rgba(255,255,255,0.02); }
         
+        .buscador-tabla { padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-dark); background: var(--bg-dark); color: white; font-family: 'Roboto', sans-serif; outline: none; width: 280px; }
+        .btn-filtro { background: var(--border-dark); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Outfit'; transition: 0.3s; }
+        .btn-filtro:hover { background: var(--text-muted); color: var(--bg-dark); }
+        
         .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: white; flex-shrink: 0;}
         .col-empleado { display: flex; align-items: center; gap: 10px; font-weight: 600; font-family: 'Outfit'; }
+        
+        /* Truncamiento para ahorrar espacio en la tabla */
+        .txt-truncado { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; display: block; }
+        .txt-truncado-cliente { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; display: block; }
         
         .badge { padding: 5px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; border: 1px solid transparent; display: inline-block; text-align: center; min-width: 100px;}
         .badge-cumplido { background: rgba(0, 227, 150, 0.15); color: var(--st-cumplido); border-color: rgba(0,227,150,0.3); }
         .badge-falta { background: rgba(255, 69, 96, 0.15); color: var(--st-falta); border-color: rgba(255,69,96,0.3); }
         .badge-incompleto { background: rgba(254, 176, 25, 0.15); color: var(--st-incompleto); border-color: rgba(254,176,25,0.3); }
         .badge-noprogramado { background: rgba(0, 143, 251, 0.15); color: var(--st-noprogramado); border-color: rgba(0,143,251,0.3); }
+        .badge-connovedad { background: rgba(119, 93, 208, 0.15); color: var(--st-connovedad); border-color: rgba(119,93,208,0.3); }
         
         .text-muted-small { font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 4px; }
 
-        /* Controles de Paginación */
         .pagination-controls { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-top: 1px solid var(--border-dark); background: var(--bg-panel); border-radius: 0 0 12px 12px; }
         .btn-page { background: var(--bg-dark); color: white; border: 1px solid var(--border-dark); padding: 8px 20px; border-radius: 6px; cursor: pointer; font-family: 'Outfit'; font-weight: 600; transition: 0.2s;}
         .btn-page:hover:not(:disabled) { background: var(--border-dark); }
@@ -113,11 +137,6 @@
         @media (max-width: 1024px) {
             .kpi-container { grid-template-columns: repeat(3, 1fr); }
             .charts-row { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 768px) {
-            body { zoom: 1; }
-            .kpi-container { grid-template-columns: 1fr; }
-            .filters-bar { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
@@ -130,70 +149,78 @@
         </div>
         <div class="header-actions">
             <div class="header-title">Consolidado de Asistencias</div>
-            <a href="comandcenter.html" class="btn-volver">← Volver al Menú</a>
+            <a href="#" class="btn-volver">← Volver al Menú</a>
         </div>
     </header>
 
-    <div id="loading-screen">⏳ Extrayendo datos operativos...</div>
+    <div id="loading-screen">⏳ Preparando entorno operativo...</div>
 
     <div class="dashboard-wrapper" id="dashboard-main">
         
         <div class="filters-bar">
-            <div class="input-group" style="max-width: 140px;">
+            <div class="input-group">
                 <label>Desde</label>
                 <input type="date" id="fecha-desde">
             </div>
-            <div class="input-group" style="max-width: 140px;">
+            <div class="input-group">
                 <label>Hasta</label>
                 <input type="date" id="fecha-hasta">
             </div>
-            <div class="input-group">
+            <div class="input-group" style="justify-content: flex-end;">
+                <button class="btn-buscar" onclick="cargarDatosDeSupabase()" title="Cargar Datos">🔍</button>
+            </div>
+            <div class="input-group" style="flex: 1; min-width: 200px;">
                 <label>Cliente / Contrato</label>
                 <select id="filtro-cliente" multiple></select>
             </div>
-            <div class="input-group">
-                <label>Frente / Sucursal</label>
-                <select id="filtro-sucursal" multiple></select>
-            </div>
-            <div class="input-group" style="max-width: 200px;">
-                <label>Estado Asistencia</label>
+            <div class="input-group" style="flex: 1; min-width: 150px;">
+                <label>Estado</label>
                 <select id="filtro-estado" multiple>
                     <option value="Cumplido">Cumplido</option>
+                    <option value="Con Novedad">Con Novedad</option>
                     <option value="Falta">Falta</option>
                     <option value="Incompleto">Incompleto</option>
                     <option value="No Programado">No Programado</option>
                 </select>
             </div>
-            <button class="btn-limpiar" onclick="resetFilters()">Limpiar</button>
+            <div class="input-group" style="flex: 1; min-width: 150px;">
+                <label>Origen</label>
+                <select id="filtro-origen" multiple></select>
+            </div>
+            <div class="input-group" style="justify-content: flex-end;">
+                <button class="btn-limpiar" onclick="resetFiltersLocales()">Limpiar</button>
+            </div>
         </div>
 
         <div class="dashboard-grid">
             
-            <!-- KPIs -->
             <div class="panel kpi-container">
                 <div class="kpi-box kpi-main">
-                    <div class="kpi-title">Horas Trabajadas</div>
-                    <div class="kpi-val val-main" id="kpi-horas">0</div>
+                    <div class="kpi-title" style="color:var(--text-main);">Cumplimiento (%)</div>
+                    <div class="kpi-val val-main" id="kpi-cumplimiento">0%</div>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-title">Ausentismos (Faltas)</div>
-                    <div class="kpi-val val-red" id="kpi-faltas">0</div>
+                    <div class="kpi-title">Planeación (Programado)</div>
+                    <div class="kpi-val" id="kpi-prog-turnos">0 Turnos</div>
+                    <div class="kpi-sub" id="kpi-prog-horas">0 Horas Equivalentes</div>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-title">Retrasos Acumulados (Min)</div>
-                    <div class="kpi-val" id="kpi-retrasos">0</div>
+                    <div class="kpi-title">Realidad (Ejecutado)</div>
+                    <div class="kpi-val" id="kpi-ejec-turnos">0 Turnos</div>
+                    <div class="kpi-sub" id="kpi-ejec-horas">0 Horas Reales</div>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-title">Marcaciones Incompletas</div>
-                    <div class="kpi-val val-orange" id="kpi-incompletos">0</div>
+                    <div class="kpi-title">Déficit (Pérdida)</div>
+                    <div class="kpi-val val-red" id="kpi-deficit">- 0 h</div>
+                    <div class="kpi-sub">Por faltas y retrasos</div>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-title">Trabajo No Programado</div>
-                    <div class="kpi-val val-blue" id="kpi-noprogramado">0</div>
+                    <div class="kpi-title">Sobreocupación</div>
+                    <div class="kpi-val val-blue" id="kpi-sobreocupacion">+ 0 h</div>
+                    <div class="kpi-sub">Personal no programado</div>
                 </div>
             </div>
 
-            <!-- Gráficas -->
             <div class="charts-row">
                 <div class="panel">
                     <div class="panel-header">
@@ -219,25 +246,33 @@
                 </div>
             </div>
 
-            <!-- Tabla -->
             <div class="panel table-panel">
-                <div class="panel-title" style="padding: 0 15px;">Registro Detallado de Personal</div>
-                <div class="panel-subtitle" style="padding: 0 15px 15px 15px;">Información cruzada entre Turnos (SIC) y Marcaciones Reales (SaberBot)</div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; padding: 0 15px 15px 15px; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <div class="panel-title">Registro Detallado de Personal</div>
+                        <div class="panel-subtitle">Información cruzada entre Turnos (SIC) y Marcaciones Reales</div>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="input-busqueda" class="buscador-tabla" placeholder="Escribe Cédula o Nombre...">
+                        <button class="btn-filtro" onclick="aplicarFiltros()">Buscar</button>
+                    </div>
+                </div>
+                
                 <table>
                     <thead>
                         <tr>
                             <th>Fecha</th>
-                            <th>Colaborador</th>
+                            <th>Colaborador / Cédula</th>
                             <th>Cliente / Frente</th>
+                            <th>Origen</th>
                             <th>Turno Asignado</th>
                             <th>Marcación Real</th>
-                            <th>Retraso</th>
+                            <th>Desviación</th>
                             <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody id="tbody-rendimiento"></tbody>
                 </table>
-                <!-- Controles de paginación añadidos aquí -->
                 <div class="pagination-controls">
                     <button id="btn-prev" onclick="cambiarPagina(-1)" class="btn-page">← Anterior</button>
                     <span id="paginacion-info">Página 1 de 1</span>
@@ -253,7 +288,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_LH1iVez6V1qmj8Lk_YVZFA_Y2nYwdKw';
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // Ajustes globales de Tooltips para que se vean bien en fondo oscuro
         Chart.defaults.color = '#94A3B8';
         Chart.defaults.font.family = "'Roboto', sans-serif";
         Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(26, 35, 51, 0.95)';
@@ -264,21 +298,14 @@
         Chart.defaults.plugins.tooltip.padding = 10;
         Chart.defaults.plugins.tooltip.cornerRadius = 8;
 
-        const coloresEstado = {
-            'Cumplido': '#00E396',
-            'Falta': '#FF4560',
-            'Incompleto': '#FEB019',
-            'No Programado': '#008FFB'
-        };
-
+        const coloresEstado = { 'Cumplido': '#00E396', 'Con Novedad': '#775DD0', 'Falta': '#FF4560', 'Incompleto': '#FEB019', 'No Programado': '#008FFB' };
         const palette = ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0', '#FF66C3', '#9D00FF'];
 
         let datosGlobales = [];
         let datosFiltrados = []; 
         let graficoTendencia = null, graficoDona = null;
-        let clienteChoices, sucursalChoices, estadoChoices;
+        let clienteChoices, estadoChoices, origenChoices;
         
-        // Variables de Paginación
         let paginaActual = 1;
         const filasPorPagina = 10;
 
@@ -290,94 +317,105 @@
 
         function formatTime(timestamp) {
             if (!timestamp) return 'Sin marcas';
-            const d = new Date(timestamp);
-            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
         async function init() {
+            const hoy = new Date();
+            const primero = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            document.getElementById('fecha-desde').value = primero.toISOString().split('T')[0];
+            document.getElementById('fecha-hasta').value = hoy.toISOString().split('T')[0];
+
             initChoices();
-            try {
-                const { data, error } = await clienteSupabase
-                    .from('vista_consolidada_asistencias')
-                    .select('*')
-                    .order('fecha_operacion', { ascending: false });
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
-                    document.getElementById('loading-screen').style.display = 'none';
-                    document.getElementById('dashboard-main').style.display = 'flex';
-                    procesarDatosIniciales(data);
-                } else {
-                    document.getElementById('loading-screen').innerHTML = '⚠️ No hay datos en Supabase.';
-                }
-            } catch (err) {
-                console.error(err);
-                document.getElementById('loading-screen').innerHTML = '❌ Error de conexión.';
-            }
-
-            document.getElementById('fecha-desde').addEventListener('change', aplicarFiltros);
-            document.getElementById('fecha-hasta').addEventListener('change', aplicarFiltros);
+            await cargarDatosDeSupabase();
         }
 
         function initChoices() {
             clienteChoices = new Choices('#filtro-cliente', { removeItemButton: true, placeholderValue: 'Seleccionar Cliente' });
-            sucursalChoices = new Choices('#filtro-sucursal', { removeItemButton: true, placeholderValue: 'Seleccionar Frente' });
             estadoChoices = new Choices('#filtro-estado', { removeItemButton: true, placeholderValue: 'Seleccionar Estado' });
+            origenChoices = new Choices('#filtro-origen', { removeItemButton: true, placeholderValue: 'Origen' });
             
-            document.getElementById('filtro-cliente').addEventListener('change', () => { actualizarFiltroSucursales(); aplicarFiltros(); });
-            document.getElementById('filtro-sucursal').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtro-cliente').addEventListener('change', aplicarFiltros);
             document.getElementById('filtro-estado').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtro-origen').addEventListener('change', aplicarFiltros);
+            
+            document.getElementById('input-busqueda').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') aplicarFiltros();
+            });
         }
 
-        function procesarDatosIniciales(data) {
-            datosGlobales = data; 
-            
-            const clientes = [...new Set(data.map(d => d.razon_social_cliente))].filter(Boolean).sort();
-            clienteChoices.setChoices(clientes.map(c => ({ value: c, label: c })), 'value', 'label', true);
-            
-            actualizarFiltroSucursales();
-            aplicarFiltros(); 
+        async function cargarDatosDeSupabase() {
+            document.getElementById('loading-screen').style.display = 'block';
+            document.getElementById('dashboard-main').style.display = 'none';
+
+            const fDesde = document.getElementById('fecha-desde').value;
+            const fHasta = document.getElementById('fecha-hasta').value;
+
+            try {
+                document.getElementById('loading-screen').innerText = `⏳ Consultando Vista Materializada...`;
+
+                // UNA SOLA LLAMADA MASIVA: Consulta directa a la vista de alta velocidad
+                const { data, error } = await clienteSupabase
+                    .from('mv_asistencias_dashboard')
+                    .select('*')
+                    .gte('fecha_operacion', fDesde)
+                    .lte('fecha_operacion', fHasta);
+                
+                if (error) throw error;
+                
+                datosGlobales = data || [];
+                
+                const clientes = [...new Set(datosGlobales.map(d => d.razon_social_cliente))].filter(Boolean).sort();
+                clienteChoices.setChoices(clientes.map(c => ({ value: c, label: c })), 'value', 'label', true);
+
+                const origenes = [...new Set(datosGlobales.map(d => d.origen_marcacion))].filter(Boolean).sort();
+                origenChoices.setChoices(origenes.map(o => ({ value: o, label: o })), 'value', 'label', true);
+
+                aplicarFiltros();
+                
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('dashboard-main').style.display = 'flex';
+                
+            } catch (err) {
+                console.error("ERROR SUPABASE:", err);
+                const msg = err.message || JSON.stringify(err);
+                document.getElementById('loading-screen').innerHTML = `
+                    <div style="color: #FF4560; font-weight: bold; font-size: 2rem;">❌ Error de conexión.</div>
+                    <div style="margin-top: 15px; font-size: 1rem; color: #94A3B8;">Detalle: ${msg}</div>
+                `;
+            }
         }
 
-        function actualizarFiltroSucursales() {
-            const clientesSelec = clienteChoices.getValue(true); 
-            let sucursales = clientesSelec.length === 0 ? 
-                [...new Set(datosGlobales.map(d => d.nombre_sucursal))] :
-                [...new Set(datosGlobales.filter(d => clientesSelec.includes(d.razon_social_cliente)).map(d => d.nombre_sucursal))];
-            
-            sucursales = sucursales.filter(Boolean).sort();
-            const sucursalesSelec = sucursalChoices.getValue(true);
-            sucursalChoices.setChoices(sucursales.map(s => ({ value: s, label: s, selected: sucursalesSelec.includes(s) })), 'value', 'label', true);
-        }
-
-        function resetFilters() {
+        function resetFiltersLocales() {
             clienteChoices.removeActiveItems();
-            sucursalChoices.removeActiveItems();
             estadoChoices.removeActiveItems();
-            document.getElementById('fecha-desde').value = '';
-            document.getElementById('fecha-hasta').value = '';
-            procesarDatosIniciales(datosGlobales);
+            origenChoices.removeActiveItems();
+            document.getElementById('input-busqueda').value = ''; 
+            aplicarFiltros();
         }
 
         function aplicarFiltros() {
             const clientes = clienteChoices.getValue(true);
-            const sucursales = sucursalChoices.getValue(true);
             const estados = estadoChoices.getValue(true);
-            const fDesde = document.getElementById('fecha-desde').value;
-            const fHasta = document.getElementById('fecha-hasta').value;
+            const origenes = origenChoices.getValue(true);
+            const textoBusqueda = document.getElementById('input-busqueda').value.toLowerCase().trim();
 
             datosFiltrados = datosGlobales.filter(d => {
                 let matchC = clientes.length === 0 || clientes.includes(d.razon_social_cliente);
-                let matchS = sucursales.length === 0 || sucursales.includes(d.nombre_sucursal);
                 let matchE = estados.length === 0 || estados.includes(d.estado_asistencia);
-                let matchF = true;
-                if (fDesde && d.fecha_operacion < fDesde) matchF = false;
-                if (fHasta && d.fecha_operacion > fHasta) matchF = false;
-                return matchC && matchS && matchE && matchF;
+                let matchO = origenes.length === 0 || origenes.includes(d.origen_marcacion);
+                
+                let matchTexto = true;
+                if (textoBusqueda) {
+                    const doc = (d.documento_empleado || '').toLowerCase();
+                    const nom = (d.nombre_empleado || '').toLowerCase();
+                    matchTexto = doc.includes(textoBusqueda) || nom.includes(textoBusqueda);
+                }
+
+                return matchC && matchE && matchO && matchTexto;
             });
             
-            paginaActual = 1; // Reiniciar a la página 1 al filtrar
+            paginaActual = 1;
             actualizarKPIs();
             renderTable();
             renderChartTendencia();
@@ -385,22 +423,35 @@
         }
 
         function actualizarKPIs() {
-            let horas = 0, faltas = 0, retrasos = 0, incompletos = 0, noProg = 0;
+            let turnosProg = 0, horasProg = 0;
+            let turnosEjec = 0, horasEjec = 0;
+            let horasDeficit = 0, horasSobreocupacion = 0;
             
             datosFiltrados.forEach(d => {
-                horas += parseFloat(d.horas_trabajadas) || 0;
-                retrasos += parseInt(d.minutos_tarde) || 0;
-                
-                if(d.estado_asistencia === 'Falta') faltas++;
-                if(d.estado_asistencia === 'Incompleto') incompletos++;
-                if(d.estado_asistencia === 'No Programado') noProg++;
+                if (d.estado_asistencia !== 'No Programado') {
+                    turnosProg++;
+                    horasProg += parseFloat(d.horas_programadas) || 0;
+                }
+                if (d.hora_entrada || d.hora_salida) {
+                    turnosEjec++;
+                    horasEjec += parseFloat(d.horas_trabajadas) || 0;
+                }
+                horasDeficit += parseFloat(d.horas_deficit) || 0;
+                horasSobreocupacion += parseFloat(d.horas_sobreocupacion) || 0;
             });
             
-            document.getElementById('kpi-horas').innerText = horas.toFixed(1);
-            document.getElementById('kpi-faltas').innerText = faltas;
-            document.getElementById('kpi-retrasos').innerText = retrasos;
-            document.getElementById('kpi-incompletos').innerText = incompletos;
-            document.getElementById('kpi-noprogramado').innerText = noProg;
+            let porcentajeCumplimiento = 0;
+            if (horasProg > 0) {
+                porcentajeCumplimiento = (horasEjec / horasProg) * 100;
+            }
+
+            document.getElementById('kpi-cumplimiento').innerText = porcentajeCumplimiento.toFixed(1) + '%';
+            document.getElementById('kpi-prog-turnos').innerText = turnosProg.toLocaleString() + ' Turnos';
+            document.getElementById('kpi-prog-horas').innerText = horasProg.toFixed(1) + ' Hrs Equivalentes';
+            document.getElementById('kpi-ejec-turnos').innerText = turnosEjec.toLocaleString() + ' Turnos';
+            document.getElementById('kpi-ejec-horas').innerText = horasEjec.toFixed(1) + ' Hrs Reales';
+            document.getElementById('kpi-deficit').innerText = '- ' + horasDeficit.toFixed(1) + ' h';
+            document.getElementById('kpi-sobreocupacion').innerText = '+ ' + horasSobreocupacion.toFixed(1) + ' h';
         }
 
         function cambiarPagina(delta) {
@@ -410,8 +461,6 @@
 
         function renderTable() {
             const tbody = document.getElementById('tbody-rendimiento');
-            
-            // Lógica de paginación
             const totalPaginas = Math.ceil(datosFiltrados.length / filasPorPagina) || 1;
             if (paginaActual > totalPaginas) paginaActual = totalPaginas;
             if (paginaActual < 1) paginaActual = 1;
@@ -422,37 +471,73 @@
 
             let html = "";
             datosPagina.forEach(d => {
-                const asigIni = formatTime(d.turno_inicio);
-                const asigFin = formatTime(d.turno_fin);
-                const realIni = formatTime(d.hora_entrada);
-                const realFin = formatTime(d.hora_salida);
-                
-                const strAsignado = d.turno_inicio ? `${asigIni} - ${asigFin}` : 'No asignado';
-                const strReal = (d.hora_entrada || d.hora_salida) ? `${realIni} - ${realFin}` : 'Sin marcas';
+                const strAsignado = d.turno_inicio ? `${formatTime(d.turno_inicio)} - ${formatTime(d.turno_fin)}` : 'No asignado';
+                const strReal = (d.hora_entrada || d.hora_salida) ? `${formatTime(d.hora_entrada)} - ${formatTime(d.hora_salida)}` : 'Sin marcas';
                 const claseBadge = `badge-${d.estado_asistencia.replace(/\s+/g, '').toLowerCase()}`;
                 
+                // Cálculo Matemático de Desviación Ignorando Desfases Nocturnos (Saltos de 24h)
+                let htmlDesviacion = '<span style="color:var(--text-muted);">-</span>';
+                if (d.turno_inicio && (d.hora_entrada || d.hora_salida)) {
+                    let lineas = [];
+                    
+                    if (d.hora_entrada && d.turno_inicio) {
+                        let diffEntrada = (new Date(d.hora_entrada) - new Date(d.turno_inicio)) / 60000;
+                        let nEntrada = diffEntrada % 1440;
+                        if (nEntrada > 720) nEntrada -= 1440;
+                        if (nEntrada < -720) nEntrada += 1440;
+                        
+                        if (nEntrada > 0) {
+                            lineas.push(`<span style="color:var(--st-falta); font-weight: 700;">+${Math.round(nEntrada)}m</span> <span style="font-size:0.8rem; color:var(--text-muted);">tarde</span>`);
+                        }
+                    }
+                    
+                    if (d.hora_salida && d.turno_fin) {
+                        let diffSalida = (new Date(d.turno_fin) - new Date(d.hora_salida)) / 60000;
+                        let nSalida = diffSalida % 1440;
+                        if (nSalida > 720) nSalida -= 1440;
+                        if (nSalida < -720) nSalida += 1440;
+                        
+                        if (nSalida > 0) {
+                            lineas.push(`<span style="color:var(--st-incompleto); font-weight: 700;">-${Math.round(nSalida)}m</span> <span style="font-size:0.8rem; color:var(--text-muted);">antes</span>`);
+                        }
+                    }
+                    
+                    if (lineas.length > 0) {
+                        htmlDesviacion = lineas.join('<br>');
+                    } else {
+                        htmlDesviacion = '<span style="color:var(--st-cumplido); font-weight:700;">Ok</span>';
+                    }
+                } else if (d.estado_asistencia === 'Falta') {
+                    htmlDesviacion = '<span style="color:var(--st-falta);">Ausente</span>';
+                }
+
                 html += `<tr>
                     <td style="font-weight:700; color:var(--text-muted);">${d.fecha_operacion}</td>
                     <td>
                         <div class="col-empleado">
                             ${getAvatar(d.nombre_empleado)}
-                            <div>${d.nombre_empleado || d.documento_empleado}</div>
+                            <div class="txt-truncado" title="${d.nombre_empleado || 'Sin Nombre'}">
+                                ${d.nombre_empleado || 'Sin Nombre'}
+                                <span class="text-muted-small">CC: ${d.documento_empleado}</span>
+                            </div>
                         </div>
                     </td>
                     <td>
-                        ${d.razon_social_cliente || 'Sin Cliente'}
-                        <span class="text-muted-small">${d.nombre_sucursal || 'Sin Frente'}</span>
+                        <div class="txt-truncado-cliente" title="${d.razon_social_cliente || 'Sin Cliente'}">
+                            ${d.razon_social_cliente || 'Sin Cliente'}
+                            <span class="text-muted-small">${d.nombre_sucursal || 'Sin Frente'}</span>
+                        </div>
                     </td>
+                    <td><span style="background:rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; font-size:0.8rem;">${d.origen_marcacion}</span></td>
                     <td>${strAsignado}</td>
                     <td>${strReal}</td>
-                    <td>${d.minutos_tarde > 0 ? d.minutos_tarde + ' min' : (d.estado_asistencia === 'Falta' ? '-' : 'Ok')}</td>
+                    <td>${htmlDesviacion}</td>
                     <td><span class="badge ${claseBadge}">${d.estado_asistencia}</span></td>
                 </tr>`;
             });
             
-            tbody.innerHTML = html || "<tr><td colspan='7' style='text-align:center;'>No hay registros para este filtro.</td></tr>";
+            tbody.innerHTML = html || "<tr><td colspan='8' style='text-align:center;'>No hay registros para este filtro.</td></tr>";
 
-            // Actualizar interfaz de paginación
             document.getElementById('paginacion-info').innerText = `Página ${paginaActual} de ${totalPaginas} (${datosFiltrados.length} registros)`;
             document.getElementById('btn-prev').disabled = paginaActual === 1;
             document.getElementById('btn-next').disabled = paginaActual === totalPaginas;
@@ -462,50 +547,34 @@
             let porDia = {};
             datosFiltrados.sort((a,b) => new Date(a.fecha_operacion) - new Date(b.fecha_operacion)).forEach(d => {
                 let f = d.fecha_operacion;
-                if(!porDia[f]) porDia[f] = { 'Cumplido': 0, 'Falta': 0, 'Incompleto': 0, 'No Programado': 0 };
+                if(!porDia[f]) porDia[f] = { 'Cumplido': 0, 'Con Novedad': 0, 'Falta': 0, 'Incompleto': 0, 'No Programado': 0 };
                 porDia[f][d.estado_asistencia]++;
             });
 
             const labels = Object.keys(porDia);
             const datasets = Object.keys(coloresEstado).map(estado => ({
-                label: estado,
-                data: labels.map(l => porDia[l][estado]),
-                backgroundColor: coloresEstado[estado],
-                maxBarThickness: 30
+                label: estado, data: labels.map(l => porDia[l][estado]), backgroundColor: coloresEstado[estado], maxBarThickness: 30
             }));
 
             const ctx = document.getElementById('chartTendencia').getContext('2d');
             if(graficoTendencia) graficoTendencia.destroy();
 
             graficoTendencia = new Chart(ctx, {
-                type: 'bar',
-                data: { labels, datasets },
+                type: 'bar', data: { labels, datasets },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    scales: {
-                        x: { stacked: true, grid: { display: false } },
-                        y: { stacked: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } }
-                    },
+                    responsive: true, maintainAspectRatio: false, 
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                    scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } } },
                     plugins: { 
                         legend: { position: 'bottom', labels: { color: '#94A3B8' } },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + context.dataset.label + ': ' + context.raw + ' personas';
-                                }
-                            }
-                        }
+                        tooltip: { callbacks: { label: function(c) { return ' ' + c.dataset.label + ': ' + c.raw + ' personas'; } } }
                     }
                 }
             });
         }
 
         function renderChartDona() {
-            let conteo = { 'Cumplido': 0, 'Falta': 0, 'Incompleto': 0, 'No Programado': 0 };
+            let conteo = { 'Cumplido': 0, 'Con Novedad': 0, 'Falta': 0, 'Incompleto': 0, 'No Programado': 0 };
             datosFiltrados.forEach(d => { conteo[d.estado_asistencia]++; });
 
             const labels = Object.keys(conteo).filter(k => conteo[k] > 0);
@@ -516,19 +585,12 @@
             if(graficoDona) graficoDona.destroy();
 
             graficoDona = new Chart(ctx, {
-                type: 'doughnut',
-                data: { labels, datasets: [{ data, backgroundColor: bgColor, borderWidth: 0 }] },
+                type: 'doughnut', data: { labels, datasets: [{ data, backgroundColor: bgColor, borderWidth: 0 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false, cutout: '75%',
                     plugins: { 
                         legend: { position: 'bottom', labels: { color: '#94A3B8' } },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + context.label + ': ' + context.raw + ' personas';
-                                }
-                            }
-                        }
+                        tooltip: { callbacks: { label: function(c) { return ' ' + c.label + ': ' + c.raw + ' personas'; } } }
                     }
                 }
             });
