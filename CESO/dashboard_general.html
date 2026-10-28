@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Visión General | Command Center Casalimpia</title>
     
+    <!-- Librerías de Gráficos, Supabase y Selects Múltiples -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Roboto:wght@400;500;700&display=swap');
@@ -14,17 +18,28 @@
             --color-azul-logo: #0085CA; --color-verde-logo: #8DC63F; 
             --color-blanco: #ffffff; --bg-oscuro: #E2E8F0;
             --color-texto: #334155; --borde: #CBD5E1;
+            
+            /* Colores de Estados Novedades */
+            --st-falta: #FF4560;
+            --st-incompleto: #FEB019;
+            --st-connovedad: #775DD0;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* TRUCO CSS: Escala 75% sin desfasar el mouse y SIN SCROLL GLOBAL */
+        html { overflow: hidden; width: 100vw; height: 100vh; }
         
         body { 
             font-family: 'Roboto', sans-serif; 
             background-color: var(--bg-oscuro); 
             color: var(--color-texto); 
-            height: 100vh; /* Obliga al body a medir exacto el 100% de la pantalla */
-            width: 100vw;
-            overflow: hidden; /* CORTA EL SCROLL */
+            transform: scale(0.75); 
+            transform-origin: top left; 
+            width: 133.333vw; 
+            height: 133.333vh; 
+            margin: 0;
+            overflow: hidden; 
             display: flex;
             flex-direction: column;
         }
@@ -35,7 +50,7 @@
             justify-content: space-between; align-items: center; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.08); 
             border-bottom: 3px solid var(--color-azul-logo); 
-            height: 60px; flex-shrink: 0; /* Evita que el header se encoja */
+            height: 60px; flex-shrink: 0; 
         }
         .logo-container { display: flex; align-items: center; gap: 10px; }
         .logo-img { height: 35px; width: auto; }
@@ -58,24 +73,16 @@
 
         /* CONTENEDOR DE GRID */
         .dashboard-container {
-            flex: 1; /* Toma todo el espacio sobrante debajo del header */
-            min-height: 0; /* Fundamental para que no se desborde */
-            padding: 10px;
-            display: grid; 
-            grid-template-columns: repeat(4, minmax(0, 1fr)); /* minmax(0,1fr) evita que columnas colapsen */
-            gap: 10px;
+            flex: 1; min-height: 0; padding: 10px; display: grid; 
+            grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;
         }
 
         /* ESTRUCTURA DEL PILAR */
-        .pilar {
-            display: flex; flex-direction: column; gap: 8px; 
-            height: 100%; min-height: 0; min-width: 0;
-        }
+        .pilar { display: flex; flex-direction: column; gap: 8px; height: 100%; min-height: 0; min-width: 0; }
         
         .pilar-header {
             background: var(--color-blanco); padding: 8px; border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center;
-            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center; flex-shrink: 0;
         }
         .pilar-header h2 { font-family: 'Outfit', sans-serif; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px;}
         .pilar-header.robot h2 { color: #475569; }
@@ -86,14 +93,12 @@
         /* FILTROS */
         .filtros-box {
             background: var(--color-blanco); padding: 6px 8px; border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex; flex-direction: column; gap: 4px;
-            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;
         }
-        .filtro-select {
+        .filtro-select, .filtro-input {
             width: 100%; padding: 3px 4px; border-radius: 4px; border: 1px solid var(--borde);
             font-family: 'Roboto', sans-serif; font-size: 0.75rem; color: var(--color-texto); 
-            background-color: #F8FAFC; cursor: pointer; font-weight: 500;
+            background-color: #F8FAFC; cursor: pointer; font-weight: 500; outline: none;
         }
 
         /* TARJETAS ELÁSTICAS */
@@ -101,15 +106,10 @@
             background: var(--color-blanco); padding: 10px; border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;
             display: flex; flex-direction: column; position: relative; 
-            flex: 1 1 0; /* CRECEN Y SE ENCOGEN PARA LLENAR EL HUECO EXACTO */
-            min-height: 0; /* EVITA EL DESBORDAMIENTO */
-            justify-content: space-between; transition: 0.3s;
+            flex: 1 1 0; min-height: 0; justify-content: space-between; transition: 0.3s;
         }
         .dash-card.updating { opacity: 0.5; transform: scale(0.98); }
-        .dash-card::before {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            border-top-left-radius: 8px; border-top-right-radius: 8px;
-        }
+        .dash-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px; border-top-left-radius: 8px; border-top-right-radius: 8px; }
         .dash-card.border-robot::before { background-color: #64748B; }
         .dash-card.border-biometria::before { background-color: #0085CA; }
         .dash-card.border-rutinas::before { background-color: #059669; }
@@ -117,8 +117,7 @@
 
         .dash-card-header {
             display: flex; justify-content: space-between; align-items: flex-start;
-            font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 5px;
-            flex-shrink: 0;
+            font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 5px; flex-shrink: 0;
         }
 
         .badge { padding: 2px 6px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; gap: 3px;}
@@ -127,27 +126,48 @@
         .badge.atencion { background: #FEF3C7; color: #92400E; }
         .badge.critico { background: #FEE2E2; color: #991B1B; }
 
-        /* NÚMEROS Y VALORES DINÁMICOS (Se ajustan al espacio) */
+        /* NÚMEROS Y VALORES DINÁMICOS */
         .value-container { text-align: center; flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;}
         
-        /* Uso clamp() para que la fuente tenga un mínimo y un máximo dependiendo de la pantalla */
-        .dash-value { font-size: clamp(2rem, 3vw, 4rem); font-weight: 800; font-family: 'Outfit', sans-serif; color: #0F172A; line-height: 1; }
+        .dash-value { font-size: clamp(2rem, 3vw, 3.5rem); font-weight: 800; font-family: 'Outfit', sans-serif; color: #0F172A; line-height: 1; }
         .dash-value span { font-size: clamp(0.9rem, 1vw, 1.2rem); font-weight: 500; color: #64748B; font-family: 'Roboto', sans-serif; }
-        .dash-value.red { color: #DC2626; }
+        .dash-value.red { color: var(--st-falta); }
         .dash-value.green { color: #059669; }
+        .dash-value.orange { color: #D97706; }
+        .dash-value.blue { color: #0085CA; }
         
         .dash-subtext { font-size: 0.75rem; color: #64748B; margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--borde); display: flex; justify-content: space-between; flex-shrink: 0;}
         
         /* GRÁFICOS FLEXIBLES */
         .chart-container { flex: 1 1 0; min-height: 0; width: 100%; position: relative; display: flex; justify-content: center; align-items: center;}
-        .chart-inner-text { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); font-family: 'Outfit'; font-size: clamp(1.5rem, 2vw, 2.2rem); font-weight: 800; color: #0F172A; }
+        .chart-container canvas { position: relative; z-index: 10; }
+        .chart-inner-text { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); font-family: 'Outfit'; font-size: clamp(1.5rem, 2vw, 2.2rem); font-weight: 800; color: #0F172A; z-index: 0;}
+        .chart-inner-text-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Outfit'; font-size: clamp(1.5rem, 2vw, 2.2rem); font-weight: 800; color: #0F172A; z-index: 0;}
         
         /* RANKING ELÁSTICO */
-        .ranking-list { display: flex; flex-direction: column; gap: 4px; flex: 1 1 0; min-height: 0; justify-content: space-evenly;}
+        .ranking-list { display: flex; flex-direction: column; gap: 4px; flex: 1 1 0; min-height: 0; justify-content: flex-start;}
         .ranking-item { display: flex; flex-direction: column; gap: 2px; }
         .ranking-header { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #334155;}
         .bar-bg { width: 100%; height: 5px; background: #E2E8F0; border-radius: 10px; overflow: hidden; }
         .bar-fill { height: 100%; border-radius: 10px; transition: 0.5s width; }
+
+        /* Lista inactivos (Scroll vertical) */
+        .lista-scroll { overflow-y: auto; overflow-x: hidden; padding-right: 5px; gap: 8px;}
+        .lista-scroll::-webkit-scrollbar { width: 4px; }
+        .lista-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        
+        .item-inactivo { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; border-bottom: 1px solid #F1F5F9; padding-bottom: 4px;}
+        .item-inactivo:last-child { border-bottom: none; }
+        .item-inactivo-nombre { font-weight: 700; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
+        .item-inactivo-sede { font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; text-align: right; }
+
+        /* Ajustes Estéticos para Choices.js en Tema Claro */
+        .choices { margin-bottom: 0; width: 100%; font-family: 'Roboto', sans-serif; }
+        .choices__inner { background-color: #F8FAFC !important; border: 1px solid var(--borde) !important; border-radius: 6px !important; min-height: 28px !important; padding: 2px 4px !important; }
+        .choices__input { color: var(--color-texto) !important; background-color: transparent !important; font-size: 0.75rem !important; }
+        .choices__list--dropdown { background-color: var(--color-blanco) !important; border: 1px solid var(--borde) !important; color: var(--color-texto) !important; z-index: 10 !important;}
+        .choices__list--multiple .choices__item { background-color: var(--color-azul-logo); border: none; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; font-weight: 600; margin-right: 3px; margin-bottom: 2px;}
+    
     </style>
 </head>
 <body>
@@ -163,84 +183,115 @@
 
     <div class="dashboard-container">
         
-        <!-- ================= PILAR 1: ROBOTS ================= -->
+        <!-- ================= PILAR 1: ROBOTS (DATA REAL SUPABASE) ================= -->
         <div class="pilar" id="pilar-robots">
             <div class="pilar-header robot"><h2>🤖 Operación Robótica</h2></div>
             
             <div class="filtros-box">
-                <select class="filtro-select" id="filtro-robot-cliente" onchange="simularDatosPilar('robots')">
+                <input type="date" class="filtro-input" id="filtro-fecha-robot" onchange="aplicarFiltrosRobots()">
+                <select class="filtro-select" id="filtro-cliente-robot" onchange="aplicarFiltrosRobots()">
                     <option value="all">🏢 Todos los Clientes (Global)</option>
-                    <option value="vanti">VANTI S.A. ESP</option>
-                    <option value="marval">CONSTRUCCIONES MARVAL</option>
                 </select>
-                <div style="display: flex; gap: 5px;">
-                    <select class="filtro-select" onchange="simularDatosPilar('robots')"><option>📍 Todas las Sedes</option><option>Sede Principal</option></select>
-                    <select class="filtro-select" onchange="simularDatosPilar('robots')"><option>🤖 Todos los Robots</option><option>Pudu-01</option></select>
-                </div>
+                <select class="filtro-select" id="filtro-robot-robot" onchange="aplicarFiltrosRobots()">
+                    <option value="all">🤖 Todos los Robots</option>
+                </select>
             </div>
 
-            <div class="dash-card border-robot">
-                <div class="dash-card-header">Robots Activos <span id="r-badge-1" class="badge en-meta">En meta</span></div>
+            <!-- TARJETA 1: ESTADO DE FLOTA -->
+            <div class="dash-card border-robot" id="rob-card-1">
+                <div class="dash-card-header">Estado de Flota <span id="r-badge-estado" class="badge">Calculando</span></div>
                 <div class="value-container">
-                    <div class="dash-value" id="r-val-activos">18 <span>/ 20</span></div>
+                    <div class="dash-value" id="r-val-activos">0 <span>/ 0</span></div>
                 </div>
-                <div class="dash-subtext"><span id="r-txt-prog">Robots programados hoy</span></div>
+                <div class="dash-subtext"><span id="r-txt-inactivos">...</span></div>
             </div>
 
-            <div class="dash-card border-robot">
-                <div class="dash-card-header">Kilometraje Hoy <span class="badge en-meta">Óptimo</span></div>
-                <div class="value-container" style="flex-direction: row; align-items: baseline; gap: 5px;">
-                    <div class="dash-value" id="r-val-km">64.5</div><span style="font-size: 1.2rem; font-weight: 500; color: #64748B;">km</span>
+            <!-- TARJETA 2: VOLUMEN DE OPERACIÓN TRIPLE + TENDENCIA 5 DÍAS -->
+            <div class="dash-card border-robot" id="rob-card-2" style="flex: 1.2;">
+                <div class="dash-card-header">Volumen de Operación (Día Sel.)</div>
+                
+                <div class="value-container" style="flex-direction: row; justify-content: space-evenly; width: 100%; margin-bottom: 5px;">
+                    <div style="text-align: center;">
+                        <div class="dash-value blue" id="r-val-horas" style="font-size: 1.5rem;">0h 0m</div>
+                        <div style="font-size: 0.75rem; font-weight: 700; color:#64748B;">Horas</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="dash-value green" id="r-val-tareas" style="font-size: 1.5rem;">0</div>
+                        <div style="font-size: 0.75rem; font-weight: 700; color:#64748B;">Tareas</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="dash-value orange" id="r-val-km" style="font-size: 1.5rem;">0.00</div>
+                        <div style="font-size: 0.75rem; font-weight: 700; color:#64748B;">Km</div>
+                    </div>
                 </div>
-                <div class="chart-container"><canvas id="chartKm"></canvas></div>
+                <div class="chart-container" style="min-height: 40px;"><canvas id="chartOperacion5Dias"></canvas></div>
+                <div class="dash-subtext"><span>Tendencia (Últimos 5 días)</span></div>
             </div>
 
-            <div class="dash-card border-robot">
-                <div class="dash-card-header">Alertas Hardware <span id="r-badge-alerta" class="badge critico">Crítico</span></div>
-                <div class="value-container">
-                    <div class="dash-value red" id="r-val-alertas">2</div>
+            <!-- TARJETA 3: LISTA DE ROBOTS INACTIVOS -->
+            <div class="dash-card border-robot" id="rob-card-3" style="flex: 1.5;">
+                <div class="dash-card-header" style="margin-bottom: 8px;">Robots Sin Movimiento <span id="r-badge-alerta" class="badge critico">Alerta</span></div>
+                <div class="ranking-list lista-scroll" id="r-lista-inactivos">
+                    <div style="text-align:center; color:#64748B; font-size:0.8rem; margin-top:10px;">Cargando flota...</div>
                 </div>
-                <div class="dash-subtext" id="r-txt-alerta1"><span>• Robot-Beta (Batería 5%)</span></div>
             </div>
         </div>
 
-        <!-- ================= PILAR 2: BIOMETRÍA ================= -->
+        <!-- ================= PILAR 2: BIOMETRÍA (DATA REAL SUPABASE) ================= -->
         <div class="pilar" id="pilar-biometria">
             <div class="pilar-header biometria"><h2>👆 Biometría y Asistencia</h2></div>
             
             <div class="filtros-box">
-                <select class="filtro-select ceco-dropdown" id="filtro-bio" onchange="simularDatosPilar('biometria')">
-                    <option value="all">🏢 Consolidado Nacional</option>
+                <input type="date" class="filtro-input" id="filtro-fecha-bio" onchange="cargarDatosBiometria()">
+                <select class="filtro-select" id="filtro-cliente-bio" onchange="aplicarFiltrosBiometria()">
+                    <option value="all">🏢 Todos los Clientes (Global)</option>
                 </select>
             </div>
 
-            <div class="dash-card border-biometria">
-                <div class="dash-card-header">Cobertura Turnos <span id="b-badge-1" class="badge en-meta">En meta</span></div>
+            <div class="dash-card border-biometria" id="bio-card-1">
+                <div class="dash-card-header">Cumplimiento Operativo <span id="b-badge-1" class="badge en-meta">Óptimo</span></div>
                 <div class="chart-container">
                     <canvas id="chartBiometria"></canvas>
-                    <div class="chart-inner-text" id="b-val-porcentaje">92%</div>
+                    <div class="chart-inner-text" id="b-val-porcentaje">0%</div>
                 </div>
-                <div class="dash-subtext"><span>Meta ≥ 90.0%</span></div>
+                <div class="dash-subtext"><span>Basado en Horas Programadas</span></div>
             </div>
 
-            <div class="dash-card border-biometria">
-                <div class="dash-card-header">Personal Real <span id="b-badge-2" class="badge atencion">Atención</span></div>
-                <div class="value-container">
-                    <div class="dash-value" id="b-val-personal">628</div>
-                </div>
-                <div class="dash-subtext"><span id="b-txt-personal">De 640 programados</span></div>
-            </div>
-
-            <div class="dash-card border-biometria">
-                <div class="dash-card-header">Novedades <span id="b-badge-3" class="badge critico">Crítico</span></div>
+            <div class="dash-card border-biometria" id="bio-card-2">
+                <div class="dash-card-header">Personal Operativo <span id="b-badge-2" class="badge">Analizando</span></div>
                 <div class="value-container" style="flex-direction: row; justify-content: space-evenly; width: 100%;">
-                    <div><div class="dash-value" id="b-val-tarde">12</div><div style="font-size: 0.7rem; font-weight: bold; color:#64748B;">Llegadas Tarde</div></div>
-                    <div><div class="dash-value red" id="b-val-ausencia">3</div><div style="font-size: 0.7rem; font-weight: bold; color:#64748B;">Ausencias</div></div>
+                    <div style="text-align: center;">
+                        <div class="dash-value green" id="b-val-presentes">0</div>
+                        <div style="font-size: 0.85rem; font-weight: 700; color:#64748B;">Presentes</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="dash-value red" id="b-val-faltas">0</div>
+                        <div style="font-size: 0.85rem; font-weight: 700; color:var(--st-falta);">Faltas</div>
+                    </div>
                 </div>
+                <div class="dash-subtext"><span id="b-txt-personal">De 0 programados</span></div>
+            </div>
+
+            <div class="dash-card border-biometria" id="bio-card-3" style="overflow: visible;">
+                <div class="dash-card-header" style="flex-direction: column; gap: 8px;">
+                    <div style="display:flex; justify-content: space-between; width: 100%;">
+                        Novedades Críticas <span id="b-badge-3" class="badge critico">Alerta</span>
+                    </div>
+                    <select id="filtro-novedades-bio" multiple>
+                        <option value="Falta" selected>Faltas (Ausentes)</option>
+                        <option value="Incompleto" selected>Incompletos</option>
+                        <option value="Con Novedad" selected>Con Novedad</option>
+                    </select>
+                </div>
+                <div class="chart-container" style="flex: 1; min-height: 90px; position: relative;">
+                    <canvas id="chartNovedades"></canvas>
+                    <div class="chart-inner-text-center" id="b-val-novedades">0</div>
+                </div>
+                <div class="dash-subtext"><span>Total casos (Filtro Aplicado)</span></div>
             </div>
         </div>
 
-        <!-- ================= PILAR 3: RUTINAS ================= -->
+        <!-- ================= PILAR 3: RUTINAS (Simulado) ================= -->
         <div class="pilar" id="pilar-rutinas">
             <div class="pilar-header rutinas"><h2>📋 Cumplimiento Rutinas</h2></div>
             
@@ -276,7 +327,7 @@
             </div>
         </div>
 
-        <!-- ================= PILAR 4: VACANTES ================= -->
+        <!-- ================= PILAR 4: VACANTES (Simulado) ================= -->
         <div class="pilar" id="pilar-vacantes">
             <div class="pilar-header vacantes"><h2>👥 Vacantes</h2></div>
             
@@ -294,7 +345,7 @@
                 <div class="dash-subtext"><span>Objetivo: 0 vacantes activas</span></div>
             </div>
 
-            <div class="dash-card border-vacantes" style="flex: 2;"> <!-- Le damos más espacio al ranking -->
+            <div class="dash-card border-vacantes" style="flex: 2;"> 
                 <div class="dash-card-header">Top CECOs Críticos <span class="badge atencion">Atención</span></div>
                 <div class="ranking-list" id="v-ranking">
                     <div class="ranking-item"><div class="ranking-header"><span>VANTI S.A. ESP</span><span>5</span></div><div class="bar-bg"><div class="bar-fill" style="width: 100%; background: #DC2626;"></div></div></div>
@@ -308,45 +359,309 @@
     </div>
 
     <script>
-        // 1. CARGA DE CECOS
+        // CONFIGURACIÓN DE SUPABASE
+        const SUPABASE_URL = 'https://tyhdwpdefiatmxihycae.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_LH1iVez6V1qmj8Lk_YVZFA_Y2nYwdKw';
+        const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let datosBiometriaGlobal = [];
+        let datosRobotsGlobal = []; 
+        let choiceNovedadesBio;
+
+        // 1. CARGA DE CECOS SIMULADOS
         const listaCecos = [
             "01342 FUNDACION UNIVERSITARIA DEL AREA ANDINA", "01344 GAS NATURAL CUNDIBOYACENSE S.A.", 
             "01345 VANTI S.A. ESP", "01348 GREEN OFFICE CORPORATIVO", "01362 FUNDACION HOSPITAL DE LA MISERICORDIA",
             "01366 IMOCOM S.A.S.", "01396 CLINICOS PROGRAMAS DE ATENCION", "01398 CONSTRUCCIONES MARVAL S.A.S",
             "01466 SALUD TOTAL EPS-S S.A", "01481 SIEMENS ENERGY", "01496 PRIMAX COLOMBIA S A"
         ];
-
         document.querySelectorAll('.ceco-dropdown').forEach(select => {
-            listaCecos.forEach(ceco => {
-                let opt = document.createElement('option');
-                opt.value = ceco; opt.textContent = ceco;
-                select.appendChild(opt);
-            });
+            listaCecos.forEach(ceco => { let opt = document.createElement('option'); opt.value = ceco; opt.textContent = ceco; select.appendChild(opt); });
         });
 
         // 2. INICIALIZACIÓN DE GRÁFICOS
-        let chartInstKm, chartInstBio, chartInstRut;
+        let chartInstOperacion5Dias, chartInstBio, chartInstRut, chartInstNovedades;
         
         function initCharts() {
-            chartInstKm = new Chart(document.getElementById('chartKm').getContext('2d'), {
-                type: 'line',
-                data: { labels: ['6am','8am','10am','12pm','2pm'], datasets: [{ data: [10, 20, 40, 55, 64.5], borderColor: '#0085CA', backgroundColor: 'rgba(0, 133, 202, 0.1)', fill: true, tension: 0.4, pointRadius: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false, min: 0 } }, layout: { padding: 0 } }
+            chartInstOperacion5Dias = new Chart(document.getElementById('chartOperacion5Dias').getContext('2d'), {
+                type: 'line', 
+                data: { labels: ['-4d','-3d','-2d','Ayer','Día Sel.'], datasets: [{ data: [0, 0, 0, 0, 0], borderColor: '#0085CA', backgroundColor: 'rgba(0, 133, 202, 0.1)', fill: true, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#0085CA' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: true } }, scales: { x: { display: false }, y: { display: false, min: 0 } }, layout: { padding: 0 } }
             });
 
             const dOpt = { responsive: true, maintainAspectRatio: false, circumference: 180, rotation: -90, cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, layout: { padding: 0 } };
 
             chartInstBio = new Chart(document.getElementById('chartBiometria').getContext('2d'), {
-                type: 'doughnut', data: { datasets: [{ data: [92, 8], backgroundColor: ['#0085CA', '#E2E8F0'], borderWidth: 0, borderRadius: [10, 0] }] }, options: dOpt
+                type: 'doughnut', data: { datasets: [{ data: [0, 100], backgroundColor: ['#0085CA', '#E2E8F0'], borderWidth: 0, borderRadius: [10, 0] }] }, options: dOpt
+            });
+            
+            chartInstNovedades = new Chart(document.getElementById('chartNovedades').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 0, borderRadius: 2 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '80%',
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c) { return ' ' + c.label + ': ' + c.raw; } } } },
+                    layout: { padding: 0 }
+                }
             });
 
             chartInstRut = new Chart(document.getElementById('chartRutinas').getContext('2d'), {
                 type: 'doughnut', data: { datasets: [{ data: [85, 15], backgroundColor: ['#059669', '#E2E8F0'], borderWidth: 0, borderRadius: [10, 0] }] }, options: dOpt
             });
         }
-        initCharts();
 
-        // 3. DATOS DINÁMICOS
+        // =======================================================
+        // LÓGICA REAL: PILAR 1 - OPERACIÓN ROBÓTICA
+        // =======================================================
+        function formatHoras(horasDec) {
+            if (!horasDec || isNaN(horasDec)) return "0h 0m";
+            const h = Math.floor(horasDec);
+            const m = Math.round((horasDec - h) * 60);
+            return `${h}h ${m}m`;
+        }
+
+        function extraerFechaStr(ts) { return ts ? ts.split('T')[0] : "N/A"; }
+
+        async function initRobots() {
+            const hoyStr = new Date().toISOString().split('T')[0];
+            document.getElementById('filtro-fecha-robot').value = hoyStr;
+            
+            await cargarDatosRobots();
+            setInterval(cargarDatosRobots, 1800000); 
+        }
+
+        async function cargarDatosRobots() {
+            const tarjetas = [document.getElementById('rob-card-1'), document.getElementById('rob-card-2'), document.getElementById('rob-card-3')];
+            tarjetas.forEach(c => c.classList.add('updating'));
+
+            try {
+                const { data, error } = await clienteSupabase.from('5-vista_dashboard_rendimiento').select('*').order('task_time', { ascending: true });
+                if (error) throw error;
+                datosRobotsGlobal = data || [];
+
+                const selectCliente = document.getElementById('filtro-cliente-robot');
+                const valClienteActual = selectCliente.value;
+                const clientes = [...new Set(datosRobotsGlobal.map(d => d.shop_name))].filter(Boolean).sort();
+                selectCliente.innerHTML = '<option value="all">🏢 Todos los Clientes (Global)</option>';
+                clientes.forEach(c => { selectCliente.innerHTML += `<option value="${c}">${c}</option>`; });
+                if (clientes.includes(valClienteActual)) selectCliente.value = valClienteActual;
+
+                const selectRobot = document.getElementById('filtro-robot-robot');
+                const valRobotActual = selectRobot.value;
+                const robots = [...new Set(datosRobotsGlobal.map(d => d.apodo_robot))].filter(Boolean).sort();
+                selectRobot.innerHTML = '<option value="all">🤖 Todos los Robots</option>';
+                robots.forEach(r => { selectRobot.innerHTML += `<option value="${r}">${r}</option>`; });
+                if (robots.includes(valRobotActual)) selectRobot.value = valRobotActual;
+
+                aplicarFiltrosRobots();
+            } catch (error) {
+                console.error("Error al cargar Robots:", error);
+                document.getElementById('r-lista-inactivos').innerHTML = '<div style="color:red; text-align:center;">Error de conexión</div>';
+            } finally {
+                tarjetas.forEach(c => c.classList.remove('updating'));
+            }
+        }
+
+        function aplicarFiltrosRobots() {
+            const fechaSelec = document.getElementById('filtro-fecha-robot').value;
+            const clienteSelec = document.getElementById('filtro-cliente-robot').value;
+            const robotSelec = document.getElementById('filtro-robot-robot').value;
+            
+            if(!fechaSelec) return;
+
+            let flotaTotalData = datosRobotsGlobal;
+            if (clienteSelec !== 'all') flotaTotalData = flotaTotalData.filter(d => d.shop_name === clienteSelec);
+            if (robotSelec !== 'all') flotaTotalData = flotaTotalData.filter(d => d.apodo_robot === robotSelec);
+            
+            let mapaRobots = {}; 
+            flotaTotalData.forEach(d => {
+                if(d.apodo_robot) {
+                    if(!mapaRobots[d.apodo_robot] || d.task_time > mapaRobots[d.apodo_robot].fecha) {
+                        mapaRobots[d.apodo_robot] = { tienda: d.shop_name, fecha: d.task_time };
+                    }
+                }
+            });
+            const totalRobotsUnicos = Object.keys(mapaRobots).length;
+
+            const datosDelDia = flotaTotalData.filter(d => extraerFechaStr(d.task_time) === fechaSelec);
+            
+            let robotsActivosHoy = new Set();
+            let sumHorasHoy = 0, sumTareasHoy = 0, sumKmHoy = 0;
+
+            datosDelDia.forEach(d => {
+                if(d.apodo_robot) robotsActivosHoy.add(d.apodo_robot);
+                sumHorasHoy += parseFloat(d.duration) || 0;
+                sumTareasHoy += parseInt(d.task_count) || 0;
+                sumKmHoy += parseFloat(d.mileage) || 0;
+            });
+
+            const cantActivos = robotsActivosHoy.size;
+            const cantInactivos = totalRobotsUnicos - cantActivos;
+
+            // Tarjeta 1
+            document.getElementById('r-val-activos').innerHTML = `${cantActivos} <span>/ ${totalRobotsUnicos}</span>`;
+            document.getElementById('r-txt-inactivos').innerText = cantInactivos > 0 ? `⚠️ ${cantInactivos} robots sin movimiento` : '✓ Toda la flota operando';
+            
+            let badgeEst = document.getElementById('r-badge-estado');
+            if (totalRobotsUnicos === 0) { badgeEst.className = 'badge'; badgeEst.innerText = 'Sin Datos'; }
+            else if (cantInactivos === 0) { badgeEst.className = 'badge en-meta'; badgeEst.innerText = 'Óptimo'; }
+            else { badgeEst.className = 'badge atencion'; badgeEst.innerText = 'Atención'; }
+
+            // Tarjeta 2
+            document.getElementById('r-val-horas').innerText = formatHoras(sumHorasHoy);
+            document.getElementById('r-val-tareas').innerText = sumTareasHoy.toLocaleString('es-CO');
+            document.getElementById('r-val-km').innerText = sumKmHoy.toFixed(2);
+
+            let arr5DiasHoras = [0, 0, 0, 0, 0];
+            let fBase = new Date(fechaSelec + 'T00:00:00'); 
+            
+            for(let i=0; i<5; i++) {
+                let dTarget = new Date(fBase);
+                dTarget.setDate(dTarget.getDate() - (4 - i));
+                let strDate = dTarget.toISOString().split('T')[0];
+                
+                let sumaDia = 0;
+                flotaTotalData.forEach(d => {
+                    if(extraerFechaStr(d.task_time) === strDate) { sumaDia += parseFloat(d.duration) || 0; }
+                });
+                arr5DiasHoras[i] = parseFloat(sumaDia.toFixed(2));
+            }
+            chartInstOperacion5Dias.data.datasets[0].data = arr5DiasHoras;
+            chartInstOperacion5Dias.update();
+
+            // Tarjeta 3
+            const listaContainer = document.getElementById('r-lista-inactivos');
+            listaContainer.innerHTML = '';
+            
+            let badgeAlerta = document.getElementById('r-badge-alerta');
+
+            if (totalRobotsUnicos === 0) {
+                listaContainer.innerHTML = '<div style="text-align:center; color:#64748B; font-size:0.8rem; margin-top:10px;">Sin robots registrados en el filtro.</div>';
+                badgeAlerta.className = 'badge'; badgeAlerta.innerText = '-';
+            } else if (cantInactivos === 0) {
+                listaContainer.innerHTML = '<div style="text-align:center; color:#059669; font-size:0.85rem; font-weight:700; margin-top:15px;">✓ Ningún robot inactivo</div>';
+                badgeAlerta.className = 'badge en-meta'; badgeAlerta.innerText = 'Limpio';
+            } else {
+                badgeAlerta.className = 'badge critico'; badgeAlerta.innerText = cantInactivos + ' Casos';
+                let arrInactivos = [];
+                Object.keys(mapaRobots).forEach(robot => {
+                    if(!robotsActivosHoy.has(robot)) {
+                        arrInactivos.push({ nombre: robot, tienda: mapaRobots[robot].tienda || 'Sin Asignar' });
+                    }
+                });
+                
+                let htmlLista = "";
+                arrInactivos.forEach(inact => {
+                    htmlLista += `
+                        <div class="item-inactivo">
+                            <div class="item-inactivo-nombre">🤖 ${inact.nombre}</div>
+                            <div class="item-inactivo-sede">${inact.tienda}</div>
+                        </div>
+                    `;
+                });
+                listaContainer.innerHTML = htmlLista;
+            }
+        }
+
+
+        // =======================================================
+        // LÓGICA REAL: PILAR 2 - BIOMETRÍA Y ASISTENCIA
+        // =======================================================
+        async function initBiometria() {
+            choiceNovedadesBio = new Choices('#filtro-novedades-bio', { removeItemButton: true, searchEnabled: false, placeholderValue: 'Seleccionar Novedad...' });
+            document.getElementById('filtro-novedades-bio').addEventListener('change', aplicarFiltrosBiometria);
+
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('filtro-fecha-bio').value = hoy;
+
+            await cargarDatosBiometria();
+            setInterval(cargarDatosBiometria, 1800000); 
+        }
+
+        async function cargarDatosBiometria() {
+            const fBuscar = document.getElementById('filtro-fecha-bio').value;
+            const tarjetas = [document.getElementById('bio-card-1'), document.getElementById('bio-card-2'), document.getElementById('bio-card-3')];
+            tarjetas.forEach(c => c.classList.add('updating'));
+
+            try {
+                const { data, error } = await clienteSupabase.from('mv_asistencias_dashboard').select('*').eq('fecha_operacion', fBuscar);
+                if (error) throw error;
+                datosBiometriaGlobal = data || [];
+
+                const selectCliente = document.getElementById('filtro-cliente-bio');
+                const valActual = selectCliente.value;
+                const clientes = [...new Set(datosBiometriaGlobal.map(d => d.razon_social_cliente))].filter(Boolean).sort();
+                
+                selectCliente.innerHTML = '<option value="all">🏢 Todos los Clientes (Global)</option>';
+                clientes.forEach(c => { selectCliente.innerHTML += `<option value="${c}">${c}</option>`; });
+                if(clientes.includes(valActual)) selectCliente.value = valActual;
+
+                aplicarFiltrosBiometria();
+            } catch (error) {
+                console.error("Error al cargar Biometría:", error);
+            } finally {
+                tarjetas.forEach(c => c.classList.remove('updating'));
+            }
+        }
+
+        function aplicarFiltrosBiometria() {
+            const clienteSelec = document.getElementById('filtro-cliente-bio').value;
+            const estadosSelec = choiceNovedadesBio.getValue(true);
+            
+            let dataLocal = datosBiometriaGlobal;
+            if (clienteSelec !== 'all') { dataLocal = dataLocal.filter(d => d.razon_social_cliente === clienteSelec); }
+
+            let turnosProg = 0, turnosEjec = 0, horasProg = 0, horasEjec = 0;
+            let countsNov = { 'Falta': 0, 'Incompleto': 0, 'Con Novedad': 0 };
+            let casosNovedades = 0;
+
+            dataLocal.forEach(d => {
+                if (d.estado_asistencia !== 'No Programado') { turnosProg++; horasProg += parseFloat(d.horas_programadas) || 0; }
+                if (d.hora_entrada || d.hora_salida) { turnosEjec++; horasEjec += parseFloat(d.horas_trabajadas) || 0; }
+                if (estadosSelec.includes(d.estado_asistencia)) { casosNovedades++; if (countsNov[d.estado_asistencia] !== undefined) countsNov[d.estado_asistencia]++; }
+            });
+
+            // Tarjeta 1
+            let pct = horasProg > 0 ? (horasEjec / horasProg) * 100 : 0;
+            document.getElementById('b-val-porcentaje').innerText = pct.toFixed(1) + '%';
+            chartInstBio.data.datasets[0].data = [pct, 100 - pct > 0 ? 100 - pct : 0];
+            chartInstBio.data.datasets[0].backgroundColor[0] = pct >= 90 ? '#0085CA' : (pct >= 80 ? '#D97706' : '#DC2626');
+            let badge1 = document.getElementById('b-badge-1');
+            if(pct >= 90) { badge1.className = 'badge en-meta'; badge1.innerText = 'Óptimo'; }
+            else if(pct >= 80) { badge1.className = 'badge atencion'; badge1.innerText = 'Atención'; }
+            else { badge1.className = 'badge critico'; badge1.innerText = 'Crítico'; }
+            chartInstBio.update();
+
+            // Tarjeta 2
+            let faltasFisicas = turnosProg - turnosEjec;
+            document.getElementById('b-val-presentes').innerText = turnosEjec;
+            document.getElementById('b-val-faltas').innerText = faltasFisicas >= 0 ? faltasFisicas : 0;
+            document.getElementById('b-txt-personal').innerText = `De ${turnosProg} programados`;
+            let badge2 = document.getElementById('b-badge-2');
+            if(turnosProg === 0) { badge2.className = 'badge'; badge2.innerText = 'Sin turnos'; }
+            else if(faltasFisicas <= 0) { badge2.className = 'badge en-meta'; badge2.innerText = 'Completo'; }
+            else { badge2.className = 'badge atencion'; badge2.innerText = `Revisar Faltas`; }
+
+            // Tarjeta 3
+            document.getElementById('b-val-novedades').innerText = casosNovedades;
+            const labels = estadosSelec;
+            const dataNov = labels.map(l => countsNov[l]);
+            const bgColors = labels.map(l => l === 'Falta' ? '#FF4560' : (l === 'Incompleto' ? '#FEB019' : '#775DD0'));
+            
+            chartInstNovedades.data.labels = labels;
+            if (casosNovedades === 0) { chartInstNovedades.data.datasets[0].data = [1]; chartInstNovedades.data.datasets[0].backgroundColor = ['#E2E8F0']; } 
+            else { chartInstNovedades.data.datasets[0].data = dataNov; chartInstNovedades.data.datasets[0].backgroundColor = bgColors; }
+            chartInstNovedades.update();
+
+            let badge3 = document.getElementById('b-badge-3');
+            if(casosNovedades > 0) { badge3.className = 'badge critico'; badge3.innerText = 'Atención'; }
+            else { badge3.className = 'badge en-meta'; badge3.innerText = 'Limpio'; }
+        }
+
+
+        // =======================================================
+        // DATOS SIMULADOS PARA RUTINAS Y VACANTES
+        // =======================================================
         function simularDatosPilar(pilar) {
             const container = document.getElementById(`pilar-${pilar}`);
             container.querySelectorAll('.dash-card').forEach(card => card.classList.add('updating'));
@@ -354,70 +669,25 @@
             setTimeout(() => {
                 const esGlobal = container.querySelector('.filtros-box select').value === 'all';
                 
-                if(pilar === 'robots') {
-                    let maxR = esGlobal ? 20 : Math.floor(Math.random() * 3) + 2;
-                    let actR = esGlobal ? 18 : maxR - Math.floor(Math.random() * 2);
-                    let km = esGlobal ? 64.5 : (Math.random() * 15 + 5).toFixed(1);
-                    
-                    document.getElementById('r-val-activos').innerHTML = `${actR} <span>/ ${maxR}</span>`;
-                    document.getElementById('r-val-km').innerHTML = `${km}`;
-                    document.getElementById('r-val-alertas').innerText = esGlobal ? 2 : (actR === maxR ? 0 : 1);
-                    document.getElementById('r-txt-alerta1').innerHTML = esGlobal ? "<span>• Robot-Beta (Batería 5%)</span>" : (actR === maxR ? "<span>Sin alertas</span>" : "<span>• Atasco en pasillo</span>");
-                    
-                    chartInstKm.data.datasets[0].data = [km*0.2, km*0.5, km*0.8, km*0.9, km];
-                    chartInstKm.update();
-                }
-
-                if(pilar === 'biometria') {
-                    let pct = esGlobal ? 92 : Math.floor(Math.random() * 15) + 85;
-                    let total = esGlobal ? 640 : Math.floor(Math.random() * 40) + 10;
-                    let asist = Math.floor(total * (pct/100));
-                    
-                    document.getElementById('b-val-porcentaje').innerText = pct + '%';
-                    document.getElementById('b-val-personal').innerText = asist;
-                    document.getElementById('b-txt-personal').innerText = `De ${total} programados`;
-                    document.getElementById('b-val-tarde').innerText = esGlobal ? 12 : Math.floor(Math.random() * 3);
-                    document.getElementById('b-val-ausencia').innerText = total - asist;
-
-                    chartInstBio.data.datasets[0].data = [pct, 100 - pct];
-                    chartInstBio.data.datasets[0].backgroundColor[0] = pct >= 90 ? '#0085CA' : (pct >= 80 ? '#D97706' : '#DC2626');
-                    chartInstBio.update();
-                }
-
                 if(pilar === 'rutinas') {
                     let pct = esGlobal ? 85 : Math.floor(Math.random() * 20) + 80;
                     let listas = esGlobal ? 256 : Math.floor(Math.random() * 30) + 5;
-                    
-                    document.getElementById('ru-val-porcentaje').innerText = pct + '%';
-                    document.getElementById('ru-val-listas').innerText = listas;
-                    
-                    if(!esGlobal) {
-                        document.getElementById('ru-lista-zonas').innerHTML = `
-                            <div class="ranking-item"><div class="ranking-header"><span>Área Seleccionada</span><span style="color:#DC2626">52 min</span></div><div class="bar-bg"><div class="bar-fill" style="width: 90%; background: #DC2626;"></div></div></div>
-                        `;
-                    }
-
-                    chartInstRut.data.datasets[0].data = [pct, 100 - pct];
-                    chartInstRut.data.datasets[0].backgroundColor[0] = pct >= 95 ? '#059669' : (pct >= 85 ? '#D97706' : '#DC2626');
-                    chartInstRut.update();
+                    document.getElementById('ru-val-porcentaje').innerText = pct + '%'; document.getElementById('ru-val-listas').innerText = listas;
+                    if(!esGlobal) { document.getElementById('ru-lista-zonas').innerHTML = `<div class="ranking-item"><div class="ranking-header"><span>Área Seleccionada</span><span style="color:#DC2626">52 min</span></div><div class="bar-bg"><div class="bar-fill" style="width: 90%; background: #DC2626;"></div></div></div>`; }
+                    chartInstRut.data.datasets[0].data = [pct, 100 - pct]; chartInstRut.data.datasets[0].backgroundColor[0] = pct >= 95 ? '#059669' : (pct >= 85 ? '#D97706' : '#DC2626'); chartInstRut.update();
                 }
 
                 if(pilar === 'vacantes') {
                     let vac = esGlobal ? 15 : Math.floor(Math.random() * 4);
                     let cecoName = container.querySelector('.filtros-box select').value;
-                    
                     document.getElementById('v-val-vacantes').innerText = vac;
-                    
-                    if(!esGlobal) {
-                        document.getElementById('v-ranking').innerHTML = vac > 0 ? `
-                            <div class="ranking-item"><div class="ranking-header"><span>${cecoName.substring(6,25)}...</span><span>${vac}</span></div><div class="bar-bg"><div class="bar-fill" style="width: 100%; background: #DC2626;"></div></div></div>
-                        ` : '<div style="text-align:center; color:#059669; font-weight:bold; margin-top:20px;">✓ Sin vacantes críticas</div>';
-                    }
+                    if(!esGlobal) { document.getElementById('v-ranking').innerHTML = vac > 0 ? `<div class="ranking-item"><div class="ranking-header"><span>${cecoName.substring(6,25)}...</span><span>${vac}</span></div><div class="bar-bg"><div class="bar-fill" style="width: 100%; background: #DC2626;"></div></div></div>` : '<div style="text-align:center; color:#059669; font-weight:bold; margin-top:20px;">✓ Sin vacantes críticas</div>'; }
                 }
-
                 container.querySelectorAll('.dash-card').forEach(card => card.classList.remove('updating'));
             }, 400); 
         }
+
+        window.onload = () => { initCharts(); initRobots(); initBiometria(); };
     </script>
 </body>
 </html>
