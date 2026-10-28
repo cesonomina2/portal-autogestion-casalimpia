@@ -224,6 +224,7 @@
                         <div style="font-size: 0.75rem; font-weight: 700; color:#64748B;">Km</div>
                     </div>
                 </div>
+                <!-- Gráfico modificado para soportar 3 métricas al tiempo -->
                 <div class="chart-container" style="min-height: 40px;"><canvas id="chartOperacion5Dias"></canvas></div>
                 <div class="dash-subtext"><span>Tendencia (Últimos 5 días)</span></div>
             </div>
@@ -383,10 +384,28 @@
         let chartInstOperacion5Dias, chartInstBio, chartInstRut, chartInstNovedades;
         
         function initCharts() {
+            // GRÁFICO ACTUALIZADO: 3 Líneas de Tendencia con ejes separados
             chartInstOperacion5Dias = new Chart(document.getElementById('chartOperacion5Dias').getContext('2d'), {
                 type: 'line', 
-                data: { labels: ['-4d','-3d','-2d','Ayer','Día Sel.'], datasets: [{ data: [0, 0, 0, 0, 0], borderColor: '#0085CA', backgroundColor: 'rgba(0, 133, 202, 0.1)', fill: true, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#0085CA' }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: true } }, scales: { x: { display: false }, y: { display: false, min: 0 } }, layout: { padding: 0 } }
+                data: { 
+                    labels: ['-4d','-3d','-2d','Ayer','Día Sel.'], 
+                    datasets: [
+                        { label: 'Horas', data: [0, 0, 0, 0, 0], borderColor: '#0085CA', backgroundColor: 'rgba(0, 133, 202, 0.1)', fill: true, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#0085CA', yAxisID: 'y' },
+                        { label: 'Tareas', data: [0, 0, 0, 0, 0], borderColor: '#059669', backgroundColor: 'transparent', fill: false, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#059669', yAxisID: 'y1' },
+                        { label: 'Km', data: [0, 0, 0, 0, 0], borderColor: '#D97706', backgroundColor: 'transparent', fill: false, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#D97706', yAxisID: 'y2' }
+                    ] 
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false }, tooltip: { enabled: true, mode: 'index', intersect: false } }, 
+                    scales: { 
+                        x: { display: false }, 
+                        y: { display: false, min: 0 },
+                        y1: { display: false, min: 0 },
+                        y2: { display: false, min: 0 }
+                    }, 
+                    layout: { padding: 0 } 
+                }
             });
 
             const dOpt = { responsive: true, maintainAspectRatio: false, circumference: 180, rotation: -90, cutout: '80%', plugins: { legend: { display: false }, tooltip: { enabled: false } }, layout: { padding: 0 } };
@@ -513,6 +532,8 @@
             document.getElementById('r-val-km').innerText = sumKmHoy.toFixed(2);
 
             let arr5DiasHoras = [0, 0, 0, 0, 0];
+            let arr5DiasTareas = [0, 0, 0, 0, 0];
+            let arr5DiasKm = [0, 0, 0, 0, 0];
             let fBase = new Date(fechaSelec + 'T00:00:00'); 
             
             for(let i=0; i<5; i++) {
@@ -520,13 +541,23 @@
                 dTarget.setDate(dTarget.getDate() - (4 - i));
                 let strDate = dTarget.toISOString().split('T')[0];
                 
-                let sumaDia = 0;
+                let sHoras = 0, sTareas = 0, sKm = 0;
                 flotaTotalData.forEach(d => {
-                    if(extraerFechaStr(d.task_time) === strDate) { sumaDia += parseFloat(d.duration) || 0; }
+                    if(extraerFechaStr(d.task_time) === strDate) { 
+                        sHoras += parseFloat(d.duration) || 0; 
+                        sTareas += parseInt(d.task_count) || 0; 
+                        sKm += parseFloat(d.mileage) || 0; 
+                    }
                 });
-                arr5DiasHoras[i] = parseFloat(sumaDia.toFixed(2));
+                arr5DiasHoras[i] = parseFloat(sHoras.toFixed(2));
+                arr5DiasTareas[i] = sTareas;
+                arr5DiasKm[i] = parseFloat(sKm.toFixed(2));
             }
+            
+            // ACTUALIZACIÓN TRIPLE PARA EL GRÁFICO 
             chartInstOperacion5Dias.data.datasets[0].data = arr5DiasHoras;
+            chartInstOperacion5Dias.data.datasets[1].data = arr5DiasTareas;
+            chartInstOperacion5Dias.data.datasets[2].data = arr5DiasKm;
             chartInstOperacion5Dias.update();
 
             // Tarjeta 3
