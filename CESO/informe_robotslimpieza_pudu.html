@@ -31,12 +31,20 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* ETIQUETA PARA FORZAR EL ZOOM AL 75% SIEMPRE */
+        /* Evitar scroll horizontal por el escalado */
+        html { overflow-x: hidden; }
+
+        /* REEMPLAZO DE ZOOM POR TRANSFORM SCALE */
         body { 
             font-family: 'Roboto', sans-serif; 
             background-color: var(--bg-dark); 
             color: var(--text-main); 
-            zoom: 0.75; 
+            
+            transform: scale(0.75);
+            transform-origin: top left;
+            /* Compensación del escalado (100 / 0.75 = 133.333%) */
+            width: 133.333%;
+            min-height: 133.333vh;
         }
 
         /* =========================================
@@ -198,7 +206,12 @@
             .custom-legend { width: 100%; height: 200px; }
         }
         @media (max-width: 768px) {
-            body { zoom: 1; }
+            body { 
+                /* Se revierte el escalado en móviles */
+                transform: scale(1); 
+                width: 100%; 
+                min-height: 100vh;
+            }
             .kpi-container { grid-template-columns: 1fr; }
             .kpi-main { grid-column: span 1; }
             .header-title { display: none; }
@@ -562,7 +575,6 @@
         // GRÁFICO 2: DONA CON SELECTOR DE COLOR CORREGIDO
         // ==========================================
         function cambiarMetricaDona(metrica, btnElement, colorActivo) {
-            // CORRECCIÓN: Buscamos el contenedor más cercano de los botones
             const container = btnElement.closest('.metric-selectors');
             container.querySelectorAll('.metric-btn').forEach(btn => {
                 btn.style.backgroundColor = 'transparent';
