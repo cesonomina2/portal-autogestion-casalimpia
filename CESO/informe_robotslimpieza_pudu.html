@@ -17,8 +17,6 @@
         :root {
             --color-azul-logo: #0085CA; 
             --color-verde-logo: #8DC63F; 
-            
-            /* Colores Dark Theme */
             --bg-dark: #0F1523; 
             --bg-panel: #1A2333; 
             --text-main: #FFFFFF;
@@ -27,29 +25,33 @@
             --accent-green: #00E396; 
             --accent-blue: #008FFB;
             --accent-orange: #FEB019;
+            --accent-purple: #775DD0;
+            --accent-red: #FF4560;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        /* Evitar scroll horizontal por el escalado */
-        html { overflow-x: hidden; }
+        html { scroll-behavior: smooth; }
 
-        /* REEMPLAZO DE ZOOM POR TRANSFORM SCALE */
-        body { 
-            font-family: 'Roboto', sans-serif; 
-            background-color: var(--bg-dark); 
-            color: var(--text-main); 
-            
+        html, body {
+            width: 100%; height: 100%;
+            margin: 0; padding: 0;
+            overflow: hidden; 
+            background-color: var(--bg-dark);
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-main);
+        }
+        
+        .app-wrapper {
+            position: absolute;
+            top: 0; left: 0;
+            width: 133.3333%;
+            height: 133.3333%;
             transform: scale(0.75);
             transform-origin: top left;
-            /* Compensación del escalado (100 / 0.75 = 133.333%) */
-            width: 133.333%;
-            min-height: 133.333vh;
+            overflow-y: auto; 
+            overflow-x: hidden;
         }
 
-        /* =========================================
-           1. HEADER CLARO (BANNER CORPORATIVO)
-           ========================================= */
         header { 
             background-color: #FFFFFF; 
             padding: 15px 5%; 
@@ -67,10 +69,7 @@
         .text-azul { color: var(--color-azul-logo); font-size: 1.6rem; margin-left: 2px; }
         
         .header-actions { display: flex; align-items: center; gap: 15px; }
-        .header-title { 
-            font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; 
-            color: #475569; background: #E2E8F0; padding: 8px 20px; border-radius: 50px; 
-        }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: #475569; background: #E2E8F0; padding: 8px 20px; border-radius: 50px; }
         .btn-volver {
             background-color: transparent; color: var(--color-azul-logo); 
             border: 2px solid var(--color-azul-logo); padding: 8px 20px; 
@@ -79,21 +78,13 @@
         }
         .btn-volver:hover { background-color: var(--color-azul-logo); color: white; }
 
-        /* =========================================
-           2. LOADING SCREEN
-           ========================================= */
         #loading-screen { text-align: center; padding: 60px; font-family: 'Outfit', sans-serif; font-size: 1.5rem; color: var(--accent-green); }
 
-        /* =========================================
-           3. CONTENEDOR DASHBOARD OSCURO
-           ========================================= */
         .dashboard-wrapper { max-width: 95%; margin: 0 auto; padding: 20px; display: none; flex-direction: column; gap: 20px; }
 
-        /* FILTROS (BARRA OSCURA) */
         .filters-bar { 
             background-color: var(--bg-panel); border-radius: 12px; padding: 15px 25px; 
-            display: flex; align-items: flex-end; flex-wrap: wrap; gap: 15px; 
-            border: 1px solid var(--border-dark);
+            display: flex; align-items: flex-end; flex-wrap: wrap; gap: 15px; border: 1px solid var(--border-dark);
         }
         .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
         .input-group label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); font-family: 'Outfit', sans-serif;}
@@ -108,83 +99,61 @@
         .btn-limpiar:hover { border-color: white; color: white; }
 
         .choices { margin-bottom: 0; width: 100%; }
-        .choices__inner { 
-            background-color: var(--bg-dark) !important; border: 1px solid var(--border-dark) !important; 
-            border-radius: 8px !important; min-height: 42px; padding: 4px 8px; 
-        }
+        .choices__inner { background-color: var(--bg-dark) !important; border: 1px solid var(--border-dark) !important; border-radius: 8px !important; min-height: 42px; padding: 4px 8px; }
         .choices__input { color: white !important; background-color: transparent !important; }
         .choices__list--dropdown { background-color: var(--bg-panel) !important; border: 1px solid var(--border-dark) !important; color: white !important;}
         .choices__list--dropdown .choices__item { color: white; }
-        .choices__list--multiple .choices__item { 
-            background-color: var(--color-azul-logo); border: none; border-radius: 6px; 
-        }
+        .choices__list--multiple .choices__item { background-color: var(--color-azul-logo); border: none; border-radius: 6px; }
 
-        /* GRID PRINCIPAL OPTIMIZADO */
-        .dashboard-grid { 
-            display: grid; 
-            grid-template-columns: 350px 1fr; 
-            gap: 20px; 
-        }
-
-        .panel { 
-            background-color: var(--bg-panel); border-radius: 12px; padding: 20px; 
-            border: 1px solid var(--border-dark); display: flex; flex-direction: column;
-        }
+        .dashboard-grid { display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+        .panel { background-color: var(--bg-panel); border-radius: 12px; padding: 20px; border: 1px solid var(--border-dark); display: flex; flex-direction: column;}
         .full-width-panel { grid-column: 1 / -1; }
 
         .panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;}
-        .panel-title { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
+        .panel-title { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; display: flex; align-items: center; gap: 10px;}
         .panel-subtitle { font-size: 0.75rem; color: var(--text-muted); }
 
-        /* SELECTORES DE MÉTRICA (PÍLDORAS) */
-        .metric-selectors { display: flex; gap: 8px; background: var(--bg-dark); padding: 4px; border-radius: 50px; border: 1px solid var(--border-dark);}
-        .metric-btn { 
-            background: transparent; color: var(--text-muted); border: none; 
-            padding: 6px 15px; border-radius: 50px; font-size: 0.85rem; font-family: 'Outfit'; font-weight: 600;
-            cursor: pointer; transition: 0.3s; 
+        .metric-selectors { display: flex; gap: 10px; background: transparent; padding: 0; flex-wrap: wrap;}
+        
+        .toggle-btn { 
+            background: var(--bg-dark); color: var(--text-muted); border: 1px solid var(--border-dark);
+            padding: 8px 18px; border-radius: 50px; font-size: 0.85rem; font-family: 'Outfit'; 
+            font-weight: 700; cursor: pointer; transition: all 0.3s ease; opacity: 0.6;
         }
-        .metric-btn.active { background: var(--color-azul-logo); color: white; }
+        .toggle-btn:hover { opacity: 0.8; }
         
-        /* Botones específicos para apagar/prender líneas (Toggle) */
-        .toggle-btn { opacity: 0.5; }
-        .toggle-btn.active { opacity: 1; }
-        .toggle-btn.btn-horas.active { background: var(--accent-blue); color: white; }
-        .toggle-btn.btn-tareas.active { background: var(--accent-green); color: var(--bg-dark); }
-        .toggle-btn.btn-km.active { background: var(--accent-orange); color: var(--bg-dark); }
+        /* Colores Activos */
+        .toggle-btn.btn-area.active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); opacity: 1; }
+        .toggle-btn.btn-tiempo.active { background: var(--accent-green); color: var(--bg-dark); border-color: var(--accent-green); opacity: 1; }
+        .toggle-btn.btn-cumplimiento.active { background: var(--accent-orange); color: var(--bg-dark); border-color: var(--accent-orange); opacity: 1; }
+        
+        /* Botones del Análisis Detallado (Gris a Color) */
+        .btn-filtro-ind { background: var(--bg-dark); color: var(--text-muted); border: 1px solid var(--border-dark); padding: 6px 15px; border-radius: 50px; font-size: 0.8rem; font-family: 'Outfit'; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn-filtro-ind:hover { background: rgba(255,255,255,0.05); }
+        .btn-filtro-ind.active { background: var(--color-azul-logo); color: white; border-color: var(--color-azul-logo); }
 
-        /* BLOQUE 1: KPIs (Izquierda) */
         .kpi-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        
-        .kpi-main { grid-column: span 2; background: rgba(0, 143, 251, 0.05); border: 1px solid rgba(0, 143, 251, 0.2); text-align: center; padding: 30px 20px;}
-        .kpi-main .kpi-title { font-size: 1.2rem; font-family: 'Outfit'; color: var(--text-main); margin-bottom: 10px; font-weight: 700;}
-        .kpi-main .kpi-val { font-size: 4rem; font-weight: 800; font-family: 'Outfit'; color: var(--accent-blue); line-height: 1;}
-        
-        .kpi-sub { text-align: center; padding: 20px 10px; background: rgba(255,255,255,0.02); border-radius: 8px;}
+        .kpi-main { grid-column: span 2; background: rgba(0, 143, 251, 0.05); border: 1px solid rgba(0, 143, 251, 0.2); text-align: center; padding: 25px 20px;}
+        .kpi-main .kpi-title { font-size: 1.2rem; font-family: 'Outfit'; color: var(--text-main); margin-bottom: 5px; font-weight: 700;}
+        .kpi-main .kpi-val { font-size: clamp(1.8rem, 3.2vw, 3.2rem); font-weight: 800; font-family: 'Outfit'; color: var(--accent-blue); line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 5px;}
+
+        .kpi-sub { display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 15px 10px; background: rgba(255,255,255,0.02); border-radius: 8px;}
         .kpi-sub .kpi-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;}
-        .kpi-sub .kpi-val { font-size: 2rem; font-weight: 700; font-family: 'Outfit'; color: white;}
+        .kpi-sub .kpi-val { font-size: 1.8rem; font-weight: 700; font-family: 'Outfit'; color: white; line-height: 1;}
         .kpi-sub .kpi-val.green { color: var(--accent-green); }
         .kpi-sub .kpi-val.orange { color: var(--accent-orange); }
 
-        /* BLOQUE 2: GRÁFICO BARRAS (Centro/Derecha) */
         .chart-container { position: relative; height: 350px; width: 100%; }
-
-        /* BLOQUE 3: DONA Y LEYENDA (Ancho completo) */
         .donut-layout { display: flex; gap: 30px; height: 350px; width: 100%; align-items: center;}
         .chart-container-donut { position: relative; height: 100%; width: 40%; display: flex; justify-content: center;}
         
-        /* LEYENDA HTML CON SCROLL */
-        .custom-legend { 
-            width: 60%; height: 100%; overflow-y: auto; padding-right: 15px;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-            gap: 12px; align-content: start;
-        }
+        .custom-legend { width: 60%; height: 100%; overflow-y: auto; padding-right: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; align-content: start;}
         .custom-legend::-webkit-scrollbar { width: 6px; }
         .custom-legend::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 10px; }
         .legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #E2E8F0; }
         .legend-color { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
         .legend-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* BLOQUE 4: TABLA RENDIMIENTO */
         .table-panel { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th { font-family: 'Outfit', sans-serif; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; padding: 15px; border-bottom: 1px solid var(--border-dark); }
@@ -194,8 +163,22 @@
         .robot-name { display: flex; align-items: center; gap: 10px; font-weight: 600; font-family: 'Outfit'; color: white;}
         .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--border-dark); display: flex; align-items: center; justify-content: center; font-size: 15px;}
         
-        .badge-activo { background: rgba(0, 227, 150, 0.15); color: var(--accent-green); padding: 5px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(0,227,150,0.3);}
+        .badge { padding: 5px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 700;}
+        .bg-success { background: rgba(0, 227, 150, 0.15); color: var(--accent-green); border: 1px solid rgba(0,227,150,0.3);}
+        .bg-warning { background: rgba(254, 176, 25, 0.15); color: var(--accent-orange); border: 1px solid rgba(254,176,25,0.3);}
         .metric-pill { background: rgba(255, 255, 255, 0.1); padding: 5px 12px; border-radius: 4px; font-family: 'Outfit'; font-weight: 600;}
+
+        .pagination-container { display: flex; justify-content: flex-end; align-items: center; gap: 15px; padding-top: 15px; border-top: 1px solid var(--border-dark); margin-top: 10px;}
+        .pagination-info { font-size: 0.85rem; color: var(--text-muted); font-family: 'Outfit';}
+        .btn-page { background: var(--bg-dark); color: white; border: 1px solid var(--border-dark); padding: 5px 15px; border-radius: 6px; cursor: pointer; font-family: 'Outfit'; transition: 0.2s;}
+        .btn-page:hover:not(:disabled) { background: var(--color-azul-logo); border-color: var(--color-azul-logo);}
+        .btn-page:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .inactive-list { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 400px; padding-right: 5px; margin-top: 10px;}
+        .inactive-list::-webkit-scrollbar { width: 4px; }
+        .inactive-list::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 10px; }
+        .inactive-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; transition: 0.2s;}
+        .inactive-item:hover { background: rgba(255,255,255,0.05); }
 
         @media (max-width: 1024px) {
             .dashboard-grid { grid-template-columns: 1fr; }
@@ -206,139 +189,231 @@
             .custom-legend { width: 100%; height: 200px; }
         }
         @media (max-width: 768px) {
-            body { 
-                /* Se revierte el escalado en móviles */
-                transform: scale(1); 
-                width: 100%; 
-                min-height: 100vh;
-            }
+            html, body { overflow: auto; }
+            .app-wrapper { position: static; transform: none; width: 100%; height: auto; overflow: visible; }
             .kpi-container { grid-template-columns: 1fr; }
             .kpi-main { grid-column: span 1; }
             .header-title { display: none; }
             .filters-bar { flex-direction: column; align-items: stretch; }
             .panel-header { flex-direction: column; }
         }
+        
+        .choices__list--dropdown .choices__item--selectable.is-highlighted {
+            background-color: var(--color-verde-logo) !important; color: #0F1523 !important; font-weight: 700;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo-container">
-            <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
-            <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Casalimpia</span></div>
-        </div>
-        <div class="header-actions">
-            <div class="header-title">Informe de Rendimiento (Supabase)</div>
-            <a href="comandcenter.html" class="btn-volver">← Volver al Menú</a>
-        </div>
-    </header>
+    <div class="app-wrapper">
 
-    <div id="loading-screen">
-        ⏳ Inicializando Command Center...
-    </div>
+        <header>
+            <div class="logo-container">
+                <img src="https://empresas.casalimpia.com/wp-content/uploads/2024/08/logo-casa-limpia.png" alt="Logo Casalimpia" class="logo-img">
+                <div class="logo-text"><span class="text-verde">SaberBot</span><span class="text-azul">Casalimpia</span></div>
+            </div>
+            <div class="header-actions">
+                <div class="header-title">Informe de Rendimiento (Área y Tiempo)</div>
+                <a href="comandcenter.html" class="btn-volver">← Volver al Menú</a>
+            </div>
+        </header>
 
-    <div class="dashboard-wrapper" id="dashboard-main">
-        
-        <div class="filters-bar">
-            <div class="input-group" style="max-width: 150px;">
-                <label>Desde</label>
-                <input type="date" id="fecha-desde">
-            </div>
-            <div class="input-group" style="max-width: 150px;">
-                <label>Hasta</label>
-                <input type="date" id="fecha-hasta">
-            </div>
-            <div class="input-group">
-                <label>Tiendas Activas</label>
-                <select id="filtro-tienda" multiple></select>
-            </div>
-            <div class="input-group">
-                <label>Flota (Robots)</label>
-                <select id="filtro-robot" multiple></select>
-            </div>
-            <button class="btn-limpiar" onclick="resetFilters()">Limpiar Filtros</button>
+        <div id="loading-screen">
+            ⏳ Inicializando Command Center...
         </div>
 
-        <div class="dashboard-grid">
+        <div class="dashboard-wrapper" id="dashboard-main">
             
-            <!-- KPIs -->
-            <div class="panel kpi-container">
-                <div class="panel kpi-main">
-                    <div class="kpi-title">Tiempo Total Operativo</div>
-                    <div class="kpi-val" id="kpi-duracion">0h 0m</div>
+            <div class="filters-bar">
+                <div class="input-group" style="max-width: 150px;">
+                    <label>Desde</label>
+                    <input type="date" id="fecha-desde">
                 </div>
-                <div class="kpi-sub">
-                    <div class="kpi-title">Tareas Completadas</div>
-                    <div class="kpi-val green" id="kpi-tareas">0</div>
+                <div class="input-group" style="max-width: 150px;">
+                    <label>Hasta</label>
+                    <input type="date" id="fecha-hasta">
                 </div>
-                <div class="kpi-sub">
-                    <div class="kpi-title">Robots en Línea</div>
-                    <div class="kpi-val" id="kpi-robots">0</div>
+                <div class="input-group">
+                    <label>Tiendas Activas</label>
+                    <select id="filtro-tienda" multiple></select>
                 </div>
-                <div class="kpi-sub" style="grid-column: span 2;">
-                    <div class="kpi-title">Kilometraje Operativo (km)</div>
-                    <div class="kpi-val orange" id="kpi-kilometraje">0.00</div>
+                <div class="input-group">
+                    <label>Flota (Robots)</label>
+                    <select id="filtro-robot" multiple></select>
                 </div>
+                <button class="btn-limpiar" onclick="resetFilters()">Limpiar Filtros</button>
             </div>
 
-            <!-- TENDENCIA COMPARATIVA (CON TOGGLES) -->
-            <div class="panel">
-                <div class="panel-header">
-                    <div>
-                        <div class="panel-title">Tendencia Operativa Comparativa</div>
-                        <div class="panel-subtitle" id="sub-fechas">Haz clic en los botones para ocultar/mostrar métricas</div>
+            <div class="dashboard-grid">
+                
+                <div class="panel kpi-container">
+                    <div class="panel kpi-main">
+                        <div class="kpi-title">Área Total Limpiada (m²)</div>
+                        <div class="kpi-val" id="kpi-area-total" title="0.00">0.00</div>
                     </div>
-                    <div class="metric-selectors">
-                        <button class="metric-btn toggle-btn btn-horas active" onclick="toggleDataset(0, this)">Horas</button>
-                        <button class="metric-btn toggle-btn btn-tareas active" onclick="toggleDataset(1, this)">Tareas</button>
-                        <button class="metric-btn toggle-btn btn-km active" onclick="toggleDataset(2, this)">Kilómetros</button>
+                    <div class="kpi-sub">
+                        <div class="kpi-title">Tiempo Efectivo</div>
+                        <div class="kpi-val green" id="kpi-tiempo-total">0h 0m</div>
+                    </div>
+                    <div class="kpi-sub">
+                        <div class="kpi-title">Robots en Línea</div>
+                        <div class="kpi-val" id="kpi-robots">0</div>
+                    </div>
+                    
+                    <div class="kpi-sub">
+                        <div class="kpi-title">Cumplimiento Promedio</div>
+                        <div class="kpi-val orange" id="kpi-cumplimiento">0%</div>
+                    </div>
+                    <div class="kpi-sub" style="padding: 10px; display: flex; flex-direction: column;">
+                        <div class="kpi-title" style="margin-bottom: 5px;">Inactivos (Últ. 5 Días)</div>
+                        <div style="flex-grow: 1; min-height: 80px; position: relative;">
+                            <canvas id="chartMiniInactivos"></canvas>
+                        </div>
                     </div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="chartTendencia"></canvas>
-                </div>
-            </div>
 
-            <!-- DISTRIBUCIÓN (DONA + SELECTOR) -->
-            <div class="panel full-width-panel">
-                <div class="panel-header">
-                    <div>
-                        <div class="panel-title">Distribución por Tienda</div>
-                        <div class="panel-subtitle">Elige qué métrica deseas visualizar en la gráfica</div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">Evolución Operativa</div>
+                            <div class="panel-subtitle" id="sub-fechas">Haz clic en los botones para ocultar/mostrar métricas</div>
+                        </div>
+                        <div class="metric-selectors">
+                            <button class="toggle-btn btn-area active" onclick="toggleDataset(0, this)">Área (m²)</button>
+                            <button class="toggle-btn btn-tiempo active" onclick="toggleDataset(1, this)">Tiempo (min)</button>
+                            <button class="toggle-btn btn-cumplimiento active" onclick="toggleDataset(2, this)">Cumplimiento (%)</button>
+                        </div>
                     </div>
-                    <div class="metric-selectors">
-                        <button class="metric-btn active" style="background-color: var(--accent-blue); color: white;" onclick="cambiarMetricaDona('duracion', this, 'var(--accent-blue)')">Horas</button>
-                        <button class="metric-btn" onclick="cambiarMetricaDona('tareas', this, 'var(--accent-green)')">Tareas</button>
-                        <button class="metric-btn" onclick="cambiarMetricaDona('km', this, 'var(--accent-orange)')">Kilómetros</button>
+                    <div class="chart-container">
+                        <canvas id="chartTendencia"></canvas>
                     </div>
                 </div>
-                <div class="donut-layout">
-                    <div class="chart-container-donut">
-                        <canvas id="chartDona"></canvas>
+
+                <div class="panel full-width-panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">Distribución por Tienda</div>
+                            <div class="panel-subtitle">Elige qué métrica deseas visualizar en la gráfica</div>
+                        </div>
+                        <div class="metric-selectors">
+                            <button class="toggle-btn btn-area active" onclick="cambiarMetricaDona('area', this, 'var(--accent-blue)')">Área (m²)</button>
+                            <button class="toggle-btn btn-tiempo" onclick="cambiarMetricaDona('tiempo', this, 'var(--accent-green)')">Tiempo Efectivo</button>
+                        </div>
                     </div>
-                    <div class="custom-legend" id="leyenda-dona"></div>
+                    <div class="donut-layout">
+                        <div class="chart-container-donut">
+                            <canvas id="chartDona"></canvas>
+                        </div>
+                        <div class="custom-legend" id="leyenda-dona"></div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- TABLA RENDIMIENTO -->
-            <div class="panel table-panel full-width-panel">
-                <div class="panel-title">Desempeño por Robot</div>
-                <div class="panel-subtitle">Métricas consolidadas del período seleccionado</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Robot</th>
-                            <th>Estado</th>
-                            <th>Tienda Principal</th>
-                            <th>Total Tareas</th>
-                            <th>Horas Operativas</th>
-                            <th>Kilómetros</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-rendimiento"></tbody>
-                </table>
-            </div>
+                <div class="panel table-panel full-width-panel">
+                    <div class="panel-title">Desempeño Detallado por Robot</div>
+                    <div class="panel-subtitle">Métricas consolidadas de limpieza</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Robot (SN/Nick)</th>
+                                <th>Tienda Principal</th>
+                                <th>Modelo</th>
+                                <th>Tareas Realizadas</th>
+                                <th>Área Limpiada (m²)</th>
+                                <th>Meta Área (m²)</th>
+                                <th>Tiempo Efectivo</th>
+                                <th>Cumplimiento (%)</th>
+                                <th>Velocidad (m²/min)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-rendimiento"></tbody>
+                    </table>
+                    <div class="pagination-container">
+                        <button class="btn-page" id="btn-prev-robot" onclick="cambiarPaginaRobot(-1)">Anterior</button>
+                        <span class="pagination-info" id="info-page-robot">Página 1 de 1</span>
+                        <button class="btn-page" id="btn-next-robot" onclick="cambiarPaginaRobot(1)">Siguiente</button>
+                    </div>
+                </div>
 
+                <div class="panel">
+                    <div class="panel-header" style="margin-bottom:5px;">
+                        <div>
+                            <div class="panel-title">Sin Actividad <span class="badge bg-warning" id="count-inactivos">0</span></div>
+                            <div class="panel-subtitle">Flota oficial sin tareas en estas fechas</div>
+                        </div>
+                    </div>
+                    <div class="inactive-list" id="lista-inactivos">
+                    </div>
+                </div>
+
+                <!-- ANÁLISIS INDIVIDUAL -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="panel-title">Análisis Detallado Individual</div>
+                            <div class="panel-subtitle">Desglose exacto de cada tarea (Respeta los filtros globales)</div>
+                        </div>
+                        
+                        <div>
+                            <button class="btn-filtro-ind" id="btn-toggle-nunca" onclick="toggleNuncaActivados(this)">⚠️ Ver Nunca Activados</button>
+                        </div>
+                    </div>
+                    
+                    <!-- SECCIÓN NORMAL (Dropdown y Tareas) -->
+                    <div id="seccion-analisis-normal" style="width: 100%;">
+                        <div style="width: 100%; margin-top: 15px;">
+                            <!-- BOTONES DE FILTRO DE ACTIVIDAD -->
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                                <button class="btn-filtro-ind active" onclick="setFiltroIndActividad('todos', this)">Todos</button>
+                                <button class="btn-filtro-ind" onclick="setFiltroIndActividad('activos', this)">Con Actividad</button>
+                                <button class="btn-filtro-ind" onclick="setFiltroIndActividad('inactivos', this)">Sin Actividad</button>
+                            </div>
+                            
+                            <div class="input-group">
+                                <select id="ind-filtro-robot"></select>
+                            </div>
+                        </div>
+
+                        <div id="ind-resultados" style="display: none; margin-top:15px;" class="table-panel">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Fecha (Task Time)</th>
+                                        <th>Nombre de la Tarea</th>
+                                        <th>Tienda</th>
+                                        <th>Área Limpiada (m²)</th>
+                                        <th>Tiempo (min)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ind-tbody-detalle"></tbody>
+                            </table>
+                            <div class="pagination-container" id="ind-pagination-container" style="display: none;">
+                                <button class="btn-page" id="ind-btn-prev" onclick="cambiarPaginaInd(-1)">Anterior</button>
+                                <span class="pagination-info" id="ind-info-page">Página 1 de 1</span>
+                                <button class="btn-page" id="ind-btn-next" onclick="cambiarPaginaInd(1)">Siguiente</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NUEVA SECCIÓN: NUNCA ACTIVADOS -->
+                    <div id="seccion-nunca-activados" style="display: none; width: 100%; margin-top: 15px;" class="table-panel">
+                        <div style="margin-bottom: 15px; color: var(--accent-orange); font-size: 0.9rem; font-family: 'Outfit'; font-weight: 600;">
+                            Lista de robots registrados en la flota que nunca han reportado actividad (first_active_time = 0).
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Robot (SN/Nick)</th>
+                                    <th>Tienda Asignada</th>
+                                    <th>Modelo</th>
+                                    <th>Estado de Activación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-nunca-activados"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -356,45 +431,115 @@
 
         const palette = [
             '#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0', '#00D9E9', '#FF66C3', 
-            '#9D00FF', '#FF8C00', '#32CD32', '#1E90FF', '#FF1493', '#00FA9A', '#DAA520', 
-            '#8A2BE2', '#FF4500', '#2E8B57', '#4169E1', '#DC143C', '#20B2AA'
+            '#9D00FF', '#FF8C00', '#32CD32', '#1E90FF', '#FF1493', '#00FA9A', '#DAA520'
         ];
 
         let datosGlobales = [];
+        let datosCrudosGlobales = []; 
         let datosFiltrados = []; 
+        let diccionarioRobotsGlobal = []; // Solo válidos (>0)
+        
         let graficoTendencia = null;
         let graficoDona = null;
-        let tiendaChoices, robotChoices;
-        let metricaDonaActiva = 'duracion'; 
+        
+        let tiendaChoices, robotChoices, indRobotChoice;
+        let metricaDonaActiva = 'area'; 
+        
+        // Estado del Análisis Individual
+        let filtroIndActividad = 'todos'; 
+        let viendoNuncaActivados = false;
+        
+        let datosRobotsPaginados = [];
+        let paginaActualRobot = 1;
+        const limiteRobotsPagina = 10;
+        
+        let datosIndPaginados = [];
+        let paginaActualInd = 1;
+        const limiteIndPagina = 10;
 
-        function formatHoras(horasDec) {
-            if (!horasDec || isNaN(horasDec)) return "0h 0m";
-            const h = Math.floor(horasDec);
-            const m = Math.round((horasDec - h) * 60);
+        function formatMinutos(minutosTotales) {
+            if (!minutosTotales || isNaN(minutosTotales)) return "0h 0m";
+            const h = Math.floor(minutosTotales / 60);
+            const m = Math.round(minutosTotales % 60);
             return `${h}h ${m}m`;
         }
+        
         function extraerFecha(ts) { return ts ? ts.split('T')[0] : "N/A"; }
         
-        function getAvatar(nombre) {
+        function getAvatar(nombre, colorForzado) {
             const letra = (nombre || 'R').charAt(0).toUpperCase();
-            const color = palette[letra.charCodeAt(0) % palette.length];
+            const color = colorForzado || palette[letra.charCodeAt(0) % palette.length];
             return `<div class="avatar" style="background:${color}">${letra}</div>`;
         }
 
         async function init() {
             initChoices();
+            const fFin = new Date();
+            const fIni = new Date();
+            fIni.setDate(fFin.getDate() - 15);
+            
+            const strFin = `${fFin.getFullYear()}-${String(fFin.getMonth()+1).padStart(2,'0')}-${String(fFin.getDate()).padStart(2,'0')}`;
+            const strIni = `${fIni.getFullYear()}-${String(fIni.getMonth()+1).padStart(2,'0')}-${String(fIni.getDate()).padStart(2,'0')}`;
+            
+            document.getElementById('fecha-desde').value = strIni;
+            document.getElementById('fecha-hasta').value = strFin;
+
             try {
-                const { data, error } = await clienteSupabase
+                const { data: dataAgrupada, error: err1 } = await clienteSupabase
                     .from('5-vista_dashboard_rendimiento')
                     .select('*')
                     .order('task_time', { ascending: true });
 
-                if (error) throw error;
+                if (err1) throw err1;
+                
+                const { data: rendimientosCrudos, error: err2 } = await clienteSupabase
+                    .from('5-pudu_rendimientos')
+                    .select('task_time, task_name, clean_area, task_area, clean_time, sn')
+                    .order('task_time', { ascending: false });
+                
+                if (err2) throw err2;
 
-                if (data && data.length > 0) {
+                const { data: datosBasicos, error: err3 } = await clienteSupabase
+                    .from('5-pudu_datos_basicos')
+                    .select('sn, nickname, shop_name, product_code, first_active_time');
+
+                if (err3) throw err3;
+
+                // Guardar la flota completa (incluyendo los que están en 0) globalmente en window
+                window.flotaCompleta = datosBasicos || [];
+
+                const diccionarioTemporal = {};
+                if (datosBasicos) {
+                    datosBasicos.forEach(r => { 
+                        // FILTRO RAÍZ NORMAL: Descartar si first_active_time es nulo o 0
+                        if(r.first_active_time && r.first_active_time > 0) {
+                            diccionarioTemporal[r.sn] = r; 
+                        }
+                    });
+                }
+                
+                diccionarioRobotsGlobal = Object.values(diccionarioTemporal); 
+                
+                datosCrudosGlobales = rendimientosCrudos.map(d => ({
+                    ...d,
+                    apodo_robot: diccionarioTemporal[d.sn] ? diccionarioTemporal[d.sn].nickname : d.sn,
+                    shop_name: diccionarioTemporal[d.sn] ? diccionarioTemporal[d.sn].shop_name : 'Sin Tienda'
+                }));
+
+                if (dataAgrupada && dataAgrupada.length > 0) {
+                    dataAgrupada.forEach(d => {
+                        if (diccionarioTemporal[d.sn]) {
+                            d.apodo_robot = diccionarioTemporal[d.sn].nickname;
+                            d.shop_name = diccionarioTemporal[d.sn].shop_name;
+                        } else {
+                            d.apodo_robot = d.sn;
+                            d.shop_name = 'Sin Tienda';
+                        }
+                    });
+                    
                     document.getElementById('loading-screen').style.display = 'none';
                     document.getElementById('dashboard-main').style.display = 'flex';
-                    procesarDatosIniciales(data);
+                    procesarDatosIniciales(dataAgrupada);
                 } else {
                     document.getElementById('loading-screen').innerHTML = '⚠️ No hay datos en Supabase.';
                 }
@@ -403,46 +548,60 @@
                 document.getElementById('loading-screen').innerHTML = '❌ Error de conexión.';
             }
 
-            document.getElementById('fecha-desde').addEventListener('change', aplicarFiltros);
-            document.getElementById('fecha-hasta').addEventListener('change', aplicarFiltros);
+            document.getElementById('fecha-desde').addEventListener('change', () => { aplicarFiltros(); aplicarFiltrosIndividual(); });
+            document.getElementById('fecha-hasta').addEventListener('change', () => { aplicarFiltros(); aplicarFiltrosIndividual(); });
         }
 
         function initChoices() {
             tiendaChoices = new Choices('#filtro-tienda', { removeItemButton: true, placeholderValue: 'Seleccionar Tiendas', itemSelectText: '' });
             robotChoices = new Choices('#filtro-robot', { removeItemButton: true, placeholderValue: 'Seleccionar Robots', itemSelectText: '' });
+            indRobotChoice = new Choices('#ind-filtro-robot', { removeItemButton: true, placeholderValue: 'Seleccionar Robot', itemSelectText: '', searchPlaceholderValue: 'Buscar...' });
+            
             document.getElementById('filtro-tienda').addEventListener('change', () => { actualizarFiltroRobots(); aplicarFiltros(); });
             document.getElementById('filtro-robot').addEventListener('change', aplicarFiltros);
+            document.getElementById('ind-filtro-robot').addEventListener('change', aplicarFiltrosIndividual);
         }
 
         function procesarDatosIniciales(data) {
             datosGlobales = data; 
-            const fechas = [...new Set(data.map(d => extraerFecha(d.task_time)))].filter(f => f !== 'N/A').sort();
-            if(fechas.length > 0) {
-                let fFin = new Date(fechas[fechas.length - 1]);
-                let fIni = new Date(fFin);
-                fIni.setDate(fIni.getDate() - 30);
-                document.getElementById('fecha-hasta').value = fFin.toISOString().split('T')[0];
-                document.getElementById('fecha-desde').value = fIni.toISOString().split('T')[0];
-            }
-            const tiendas = [...new Set(data.map(d => d.shop_name))].filter(Boolean).sort();
+            
+            const tiendas = [...new Set(diccionarioRobotsGlobal.map(d => d.shop_name))].filter(t => t !== 'Sin Tienda').sort();
             tiendaChoices.setChoices(tiendas.map(t => ({ value: t, label: t })), 'value', 'label', true);
+            
             actualizarFiltroRobots();
             aplicarFiltros(); 
         }
 
         function actualizarFiltroRobots() {
             const selectedTiendas = tiendaChoices.getValue(true); 
-            let robots = selectedTiendas.length === 0 ? 
-                [...new Set(datosGlobales.map(d => d.apodo_robot))].filter(Boolean).sort() :
-                [...new Set(datosGlobales.filter(d => selectedTiendas.includes(d.shop_name)).map(d => d.apodo_robot))].filter(Boolean).sort();
+            
+            let robotsValidos = diccionarioRobotsGlobal;
+            if (selectedTiendas.length > 0) {
+                robotsValidos = robotsValidos.filter(r => selectedTiendas.includes(r.shop_name));
+            }
+            
+            const nombresRobots = [...new Set(robotsValidos.map(r => r.nickname || r.sn))].filter(Boolean).sort();
+            
             const selectedRobots = robotChoices.getValue(true);
-            robotChoices.setChoices(robots.map(r => ({ value: r, label: r, selected: selectedRobots.includes(r) })), 'value', 'label', true);
+            robotChoices.setChoices(nombresRobots.map(r => ({ value: r, label: r, selected: selectedRobots.includes(r) })), 'value', 'label', true);
         }
 
         function resetFilters() {
             tiendaChoices.removeActiveItems();
             robotChoices.removeActiveItems();
-            procesarDatosIniciales(datosGlobales);
+            
+            const fFin = new Date();
+            const fIni = new Date();
+            fIni.setDate(fFin.getDate() - 15);
+            
+            const strFin = `${fFin.getFullYear()}-${String(fFin.getMonth()+1).padStart(2,'0')}-${String(fFin.getDate()).padStart(2,'0')}`;
+            const strIni = `${fIni.getFullYear()}-${String(fIni.getMonth()+1).padStart(2,'0')}-${String(fIni.getDate()).padStart(2,'0')}`;
+
+            document.getElementById('fecha-desde').value = strIni;
+            document.getElementById('fecha-hasta').value = strFin;
+            
+            aplicarFiltros();
+            aplicarFiltrosIndividual();
         }
 
         function aplicarFiltros() {
@@ -454,8 +613,9 @@
             document.getElementById('sub-fechas').innerText = `${fDesde || 'Inicio'} al ${fHasta || 'Fin'}`;
 
             datosFiltrados = datosGlobales.filter(d => {
+                let nameToFilter = d.apodo_robot || d.sn;
                 let matchT = tiendas.length === 0 || tiendas.includes(d.shop_name);
-                let matchR = robots.length === 0 || robots.includes(d.apodo_robot);
+                let matchR = robots.length === 0 || robots.includes(nameToFilter);
                 let f = extraerFecha(d.task_time);
                 let matchF = true;
                 if (fDesde && f < fDesde) matchF = false;
@@ -464,87 +624,251 @@
             });
             
             actualizarKPIs();
-            renderTable();
+            prepararDatosTablaRobots();
             renderChartTendencia();
             renderChartDona();
+            renderRobotsInactivos(tiendas); 
+            renderMiniChartInactivos(tiendas); 
+            
+            // Actualizar el Dropdown del panel Individual y la tabla de Nunca Activados (si está visible)
+            actualizarDropdownIndividual();
+            if(viendoNuncaActivados) {
+                renderNuncaActivados();
+            }
         }
 
         function actualizarKPIs() {
-            let sumKm = 0, sumTareas = 0, sumDuracion = 0;
+            let sumArea = 0, sumMeta = 0, sumTiempo = 0;
             let robotsSet = new Set();
             datosFiltrados.forEach(d => {
-                sumKm += parseFloat(d.mileage) || 0;
-                sumTareas += parseInt(d.task_count) || 0;
-                sumDuracion += parseFloat(d.duration) || 0;
-                if(d.apodo_robot) robotsSet.add(d.apodo_robot);
+                sumArea += parseFloat(d.total_clean_area) || 0;
+                sumMeta += parseFloat(d.total_task_area) || 0;
+                sumTiempo += parseFloat(d.tiempo_efectivo_minutos) || 0;
+                robotsSet.add(d.sn);
             });
-            document.getElementById('kpi-duracion').innerText = formatHoras(sumDuracion);
-            document.getElementById('kpi-tareas').innerText = sumTareas.toLocaleString('es-CO');
+            
+            const cumplimientoTotal = sumMeta > 0 ? ((sumArea / sumMeta) * 100).toFixed(1) : 0;
+            const areaFormateada = sumArea.toLocaleString('es-CO', {maximumFractionDigits: 2});
+
+            const kpiAreaEl = document.getElementById('kpi-area-total');
+            kpiAreaEl.innerText = areaFormateada;
+            kpiAreaEl.title = areaFormateada + " m²"; 
+
+            document.getElementById('kpi-tiempo-total').innerText = formatMinutos(sumTiempo);
             document.getElementById('kpi-robots').innerText = robotsSet.size;
-            document.getElementById('kpi-kilometraje').innerText = sumKm.toFixed(2);
+            document.getElementById('kpi-cumplimiento').innerText = `${cumplimientoTotal}%`;
         }
 
-        function renderTable() {
+        // --- LÓGICA MINIGRÁFICA ---
+        function renderMiniChartInactivos(tiendasSeleccionadas) {
+            const labels = [];
+            const dataInactivos = [];
+            
+            const robotsBase = diccionarioRobotsGlobal.filter(r => {
+                if (!r.shop_name || r.shop_name.trim() === '' || r.shop_name === 'Sin Tienda') return false;
+                if (tiendasSeleccionadas.length > 0 && !tiendasSeleccionadas.includes(r.shop_name)) return false;
+                return true;
+            });
+            
+            const validSns = new Set(robotsBase.map(r => r.sn));
+            const totalRobotsValidos = validSns.size;
+
+            const fHastaStr = document.getElementById('fecha-hasta').value;
+            let baseDate = new Date();
+            if (fHastaStr) {
+                const parts = fHastaStr.split('-');
+                baseDate = new Date(parts[0], parts[1] - 1, parts[2]); 
+            }
+
+            for (let i = 4; i >= 0; i--) {
+                let d = new Date(baseDate);
+                d.setDate(d.getDate() - i);
+                
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+                
+                labels.push(`${month}-${day}`); 
+
+                let activosHoy = new Set();
+                datosCrudosGlobales.forEach(registro => {
+                    if (extraerFecha(registro.task_time) === dateStr && validSns.has(registro.sn)) {
+                        activosHoy.add(registro.sn);
+                    }
+                });
+
+                let inactivosCount = totalRobotsValidos - activosHoy.size;
+                dataInactivos.push(inactivosCount < 0 ? 0 : inactivosCount);
+            }
+
+            const ctx = document.getElementById('chartMiniInactivos').getContext('2d');
+            if (window.graficoMini) window.graficoMini.destroy();
+
+            window.graficoMini = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataInactivos,
+                        backgroundColor: 'rgba(255, 69, 96, 0.9)',
+                        borderRadius: 3,
+                        maxBarThickness: 15
+                    }]
+                },
+                options: {
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false }, 
+                        tooltip: { 
+                            enabled: true, 
+                            callbacks: { title: () => null, label: (c) => ` Inactivos: ${c.raw}` } 
+                        } 
+                    },
+                    scales: {
+                        x: { 
+                            display: true, 
+                            ticks: { font: { size: 10, family: 'Outfit' }, color: '#94A3B8' }, 
+                            grid: { display: false } 
+                        },
+                        y: { 
+                            display: true, min: 0, 
+                            ticks: { font: { size: 10, family: 'Outfit' }, color: '#94A3B8', stepSize: 5 }, 
+                            grid: { color: 'rgba(255,255,255,0.05)' } 
+                        }
+                    },
+                    layout: { padding: 0 }
+                }
+            });
+        }
+
+        // --- LÓGICA DE LISTA DE INACTIVOS ---
+        function renderRobotsInactivos(tiendasSeleccionadas) {
+            const robotsActivosSet = new Set(datosFiltrados.map(d => d.sn));
+
+            const inactivos = diccionarioRobotsGlobal.filter(r => {
+                if (!r.shop_name || r.shop_name.trim() === '' || r.shop_name === 'Sin Tienda') return false;
+                if (tiendasSeleccionadas.length > 0 && !tiendasSeleccionadas.includes(r.shop_name)) return false;
+                return !robotsActivosSet.has(r.sn);
+            });
+
+            document.getElementById('count-inactivos').innerText = inactivos.length;
+
+            let html = "";
+            inactivos.forEach(r => {
+                const apodo = r.nickname || r.sn;
+                html += `
+                    <div class="inactive-item">
+                        ${getAvatar(apodo, '#2A3649')}
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <span style="color:#E2E8F0; font-weight:600; font-size:0.9rem;">${apodo}</span>
+                            <span style="color:var(--text-muted); font-size:0.75rem;">${r.shop_name}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const container = document.getElementById('lista-inactivos');
+            if(inactivos.length === 0) {
+                container.innerHTML = `<div style="padding:15px; color:var(--accent-green); font-size:0.85rem; font-weight:600; text-align:center;">¡Todos los robots con tienda están activos!</div>`;
+            } else {
+                container.innerHTML = html;
+            }
+        }
+
+        function prepararDatosTablaRobots() {
             let agrupar = {};
             datosFiltrados.forEach(d => {
-                let r = d.apodo_robot || 'Desconocido';
-                if(!agrupar[r]) agrupar[r] = { tienda: d.shop_name, tareas: 0, duracion: 0, km: 0 };
-                agrupar[r].tareas += parseInt(d.task_count) || 0;
-                agrupar[r].duracion += parseFloat(d.duration) || 0;
-                agrupar[r].km += parseFloat(d.mileage) || 0;
-                agrupar[r].tienda = d.shop_name; 
+                let sn = d.sn;
+                if(!agrupar[sn]) {
+                    agrupar[sn] = { 
+                        apodo: d.apodo_robot || sn, tienda: d.shop_name, 
+                        modelo: d.product_code || 'N/A', area: 0, meta: 0, tiempo: 0, tareas: 0 
+                    };
+                }
+                agrupar[sn].area += parseFloat(d.total_clean_area) || 0;
+                agrupar[sn].meta += parseFloat(d.total_task_area) || 0;
+                agrupar[sn].tiempo += parseFloat(d.tiempo_efectivo_minutos) || 0;
             });
-            let arr = Object.keys(agrupar).map(k => ({ nombre: k, ...agrupar[k] })).sort((a,b) => b.duracion - a.duracion);
-            let html = "";
-            arr.forEach(r => {
-                html += `<tr>
-                    <td><div class="robot-name">${getAvatar(r.nombre)} ${r.nombre}</div></td>
-                    <td><span class="badge-activo">● Activo</span></td>
-                    <td>${r.tienda || 'N/A'}</td>
-                    <td>${r.tareas.toLocaleString()}</td>
-                    <td><span class="metric-pill">${formatHoras(r.duracion)}</span></td>
-                    <td>${r.km.toFixed(2)}</td>
-                </tr>`;
+            
+            const fDesde = document.getElementById('fecha-desde').value;
+            const fHasta = document.getElementById('fecha-hasta').value;
+            datosCrudosGlobales.forEach(c => {
+                 let f = extraerFecha(c.task_time);
+                 let sn = c.sn;
+                 if (agrupar[sn]) {
+                    let matchF = true;
+                    if (fDesde && f < fDesde) matchF = false;
+                    if (fHasta && f > fHasta) matchF = false;
+                    if(matchF) agrupar[sn].tareas++;
+                 }
             });
-            document.getElementById('tbody-rendimiento').innerHTML = html || "<tr><td colspan='6'>No hay datos.</td></tr>";
+
+            datosRobotsPaginados = Object.values(agrupar).map(r => {
+                r.cumplimiento = r.meta > 0 ? ((r.area / r.meta) * 100) : 0;
+                r.velocidad = r.tiempo > 0 ? (r.area / r.tiempo) : 0;
+                return r;
+            }).sort((a,b) => b.area - a.area);
+            
+            paginaActualRobot = 1;
+            renderTablaRobots();
         }
 
-        // ==========================================
-        // GRÁFICO 1: TENDENCIA DIARIA (TOGGLES ACTIVOS)
-        // ==========================================
+        function renderTablaRobots() {
+            const totalPaginas = Math.ceil(datosRobotsPaginados.length / limiteRobotsPagina) || 1;
+            const inicio = (paginaActualRobot - 1) * limiteRobotsPagina;
+            const datosPagina = datosRobotsPaginados.slice(inicio, inicio + limiteRobotsPagina);
+            
+            let html = "";
+            datosPagina.forEach(r => {
+                const isSuccess = r.cumplimiento >= 100;
+                html += `<tr>
+                    <td><div class="robot-name">${getAvatar(r.apodo)} ${r.apodo}</div></td>
+                    <td>${r.tienda || 'N/A'}</td>
+                    <td><span class="metric-pill">${r.modelo}</span></td>
+                    <td><strong>${r.tareas}</strong></td>
+                    <td>${r.area.toLocaleString('es-CO', {maximumFractionDigits: 2})}</td>
+                    <td>${r.meta.toLocaleString('es-CO', {maximumFractionDigits: 2})}</td>
+                    <td><span style="color:var(--text-muted); font-weight:600;">${formatMinutos(r.tiempo)}</span></td>
+                    <td><span class="badge ${isSuccess ? 'bg-success' : 'bg-warning'}">${r.cumplimiento.toFixed(1)}%</span></td>
+                    <td>${r.velocidad.toFixed(2)}</td>
+                </tr>`;
+            });
+            document.getElementById('tbody-rendimiento').innerHTML = html || "<tr><td colspan='9'>No hay datos para esta selección.</td></tr>";
+            
+            document.getElementById('info-page-robot').innerText = `Página ${paginaActualRobot} de ${totalPaginas}`;
+            document.getElementById('btn-prev-robot').disabled = paginaActualRobot === 1;
+            document.getElementById('btn-next-robot').disabled = paginaActualRobot === totalPaginas;
+        }
+
+        function cambiarPaginaRobot(direccion) { paginaActualRobot += direccion; renderTablaRobots(); }
+
         function toggleDataset(index, btnElement) {
             const isVisible = graficoTendencia.isDatasetVisible(index);
-            if (isVisible) {
-                graficoTendencia.hide(index);
-                btnElement.classList.remove('active');
-            } else {
-                graficoTendencia.show(index);
-                btnElement.classList.add('active');
-            }
+            if (isVisible) { graficoTendencia.hide(index); btnElement.classList.remove('active'); } 
+            else { graficoTendencia.show(index); btnElement.classList.add('active'); }
         }
 
         function renderChartTendencia() {
             let porDia = {};
             datosFiltrados.sort((a,b) => new Date(a.task_time) - new Date(b.task_time)).forEach(d => {
                 let f = extraerFecha(d.task_time);
-                if(!porDia[f]) porDia[f] = { horas: 0, tareas: 0, km: 0 };
-                porDia[f].horas += parseFloat(d.duration) || 0; 
-                porDia[f].tareas += parseInt(d.task_count) || 0; 
-                porDia[f].km += parseFloat(d.mileage) || 0; 
+                if(!porDia[f]) porDia[f] = { area: 0, meta: 0, tiempo: 0 };
+                porDia[f].area += parseFloat(d.total_clean_area) || 0; 
+                porDia[f].meta += parseFloat(d.total_task_area) || 0; 
+                porDia[f].tiempo += parseFloat(d.tiempo_efectivo_minutos) || 0; 
             });
 
             const labels = Object.keys(porDia);
-            const dataHoras = labels.map(l => porDia[l].horas);
-            const dataTareas = labels.map(l => porDia[l].tareas);
-            const dataKm = labels.map(l => porDia[l].km);
+            const dataArea = labels.map(l => porDia[l].area);
+            const dataTiempo = labels.map(l => porDia[l].tiempo);
+            const dataCumplimiento = labels.map(l => porDia[l].meta > 0 ? (porDia[l].area / porDia[l].meta) * 100 : 0);
 
             const ctx = document.getElementById('chartTendencia').getContext('2d');
-            
             let visibilityState = [true, true, true];
             if(graficoTendencia) {
-                visibilityState[0] = graficoTendencia.isDatasetVisible(0);
-                visibilityState[1] = graficoTendencia.isDatasetVisible(1);
-                visibilityState[2] = graficoTendencia.isDatasetVisible(2);
+                visibilityState[0] = graficoTendencia.isDatasetVisible(0); visibilityState[1] = graficoTendencia.isDatasetVisible(1); visibilityState[2] = graficoTendencia.isDatasetVisible(2);
                 graficoTendencia.destroy();
             }
 
@@ -553,38 +877,31 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Horas', type: 'bar', data: dataHoras, backgroundColor: '#008FFB', yAxisID: 'y', maxBarThickness: 15, borderRadius: 4, hidden: !visibilityState[0] },
-                        { label: 'Tareas', type: 'line', data: dataTareas, borderColor: '#00E396', backgroundColor: '#00E396', borderWidth: 2, tension: 0.3, yAxisID: 'y1', hidden: !visibilityState[1] },
-                        { label: 'Kilómetros', type: 'line', data: dataKm, borderColor: '#FEB019', backgroundColor: '#FEB019', borderWidth: 2, tension: 0.3, yAxisID: 'y', hidden: !visibilityState[2] }
+                        { label: 'Área (m²)', type: 'bar', data: dataArea, backgroundColor: 'rgba(0, 143, 251, 0.35)', borderColor: '#008FFB', borderWidth: 1, yAxisID: 'y', maxBarThickness: 40, borderRadius: 4, order: 3, hidden: !visibilityState[0] },
+                        { label: 'Tiempo (min)', type: 'line', data: dataTiempo, borderColor: '#00E396', backgroundColor: '#00E396', borderWidth: 2, tension: 0.3, yAxisID: 'y1', order: 1, hidden: !visibilityState[1] },
+                        { label: 'Cumplimiento (%)', type: 'line', data: dataCumplimiento, borderColor: '#FEB019', backgroundColor: '#FEB019', borderWidth: 2, tension: 0.3, yAxisID: 'y_pct', order: 2, hidden: !visibilityState[2] }
                     ]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { display: false } }, 
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false } }, 
                     scales: { 
                         x: { grid: { display: false } },
-                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Horas / Km' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
-                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Tareas' }, grid: { drawOnChartArea: false } }
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Área (m²)' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Minutos' }, grid: { drawOnChartArea: false } },
+                        y_pct: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Cumplimiento (%)' }, min: 0, max: 100, grid: { drawOnChartArea: false } }
                     }
                 }
             });
         }
 
-        // ==========================================
-        // GRÁFICO 2: DONA CON SELECTOR DE COLOR CORREGIDO
-        // ==========================================
         function cambiarMetricaDona(metrica, btnElement, colorActivo) {
             const container = btnElement.closest('.metric-selectors');
-            container.querySelectorAll('.metric-btn').forEach(btn => {
-                btn.style.backgroundColor = 'transparent';
-                btn.style.color = 'var(--text-muted)';
+            container.querySelectorAll('.toggle-btn').forEach(btn => { 
+                btn.style.backgroundColor = 'transparent'; 
+                btn.style.color = 'var(--text-muted)'; 
             });
-            
             btnElement.style.backgroundColor = colorActivo;
-            if (metrica === 'tareas') btnElement.style.color = 'var(--bg-dark)';
-            else btnElement.style.color = 'white';
-            
+            if (metrica === 'tiempo') btnElement.style.color = 'var(--bg-dark)'; else btnElement.style.color = 'white';
             metricaDonaActiva = metrica;
             renderChartDona();
         }
@@ -594,10 +911,8 @@
             datosFiltrados.forEach(d => {
                 let t = d.shop_name || 'Sin Tienda';
                 if(!porTienda[t]) porTienda[t] = 0;
-                
-                if (metricaDonaActiva === 'duracion') porTienda[t] += parseFloat(d.duration) || 0;
-                else if (metricaDonaActiva === 'tareas') porTienda[t] += parseInt(d.task_count) || 0;
-                else if (metricaDonaActiva === 'km') porTienda[t] += parseFloat(d.mileage) || 0;
+                if (metricaDonaActiva === 'area') porTienda[t] += parseFloat(d.total_clean_area) || 0;
+                else if (metricaDonaActiva === 'tiempo') porTienda[t] += parseFloat(d.tiempo_efectivo_minutos) || 0;
             });
 
             const sortedLabels = Object.keys(porTienda).sort((a,b) => porTienda[b] - porTienda[a]);
@@ -607,14 +922,7 @@
             if(graficoDona) graficoDona.destroy();
             graficoDona = new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: sortedLabels,
-                    datasets: [{
-                        data: sortedData,
-                        backgroundColor: palette,
-                        borderWidth: 0, hoverOffset: 5
-                    }]
-                },
+                data: { labels: sortedLabels, datasets: [{ data: sortedData, backgroundColor: palette, borderWidth: 0, hoverOffset: 5 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false, cutout: '75%',
                     plugins: {
@@ -623,9 +931,8 @@
                             callbacks: {
                                 label: function(ctx) {
                                     let val = ctx.raw;
-                                    if(metricaDonaActiva === 'duracion') return ` ${ctx.label}: ${formatHoras(val)}`;
-                                    if(metricaDonaActiva === 'km') return ` ${ctx.label}: ${val.toFixed(2)} km`;
-                                    return ` ${ctx.label}: ${val.toLocaleString()} tareas`;
+                                    if(metricaDonaActiva === 'tiempo') return ` ${ctx.label}: ${formatMinutos(val)}`;
+                                    return ` ${ctx.label}: ${val.toLocaleString('es-CO', {maximumFractionDigits: 2})} m²`;
                                 }
                             }
                         }
@@ -635,23 +942,165 @@
 
             const leyendaContainer = document.getElementById('leyenda-dona');
             leyendaContainer.innerHTML = '';
-            
             sortedLabels.forEach((label, i) => {
                 const color = palette[i % palette.length];
                 let val = sortedData[i];
-                let displayVal = "";
-                
-                if (metricaDonaActiva === 'duracion') displayVal = formatHoras(val);
-                else if (metricaDonaActiva === 'km') displayVal = val.toFixed(2) + ' km';
-                else displayVal = val.toLocaleString();
-
-                leyendaContainer.innerHTML += `
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: ${color};"></div>
-                        <div class="legend-text" title="${label}"><strong>${label}</strong> <span style="color:var(--text-muted)">(${displayVal})</span></div>
-                    </div>
-                `;
+                let displayVal = metricaDonaActiva === 'tiempo' ? formatMinutos(val) : val.toLocaleString('es-CO', {maximumFractionDigits: 2}) + ' m²';
+                leyendaContainer.innerHTML += `<div class="legend-item"><div class="legend-color" style="background-color: ${color};"></div><div class="legend-text" title="${label}"><strong>${label}</strong> <span style="color:var(--text-muted)">(${displayVal})</span></div></div>`;
             });
+        }
+
+        // --- LÓGICA DE BOTONES "TODOS / CON ACTIVIDAD / SIN ACTIVIDAD" ---
+        function setFiltroIndActividad(modo, btnElement) {
+            filtroIndActividad = modo;
+            const container = btnElement.parentElement;
+            container.querySelectorAll('.btn-filtro-ind').forEach(btn => {
+                if (btn.id !== 'btn-toggle-nunca') {
+                    btn.classList.remove('active');
+                }
+            });
+            btnElement.classList.add('active');
+            actualizarDropdownIndividual();
+        }
+
+        // Esta función llena el dropdown dependiendo de qué botón de los 3 esté seleccionado
+        function actualizarDropdownIndividual() {
+            const tiendasSeleccionadas = tiendaChoices.getValue(true);
+            
+            let robotsBase = diccionarioRobotsGlobal; // Solo usa la flota oficial (>0)
+            if (tiendasSeleccionadas.length > 0) {
+                robotsBase = robotsBase.filter(r => tiendasSeleccionadas.includes(r.shop_name));
+            }
+
+            const robotsActivosSet = new Set(datosFiltrados.map(d => d.sn));
+            
+            let robotsParaMostrar = [];
+            if (filtroIndActividad === 'todos') {
+                robotsParaMostrar = robotsBase;
+            } else if (filtroIndActividad === 'activos') {
+                robotsParaMostrar = robotsBase.filter(r => robotsActivosSet.has(r.sn));
+            } else if (filtroIndActividad === 'inactivos') {
+                robotsParaMostrar = robotsBase.filter(r => !robotsActivosSet.has(r.sn));
+            }
+
+            const nombresRobots = [...new Set(robotsParaMostrar.map(r => r.nickname || r.sn))].filter(Boolean).sort();
+            
+            indRobotChoice.clearChoices();
+            indRobotChoice.setChoices(nombresRobots.map(r => ({ value: r, label: r })), 'value', 'label', true);
+            
+            // Si el robot que estaba seleccionado ya no está en la nueva lista, escondemos los resultados
+            const currentSelection = indRobotChoice.getValue(true);
+            if (!nombresRobots.includes(currentSelection)) {
+                document.getElementById('ind-resultados').style.display = 'none';
+            } else {
+                aplicarFiltrosIndividual();
+            }
+        }
+
+        // --- TABLA DETALLADA NORMAL ---
+        function aplicarFiltrosIndividual() {
+            const fDesde = document.getElementById('fecha-desde').value;
+            const fHasta = document.getElementById('fecha-hasta').value;
+            const robot = indRobotChoice.getValue(true);
+            
+            const bloqueResultados = document.getElementById('ind-resultados');
+
+            if (!robot) { bloqueResultados.style.display = 'none'; return; }
+            bloqueResultados.style.display = 'block';
+
+            datosIndPaginados = datosCrudosGlobales.filter(d => {
+                let nameToFilter = d.apodo_robot || d.sn;
+                if (nameToFilter !== robot) return false;
+                let f = extraerFecha(d.task_time);
+                if (fDesde && f < fDesde) return false;
+                if (fHasta && f > fHasta) return false;
+                return true;
+            });
+
+            paginaActualInd = 1;
+            renderTablaIndividual();
+        }
+
+        function renderTablaIndividual() {
+            const totalPaginas = Math.ceil(datosIndPaginados.length / limiteIndPagina) || 1;
+            const inicio = (paginaActualInd - 1) * limiteIndPagina;
+            const datosPagina = datosIndPaginados.slice(inicio, inicio + limiteIndPagina);
+            const paginacion = document.getElementById('ind-pagination-container');
+
+            let html = "";
+            datosPagina.forEach(d => {
+                html += `<tr>
+                    <td>${extraerFecha(d.task_time)}</td>
+                    <td><strong>${d.task_name || 'Desconocida'}</strong></td>
+                    <td>${d.shop_name || 'N/A'}</td>
+                    <td>${(parseFloat(d.clean_area) || 0).toLocaleString('es-CO', {maximumFractionDigits: 2})}</td>
+                    <td>${formatMinutos((parseFloat(d.clean_time) || 0) / 60)}</td>
+                </tr>`;
+            });
+            
+            document.getElementById('ind-tbody-detalle').innerHTML = html || "<tr><td colspan='5'>No se encontraron tareas para este robot en el rango de fechas.</td></tr>";
+            
+            if (datosIndPaginados.length > limiteIndPagina) {
+                paginacion.style.display = 'flex';
+                document.getElementById('ind-info-page').innerText = `Página ${paginaActualInd} de ${totalPaginas}`;
+                document.getElementById('ind-btn-prev').disabled = paginaActualInd === 1;
+                document.getElementById('ind-btn-next').disabled = paginaActualInd === totalPaginas;
+            } else { paginacion.style.display = 'none'; }
+        }
+
+        function cambiarPaginaInd(direccion) { paginaActualInd += direccion; renderTablaIndividual(); }
+
+        // --- NUEVA LÓGICA: BOTÓN "NUNCA ACTIVADOS" ---
+        function toggleNuncaActivados(btn) {
+            viendoNuncaActivados = !viendoNuncaActivados;
+            const seccionNormal = document.getElementById('seccion-analisis-normal');
+            const seccionNunca = document.getElementById('seccion-nunca-activados');
+            
+            if(viendoNuncaActivados) {
+                btn.classList.add('active');
+                btn.style.backgroundColor = 'var(--accent-orange)';
+                btn.style.borderColor = 'var(--accent-orange)';
+                btn.style.color = '#0F1523';
+                btn.innerHTML = '← Volver al Análisis Normal';
+                
+                seccionNormal.style.display = 'none';
+                seccionNunca.style.display = 'block';
+                renderNuncaActivados();
+            } else {
+                btn.classList.remove('active');
+                btn.style.backgroundColor = 'var(--bg-dark)';
+                btn.style.borderColor = 'var(--border-dark)';
+                btn.style.color = 'var(--text-muted)';
+                btn.innerHTML = '⚠️ Ver Nunca Activados';
+                
+                seccionNormal.style.display = 'block';
+                seccionNunca.style.display = 'none';
+            }
+        }
+
+        function renderNuncaActivados() {
+            const tiendasSeleccionadas = tiendaChoices.getValue(true);
+            
+            // Busca en la FLOTA COMPLETA (incluyendo los que tienen first_active_time = 0)
+            const inactivosAbsolutos = window.flotaCompleta.filter(r => {
+                const esCero = !r.first_active_time || r.first_active_time == 0;
+                if (!esCero) return false;
+                if (tiendasSeleccionadas.length > 0 && !tiendasSeleccionadas.includes(r.shop_name)) return false;
+                return true;
+            });
+
+            let html = "";
+            inactivosAbsolutos.forEach(r => {
+                const apodo = r.nickname || r.sn;
+                html += `<tr>
+                    <td><div class="robot-name">${getAvatar(apodo, '#2A3649')} ${apodo}</div></td>
+                    <td>${r.shop_name || 'Sin Tienda'}</td>
+                    <td><span class="metric-pill">${r.product_code || 'N/A'}</span></td>
+                    <td><span class="badge" style="background: rgba(255, 69, 96, 0.15); color: var(--accent-red); border: 1px solid rgba(255, 69, 96, 0.3);">Sin Inicializar</span></td>
+                </tr>`;
+            });
+            
+            document.getElementById('tbody-nunca-activados').innerHTML = html || "<tr><td colspan='4'>No hay robots sin inicializar en esta selección.</td></tr>";
         }
 
         window.onload = init;
