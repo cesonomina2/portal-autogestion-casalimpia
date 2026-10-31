@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Visión General | Command Center Casalimpia</title>
     
-    <!-- Librerías de Gráficos, Supabase y Selects Múltiples -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
@@ -19,15 +18,12 @@
             --color-blanco: #ffffff; --bg-oscuro: #E2E8F0;
             --color-texto: #334155; --borde: #CBD5E1;
             
-            /* Colores de Estados Novedades */
             --st-falta: #FF4560;
             --st-incompleto: #FEB019;
             --st-connovedad: #775DD0;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        /* TRUCO CSS: Escala 75% sin desfasar el mouse y SIN SCROLL GLOBAL */
         html { overflow: hidden; width: 100vw; height: 100vh; }
         
         body { 
@@ -44,7 +40,6 @@
             flex-direction: column;
         }
 
-        /* HEADER */
         header { 
             background-color: var(--color-blanco); padding: 5px 2%; display: flex; 
             justify-content: space-between; align-items: center; 
@@ -71,13 +66,11 @@
         }
         .btn-volver:hover { background-color: var(--color-azul-logo); color: white; }
 
-        /* CONTENEDOR DE GRID */
         .dashboard-container {
             flex: 1; min-height: 0; padding: 10px; display: grid; 
             grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;
         }
 
-        /* ESTRUCTURA DEL PILAR */
         .pilar { display: flex; flex-direction: column; gap: 8px; height: 100%; min-height: 0; min-width: 0; }
         
         .pilar-header {
@@ -90,7 +83,6 @@
         .pilar-header.rutinas h2 { color: #059669; }
         .pilar-header.vacantes h2 { color: #D97706; }
 
-        /* FILTROS */
         .filtros-box {
             background: var(--color-blanco); padding: 6px 8px; border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;
@@ -101,7 +93,6 @@
             background-color: #F8FAFC; cursor: pointer; font-weight: 500; outline: none;
         }
 
-        /* TARJETAS ELÁSTICAS */
         .dash-card {
             background: var(--color-blanco); padding: 10px; border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #E2E8F0;
@@ -126,7 +117,6 @@
         .badge.atencion { background: #FEF3C7; color: #92400E; }
         .badge.critico { background: #FEE2E2; color: #991B1B; }
 
-        /* NÚMEROS Y VALORES DINÁMICOS */
         .value-container { text-align: center; flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;}
         
         .dash-value { font-size: clamp(2rem, 3vw, 3.5rem); font-weight: 800; font-family: 'Outfit', sans-serif; color: #0F172A; line-height: 1; }
@@ -138,20 +128,17 @@
         
         .dash-subtext { font-size: 0.75rem; color: #64748B; margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--borde); display: flex; justify-content: space-between; flex-shrink: 0;}
         
-        /* GRÁFICOS FLEXIBLES */
         .chart-container { flex: 1 1 0; min-height: 0; width: 100%; position: relative; display: flex; justify-content: center; align-items: center;}
         .chart-container canvas { position: relative; z-index: 10; }
         .chart-inner-text { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); font-family: 'Outfit'; font-size: clamp(1.5rem, 2vw, 2.2rem); font-weight: 800; color: #0F172A; z-index: 0;}
         .chart-inner-text-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Outfit'; font-size: clamp(1.5rem, 2vw, 2.2rem); font-weight: 800; color: #0F172A; z-index: 0;}
         
-        /* RANKING ELÁSTICO */
         .ranking-list { display: flex; flex-direction: column; gap: 4px; flex: 1 1 0; min-height: 0; justify-content: flex-start;}
         .ranking-item { display: flex; flex-direction: column; gap: 2px; }
         .ranking-header { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #334155;}
         .bar-bg { width: 100%; height: 5px; background: #E2E8F0; border-radius: 10px; overflow: hidden; }
         .bar-fill { height: 100%; border-radius: 10px; transition: 0.5s width; }
 
-        /* Lista inactivos (Scroll vertical) */
         .lista-scroll { overflow-y: auto; overflow-x: hidden; padding-right: 5px; gap: 8px;}
         .lista-scroll::-webkit-scrollbar { width: 4px; }
         .lista-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
@@ -161,13 +148,11 @@
         .item-inactivo-nombre { font-weight: 700; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
         .item-inactivo-sede { font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; text-align: right; }
 
-        /* Ajustes Estéticos para Choices.js en Tema Claro */
         .choices { margin-bottom: 0; width: 100%; font-family: 'Roboto', sans-serif; }
         .choices__inner { background-color: #F8FAFC !important; border: 1px solid var(--borde) !important; border-radius: 6px !important; min-height: 28px !important; padding: 2px 4px !important; }
         .choices__input { color: var(--color-texto) !important; background-color: transparent !important; font-size: 0.75rem !important; }
         .choices__list--dropdown { background-color: var(--color-blanco) !important; border: 1px solid var(--borde) !important; color: var(--color-texto) !important; z-index: 10 !important;}
         .choices__list--multiple .choices__item { background-color: var(--color-azul-logo); border: none; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; font-weight: 600; margin-right: 3px; margin-bottom: 2px;}
-    
     </style>
 </head>
 <body>
@@ -183,7 +168,7 @@
 
     <div class="dashboard-container">
         
-        <!-- ================= PILAR 1: ROBOTS (DATA REAL SUPABASE) ================= -->
+        <!-- ================= PILAR 1: ROBOTS ================= -->
         <div class="pilar" id="pilar-robots">
             <div class="pilar-header robot"><h2>🤖 Operación Robótica</h2></div>
             
@@ -197,8 +182,8 @@
                 </select>
             </div>
 
-            <!-- TARJETA 1: ESTADO DE FLOTA -->
-            <div class="dash-card border-robot" id="rob-card-1">
+            <!-- TARJETA 1 REDUCIDA -->
+            <div class="dash-card border-robot" id="rob-card-1" style="flex: 0.6;">
                 <div class="dash-card-header">Estado de Flota <span id="r-badge-estado" class="badge">Calculando</span></div>
                 <div class="value-container">
                     <div class="dash-value" id="r-val-activos">0 <span>/ 0</span></div>
@@ -206,8 +191,8 @@
                 <div class="dash-subtext"><span id="r-txt-inactivos">...</span></div>
             </div>
 
-            <!-- TARJETA 2: VOLUMEN DE OPERACIÓN TRIPLE + TENDENCIA 5 DÍAS -->
-            <div class="dash-card border-robot" id="rob-card-2" style="flex: 1.2;">
+            <!-- TARJETA 2 AMPLIADA -->
+            <div class="dash-card border-robot" id="rob-card-2" style="flex: 1.8;">
                 <div class="dash-card-header">Volumen de Operación (Día Sel.)</div>
                 
                 <div class="value-container" style="flex-direction: row; justify-content: space-evenly; width: 100%; margin-bottom: 5px;">
@@ -220,16 +205,16 @@
                         <div style="font-size: 0.75rem; font-weight: 700; color:#64748B;">Tareas</div>
                     </div>
                     <div style="text-align: center;">
-                        <div class="dash-value orange" id="r-val-km" style="font-size: 1.5rem;">0.00</div>
-                        <div style="font-size: 0.75rem; font-weight: 700; color:#64748B;">Km</div>
+                        <div class="dash-value orange" id="r-val-area" style="font-size: 1.5rem;">0.00</div>
+                        <div style="font-size: 0.75rem; font-weight: 700; color:#64748B;">Área (m²)</div>
                     </div>
                 </div>
-                <!-- Gráfico modificado para soportar 3 métricas al tiempo -->
-                <div class="chart-container" style="min-height: 40px;"><canvas id="chartOperacion5Dias"></canvas></div>
+                
+                <!-- Gráfico expandido para evitar cortes -->
+                <div class="chart-container" style="flex: 1; min-height: 80px;"><canvas id="chartOperacion5Dias"></canvas></div>
                 <div class="dash-subtext"><span>Tendencia (Últimos 5 días)</span></div>
             </div>
 
-            <!-- TARJETA 3: LISTA DE ROBOTS INACTIVOS -->
             <div class="dash-card border-robot" id="rob-card-3" style="flex: 1.5;">
                 <div class="dash-card-header" style="margin-bottom: 8px;">Robots Sin Movimiento <span id="r-badge-alerta" class="badge critico">Alerta</span></div>
                 <div class="ranking-list lista-scroll" id="r-lista-inactivos">
@@ -238,7 +223,7 @@
             </div>
         </div>
 
-        <!-- ================= PILAR 2: BIOMETRÍA (DATA REAL SUPABASE) ================= -->
+        <!-- ================= PILAR 2: BIOMETRÍA ================= -->
         <div class="pilar" id="pilar-biometria">
             <div class="pilar-header biometria"><h2>👆 Biometría y Asistencia</h2></div>
             
@@ -292,7 +277,7 @@
             </div>
         </div>
 
-        <!-- ================= PILAR 3: RUTINAS (Simulado) ================= -->
+        <!-- ================= PILAR 3: RUTINAS ================= -->
         <div class="pilar" id="pilar-rutinas">
             <div class="pilar-header rutinas"><h2>📋 Cumplimiento Rutinas</h2></div>
             
@@ -328,7 +313,7 @@
             </div>
         </div>
 
-        <!-- ================= PILAR 4: VACANTES (Simulado) ================= -->
+        <!-- ================= PILAR 4: VACANTES ================= -->
         <div class="pilar" id="pilar-vacantes">
             <div class="pilar-header vacantes"><h2>👥 Vacantes</h2></div>
             
@@ -360,7 +345,6 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN DE SUPABASE
         const SUPABASE_URL = 'https://tyhdwpdefiatmxihycae.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_LH1iVez6V1qmj8Lk_YVZFA_Y2nYwdKw';
         const clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -369,7 +353,9 @@
         let datosRobotsGlobal = []; 
         let choiceNovedadesBio;
 
-        // 1. CARGA DE CECOS SIMULADOS
+        window.flotaBaseOficial = []; 
+        window.datosCrudosRend = []; 
+
         const listaCecos = [
             "01342 FUNDACION UNIVERSITARIA DEL AREA ANDINA", "01344 GAS NATURAL CUNDIBOYACENSE S.A.", 
             "01345 VANTI S.A. ESP", "01348 GREEN OFFICE CORPORATIVO", "01362 FUNDACION HOSPITAL DE LA MISERICORDIA",
@@ -380,11 +366,9 @@
             listaCecos.forEach(ceco => { let opt = document.createElement('option'); opt.value = ceco; opt.textContent = ceco; select.appendChild(opt); });
         });
 
-        // 2. INICIALIZACIÓN DE GRÁFICOS
         let chartInstOperacion5Dias, chartInstBio, chartInstRut, chartInstNovedades;
         
         function initCharts() {
-            // GRÁFICO ACTUALIZADO: 3 Líneas de Tendencia con ejes separados
             chartInstOperacion5Dias = new Chart(document.getElementById('chartOperacion5Dias').getContext('2d'), {
                 type: 'line', 
                 data: { 
@@ -392,7 +376,7 @@
                     datasets: [
                         { label: 'Horas', data: [0, 0, 0, 0, 0], borderColor: '#0085CA', backgroundColor: 'rgba(0, 133, 202, 0.1)', fill: true, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#0085CA', yAxisID: 'y' },
                         { label: 'Tareas', data: [0, 0, 0, 0, 0], borderColor: '#059669', backgroundColor: 'transparent', fill: false, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#059669', yAxisID: 'y1' },
-                        { label: 'Km', data: [0, 0, 0, 0, 0], borderColor: '#D97706', backgroundColor: 'transparent', fill: false, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#D97706', yAxisID: 'y2' }
+                        { label: 'Área', data: [0, 0, 0, 0, 0], borderColor: '#D97706', backgroundColor: 'transparent', fill: false, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#D97706', yAxisID: 'y2' }
                     ] 
                 },
                 options: { 
@@ -400,11 +384,26 @@
                     plugins: { legend: { display: false }, tooltip: { enabled: true, mode: 'index', intersect: false } }, 
                     scales: { 
                         x: { display: false }, 
-                        y: { display: false, min: 0 },
-                        y1: { display: false, min: 0 },
-                        y2: { display: false, min: 0 }
+                        y: { 
+                            display: true, position: 'left', 
+                            grid: { color: 'rgba(0,0,0,0.05)' }, 
+                            ticks: { font: { size: 9, family: 'Outfit' }, color: '#64748B' } 
+                        },
+                        y1: { display: false, position: 'right' },
+                        y2: { 
+                            display: true, position: 'right', 
+                            grid: { display: false }, 
+                            ticks: { 
+                                font: { size: 9, family: 'Outfit' }, 
+                                color: '#D97706',
+                                callback: function(value) {
+                                    if (value >= 1000) return (value / 1000).toFixed(1) + 'k';
+                                    return value;
+                                }
+                            } 
+                        } 
                     }, 
-                    layout: { padding: 0 } 
+                    layout: { padding: { top: 10, bottom: 10 } } 
                 }
             });
 
@@ -429,9 +428,6 @@
             });
         }
 
-        // =======================================================
-        // LÓGICA REAL: PILAR 1 - OPERACIÓN ROBÓTICA
-        // =======================================================
         function formatHoras(horasDec) {
             if (!horasDec || isNaN(horasDec)) return "0h 0m";
             const h = Math.floor(horasDec);
@@ -442,7 +438,8 @@
         function extraerFechaStr(ts) { return ts ? ts.split('T')[0] : "N/A"; }
 
         async function initRobots() {
-            const hoyStr = new Date().toISOString().split('T')[0];
+            const fHoy = new Date();
+            const hoyStr = `${fHoy.getFullYear()}-${String(fHoy.getMonth() + 1).padStart(2, '0')}-${String(fHoy.getDate()).padStart(2, '0')}`;
             document.getElementById('filtro-fecha-robot').value = hoyStr;
             
             await cargarDatosRobots();
@@ -454,23 +451,49 @@
             tarjetas.forEach(c => c.classList.add('updating'));
 
             try {
-                const { data, error } = await clienteSupabase.from('5-vista_dashboard_rendimiento').select('*').order('task_time', { ascending: true });
-                if (error) throw error;
-                datosRobotsGlobal = data || [];
+                const { data: dataAgrupada, error: err1 } = await clienteSupabase
+                    .from('5-vista_dashboard_rendimiento')
+                    .select('*')
+                    .order('task_time', { ascending: true });
+                if (err1) throw err1;
+
+                const { data: datosBasicos, error: err2 } = await clienteSupabase
+                    .from('5-pudu_datos_basicos')
+                    .select('sn, nickname, shop_name, first_active_time');
+                if (err2) throw err2;
+
+                const { data: rendimientosCrudos, error: err3 } = await clienteSupabase
+                    .from('5-pudu_rendimientos')
+                    .select('task_time, sn');
+                if (err3) throw err3;
+                window.datosCrudosRend = rendimientosCrudos || [];
+
+                const diccionarioOficial = {};
+                datosBasicos.forEach(r => {
+                    if (r.first_active_time && r.first_active_time > 0) {
+                        diccionarioOficial[r.sn] = r;
+                    }
+                });
+
+                datosRobotsGlobal = []; 
+                if (dataAgrupada) {
+                    dataAgrupada.forEach(d => {
+                        if (diccionarioOficial[d.sn]) {
+                            d.apodo_robot = diccionarioOficial[d.sn].nickname || d.sn;
+                            d.shop_name = diccionarioOficial[d.sn].shop_name || 'Sin Tienda';
+                            datosRobotsGlobal.push(d);
+                        }
+                    });
+                }
+
+                window.flotaBaseOficial = Object.values(diccionarioOficial).filter(r => r.shop_name && r.shop_name.trim() !== '' && r.shop_name !== 'Sin Tienda');
 
                 const selectCliente = document.getElementById('filtro-cliente-robot');
                 const valClienteActual = selectCliente.value;
-                const clientes = [...new Set(datosRobotsGlobal.map(d => d.shop_name))].filter(Boolean).sort();
+                const clientes = [...new Set(window.flotaBaseOficial.map(d => d.shop_name))].sort();
                 selectCliente.innerHTML = '<option value="all">🏢 Todos los Clientes (Global)</option>';
                 clientes.forEach(c => { selectCliente.innerHTML += `<option value="${c}">${c}</option>`; });
                 if (clientes.includes(valClienteActual)) selectCliente.value = valClienteActual;
-
-                const selectRobot = document.getElementById('filtro-robot-robot');
-                const valRobotActual = selectRobot.value;
-                const robots = [...new Set(datosRobotsGlobal.map(d => d.apodo_robot))].filter(Boolean).sort();
-                selectRobot.innerHTML = '<option value="all">🤖 Todos los Robots</option>';
-                robots.forEach(r => { selectRobot.innerHTML += `<option value="${r}">${r}</option>`; });
-                if (robots.includes(valRobotActual)) selectRobot.value = valRobotActual;
 
                 aplicarFiltrosRobots();
             } catch (error) {
@@ -488,85 +511,133 @@
             
             if(!fechaSelec) return;
 
-            let flotaTotalData = datosRobotsGlobal;
-            if (clienteSelec !== 'all') flotaTotalData = flotaTotalData.filter(d => d.shop_name === clienteSelec);
-            if (robotSelec !== 'all') flotaTotalData = flotaTotalData.filter(d => d.apodo_robot === robotSelec);
+            let flotaOficialFiltrada = window.flotaBaseOficial;
+            if (clienteSelec !== 'all') {
+                flotaOficialFiltrada = flotaOficialFiltrada.filter(r => r.shop_name === clienteSelec);
+            }
             
-            let mapaRobots = {}; 
-            flotaTotalData.forEach(d => {
-                if(d.apodo_robot) {
-                    if(!mapaRobots[d.apodo_robot] || d.task_time > mapaRobots[d.apodo_robot].fecha) {
-                        mapaRobots[d.apodo_robot] = { tienda: d.shop_name, fecha: d.task_time };
+            const selectRobot = document.getElementById('filtro-robot-robot');
+            const valRobotActual = selectRobot.value;
+            const robotsDrop = [...new Set(flotaOficialFiltrada.map(r => r.nickname || r.sn))].sort();
+            selectRobot.innerHTML = '<option value="all">🤖 Todos los Robots</option>';
+            robotsDrop.forEach(r => { selectRobot.innerHTML += `<option value="${r}">${r}</option>`; });
+            if (robotsDrop.includes(valRobotActual)) selectRobot.value = valRobotActual;
+
+            const totalRobotsUnicos = flotaOficialFiltrada.length;
+            
+            let robotSeleccionadoData = null;
+            if (robotSelec !== 'all') {
+                robotSeleccionadoData = flotaOficialFiltrada.find(r => (r.nickname || r.sn) === robotSelec);
+            }
+
+            let datosRendimiento = datosRobotsGlobal;
+            if (clienteSelec !== 'all') datosRendimiento = datosRendimiento.filter(d => d.shop_name === clienteSelec);
+            if (robotSelec !== 'all' && robotSeleccionadoData) {
+                datosRendimiento = datosRendimiento.filter(d => d.sn === robotSeleccionadoData.sn);
+            } else if (robotSelec !== 'all') {
+                datosRendimiento = [];
+            }
+
+            const datosDelDia = datosRendimiento.filter(d => extraerFechaStr(d.task_time) === fechaSelec);
+            
+            let robotsActivosHoy = new Set();
+            let sumHorasHoy = 0, sumAreaHoy = 0;
+
+            datosDelDia.forEach(d => {
+                if(d.sn) robotsActivosHoy.add(d.sn);
+                sumHorasHoy += parseFloat(d.tiempo_efectivo_minutos) / 60 || 0;
+                sumAreaHoy += parseFloat(d.total_clean_area) || 0;
+            });
+            
+            let sumTareasHoy = 0;
+            window.datosCrudosRend.forEach(c => {
+                if (extraerFechaStr(c.task_time) === fechaSelec) {
+                    const robotInfo = flotaOficialFiltrada.find(r => r.sn === c.sn);
+                    if (robotInfo) {
+                        if (robotSelec === 'all' || (robotSeleccionadoData && c.sn === robotSeleccionadoData.sn)) {
+                            sumTareasHoy++;
+                        }
                     }
                 }
             });
-            const totalRobotsUnicos = Object.keys(mapaRobots).length;
 
-            const datosDelDia = flotaTotalData.filter(d => extraerFechaStr(d.task_time) === fechaSelec);
-            
-            let robotsActivosHoy = new Set();
-            let sumHorasHoy = 0, sumTareasHoy = 0, sumKmHoy = 0;
+            let arrInactivos = [];
+            if (robotSelec === 'all') {
+                arrInactivos = flotaOficialFiltrada.filter(r => !robotsActivosHoy.has(r.sn));
+            } else {
+                if (robotSeleccionadoData && !robotsActivosHoy.has(robotSeleccionadoData.sn)) {
+                    arrInactivos.push(robotSeleccionadoData);
+                }
+            }
 
-            datosDelDia.forEach(d => {
-                if(d.apodo_robot) robotsActivosHoy.add(d.apodo_robot);
-                sumHorasHoy += parseFloat(d.duration) || 0;
-                sumTareasHoy += parseInt(d.task_count) || 0;
-                sumKmHoy += parseFloat(d.mileage) || 0;
-            });
+            const cantTotalEvaluada = (robotSelec !== 'all') ? (robotSeleccionadoData ? 1 : 0) : totalRobotsUnicos;
+            const cantActivos = cantTotalEvaluada - arrInactivos.length;
+            const cantInactivos = arrInactivos.length;
 
-            const cantActivos = robotsActivosHoy.size;
-            const cantInactivos = totalRobotsUnicos - cantActivos;
-
-            // Tarjeta 1
-            document.getElementById('r-val-activos').innerHTML = `${cantActivos} <span>/ ${totalRobotsUnicos}</span>`;
+            document.getElementById('r-val-activos').innerHTML = `${cantActivos} <span>/ ${cantTotalEvaluada}</span>`;
             document.getElementById('r-txt-inactivos').innerText = cantInactivos > 0 ? `⚠️ ${cantInactivos} robots sin movimiento` : '✓ Toda la flota operando';
             
             let badgeEst = document.getElementById('r-badge-estado');
-            if (totalRobotsUnicos === 0) { badgeEst.className = 'badge'; badgeEst.innerText = 'Sin Datos'; }
+            if (cantTotalEvaluada === 0) { badgeEst.className = 'badge'; badgeEst.innerText = 'Sin Datos'; }
             else if (cantInactivos === 0) { badgeEst.className = 'badge en-meta'; badgeEst.innerText = 'Óptimo'; }
             else { badgeEst.className = 'badge atencion'; badgeEst.innerText = 'Atención'; }
 
-            // Tarjeta 2
             document.getElementById('r-val-horas').innerText = formatHoras(sumHorasHoy);
             document.getElementById('r-val-tareas').innerText = sumTareasHoy.toLocaleString('es-CO');
-            document.getElementById('r-val-km').innerText = sumKmHoy.toFixed(2);
+            document.getElementById('r-val-area').innerText = sumAreaHoy.toLocaleString('es-CO', {maximumFractionDigits: 2});
 
             let arr5DiasHoras = [0, 0, 0, 0, 0];
             let arr5DiasTareas = [0, 0, 0, 0, 0];
-            let arr5DiasKm = [0, 0, 0, 0, 0];
-            let fBase = new Date(fechaSelec + 'T00:00:00'); 
+            let arr5DiasArea = [0, 0, 0, 0, 0];
+            
+            const parts = fechaSelec.split('-');
+            let fBase = new Date(parts[0], parts[1] - 1, parts[2]); 
             
             for(let i=0; i<5; i++) {
                 let dTarget = new Date(fBase);
                 dTarget.setDate(dTarget.getDate() - (4 - i));
-                let strDate = dTarget.toISOString().split('T')[0];
                 
-                let sHoras = 0, sTareas = 0, sKm = 0;
-                flotaTotalData.forEach(d => {
+                const year = dTarget.getFullYear();
+                const month = String(dTarget.getMonth() + 1).padStart(2, '0');
+                const day = String(dTarget.getDate()).padStart(2, '0');
+                let strDate = `${year}-${month}-${day}`;
+                
+                let sHoras = 0, sArea = 0, sTareas = 0;
+                
+                datosRendimiento.forEach(d => {
                     if(extraerFechaStr(d.task_time) === strDate) { 
-                        sHoras += parseFloat(d.duration) || 0; 
-                        sTareas += parseInt(d.task_count) || 0; 
-                        sKm += parseFloat(d.mileage) || 0; 
+                        sHoras += parseFloat(d.tiempo_efectivo_minutos) / 60 || 0; 
+                        sArea += parseFloat(d.total_clean_area) || 0; 
                     }
                 });
+
+                window.datosCrudosRend.forEach(c => {
+                    if (extraerFechaStr(c.task_time) === strDate) {
+                        const robotInfo = flotaOficialFiltrada.find(r => r.sn === c.sn);
+                        if (robotInfo) {
+                            if (robotSelec === 'all' || (robotSeleccionadoData && c.sn === robotSeleccionadoData.sn)) {
+                                sTareas++;
+                            }
+                        }
+                    }
+                });
+
                 arr5DiasHoras[i] = parseFloat(sHoras.toFixed(2));
                 arr5DiasTareas[i] = sTareas;
-                arr5DiasKm[i] = parseFloat(sKm.toFixed(2));
+                arr5DiasArea[i] = parseFloat(sArea.toFixed(2));
             }
             
-            // ACTUALIZACIÓN TRIPLE PARA EL GRÁFICO 
             chartInstOperacion5Dias.data.datasets[0].data = arr5DiasHoras;
             chartInstOperacion5Dias.data.datasets[1].data = arr5DiasTareas;
-            chartInstOperacion5Dias.data.datasets[2].data = arr5DiasKm;
+            chartInstOperacion5Dias.data.datasets[2].data = arr5DiasArea;
             chartInstOperacion5Dias.update();
 
-            // Tarjeta 3
             const listaContainer = document.getElementById('r-lista-inactivos');
             listaContainer.innerHTML = '';
             
             let badgeAlerta = document.getElementById('r-badge-alerta');
 
-            if (totalRobotsUnicos === 0) {
+            if (cantTotalEvaluada === 0) {
                 listaContainer.innerHTML = '<div style="text-align:center; color:#64748B; font-size:0.8rem; margin-top:10px;">Sin robots registrados en el filtro.</div>';
                 badgeAlerta.className = 'badge'; badgeAlerta.innerText = '-';
             } else if (cantInactivos === 0) {
@@ -574,19 +645,14 @@
                 badgeAlerta.className = 'badge en-meta'; badgeAlerta.innerText = 'Limpio';
             } else {
                 badgeAlerta.className = 'badge critico'; badgeAlerta.innerText = cantInactivos + ' Casos';
-                let arrInactivos = [];
-                Object.keys(mapaRobots).forEach(robot => {
-                    if(!robotsActivosHoy.has(robot)) {
-                        arrInactivos.push({ nombre: robot, tienda: mapaRobots[robot].tienda || 'Sin Asignar' });
-                    }
-                });
                 
                 let htmlLista = "";
                 arrInactivos.forEach(inact => {
+                    const nombreDisplay = inact.nickname || inact.sn;
                     htmlLista += `
                         <div class="item-inactivo">
-                            <div class="item-inactivo-nombre">🤖 ${inact.nombre}</div>
-                            <div class="item-inactivo-sede">${inact.tienda}</div>
+                            <div class="item-inactivo-nombre">🤖 ${nombreDisplay}</div>
+                            <div class="item-inactivo-sede">${inact.shop_name}</div>
                         </div>
                     `;
                 });
@@ -602,8 +668,9 @@
             choiceNovedadesBio = new Choices('#filtro-novedades-bio', { removeItemButton: true, searchEnabled: false, placeholderValue: 'Seleccionar Novedad...' });
             document.getElementById('filtro-novedades-bio').addEventListener('change', aplicarFiltrosBiometria);
 
-            const hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('filtro-fecha-bio').value = hoy;
+            const fHoy = new Date();
+            const hoyStrBio = `${fHoy.getFullYear()}-${String(fHoy.getMonth() + 1).padStart(2, '0')}-${String(fHoy.getDate()).padStart(2, '0')}`;
+            document.getElementById('filtro-fecha-bio').value = hoyStrBio;
 
             await cargarDatosBiometria();
             setInterval(cargarDatosBiometria, 1800000); 
@@ -652,7 +719,6 @@
                 if (estadosSelec.includes(d.estado_asistencia)) { casosNovedades++; if (countsNov[d.estado_asistencia] !== undefined) countsNov[d.estado_asistencia]++; }
             });
 
-            // Tarjeta 1
             let pct = horasProg > 0 ? (horasEjec / horasProg) * 100 : 0;
             document.getElementById('b-val-porcentaje').innerText = pct.toFixed(1) + '%';
             chartInstBio.data.datasets[0].data = [pct, 100 - pct > 0 ? 100 - pct : 0];
@@ -663,7 +729,6 @@
             else { badge1.className = 'badge critico'; badge1.innerText = 'Crítico'; }
             chartInstBio.update();
 
-            // Tarjeta 2
             let faltasFisicas = turnosProg - turnosEjec;
             document.getElementById('b-val-presentes').innerText = turnosEjec;
             document.getElementById('b-val-faltas').innerText = faltasFisicas >= 0 ? faltasFisicas : 0;
@@ -673,7 +738,6 @@
             else if(faltasFisicas <= 0) { badge2.className = 'badge en-meta'; badge2.innerText = 'Completo'; }
             else { badge2.className = 'badge atencion'; badge2.innerText = `Revisar Faltas`; }
 
-            // Tarjeta 3
             document.getElementById('b-val-novedades').innerText = casosNovedades;
             const labels = estadosSelec;
             const dataNov = labels.map(l => countsNov[l]);
@@ -689,10 +753,6 @@
             else { badge3.className = 'badge en-meta'; badge3.innerText = 'Limpio'; }
         }
 
-
-        // =======================================================
-        // DATOS SIMULADOS PARA RUTINAS Y VACANTES
-        // =======================================================
         function simularDatosPilar(pilar) {
             const container = document.getElementById(`pilar-${pilar}`);
             container.querySelectorAll('.dash-card').forEach(card => card.classList.add('updating'));
