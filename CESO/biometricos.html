@@ -23,7 +23,7 @@
             --border-dark: #2A3649;
             
             /* Colores de Estado */
-            --st-cumplido: #00E396; 
+            --st-completado: #00E396; 
             --st-falta: #FF4560;
             --st-incompleto: #FEB019;
             --st-noprogramado: #008FFB;
@@ -32,17 +32,27 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* Solución del Zoom: Escala la página matemáticamente sin romper las coordenadas del mouse */
-        html { overflow-x: hidden; }
+        /* CORRECCIÓN AVANZADA DEL ESPACIO MUERTO Y EL MOUSE */
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Corta el scroll externo (el que deja el fondo vacío) */
+            background-color: var(--bg-dark);
+        }
+        
         body { 
             font-family: 'Roboto', sans-serif; 
             background-color: var(--bg-dark); 
             color: var(--text-main); 
-            transform: scale(0.75); 
-            transform-origin: top left; 
-            width: 133.33%; 
-            min-height: 133.33vh; 
             margin: 0;
+            
+            /* Se escala matemáticamente y maneja su propio scroll */
+            width: 133.333%;
+            height: 133.333%;
+            transform: scale(0.75);
+            transform-origin: top left;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         header { background-color: #FFFFFF; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-top: 5px solid var(--color-azul-logo); border-bottom: 5px solid var(--color-azul-logo); flex-wrap: wrap; gap: 15px; position: sticky; top: 0; z-index: 100; }
@@ -94,12 +104,23 @@
         .kpi-box .kpi-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; font-family: 'Outfit'; text-transform: uppercase;}
         .kpi-box .kpi-val { font-size: 1.8rem; font-weight: 700; font-family: 'Outfit'; color: white; margin-bottom: 5px;}
         .kpi-box .kpi-sub { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
-        .val-main { color: var(--st-cumplido) !important; font-size: 3rem !important; margin-bottom: 0 !important;}
+        .val-main { color: var(--st-completado) !important; font-size: 3rem !important; margin-bottom: 0 !important;}
         .val-red { color: var(--st-falta) !important; }
         .val-blue { color: var(--st-noprogramado) !important; }
 
         .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         .chart-container { position: relative; height: 350px; width: 100%; }
+
+        /* RANKINGS */
+        .grid-half { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .ranking-list { display: flex; flex-direction: column; gap: 12px; max-height: 350px; overflow-y: auto; padding-right: 5px;}
+        .ranking-list::-webkit-scrollbar { width: 4px; }
+        .ranking-list::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 4px; }
+        .rank-item { background: var(--bg-dark); padding: 12px; border-radius: 8px; border: 1px solid var(--border-dark); }
+        .rank-header { display: flex; justify-content: space-between; font-family: 'Outfit'; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px;}
+        .rank-metrics { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;}
+        .rank-bar-bg { height: 6px; background: var(--border-dark); border-radius: 10px; overflow: hidden; }
+        .rank-bar-fill { height: 100%; border-radius: 10px; }
         
         /* Tabla y Buscador */
         .table-panel { overflow-x: auto; padding-bottom: 0; }
@@ -115,12 +136,11 @@
         .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: white; flex-shrink: 0;}
         .col-empleado { display: flex; align-items: center; gap: 10px; font-weight: 600; font-family: 'Outfit'; }
         
-        /* Truncamiento para ahorrar espacio en la tabla */
         .txt-truncado { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; display: block; }
         .txt-truncado-cliente { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; display: block; }
         
         .badge { padding: 5px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; border: 1px solid transparent; display: inline-block; text-align: center; min-width: 100px;}
-        .badge-cumplido { background: rgba(0, 227, 150, 0.15); color: var(--st-cumplido); border-color: rgba(0,227,150,0.3); }
+        .badge-completado { background: rgba(0, 227, 150, 0.15); color: var(--st-completado); border-color: rgba(0,227,150,0.3); }
         .badge-falta { background: rgba(255, 69, 96, 0.15); color: var(--st-falta); border-color: rgba(255,69,96,0.3); }
         .badge-incompleto { background: rgba(254, 176, 25, 0.15); color: var(--st-incompleto); border-color: rgba(254,176,25,0.3); }
         .badge-noprogramado { background: rgba(0, 143, 251, 0.15); color: var(--st-noprogramado); border-color: rgba(0,143,251,0.3); }
@@ -136,7 +156,7 @@
 
         @media (max-width: 1024px) {
             .kpi-container { grid-template-columns: repeat(3, 1fr); }
-            .charts-row { grid-template-columns: 1fr; }
+            .charts-row, .grid-half { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -176,7 +196,7 @@
             <div class="input-group" style="flex: 1; min-width: 150px;">
                 <label>Estado</label>
                 <select id="filtro-estado" multiple>
-                    <option value="Cumplido">Cumplido</option>
+                    <option value="Completado">Completado</option>
                     <option value="Con Novedad">Con Novedad</option>
                     <option value="Falta">Falta</option>
                     <option value="Incompleto">Incompleto</option>
@@ -196,7 +216,7 @@
             
             <div class="panel kpi-container">
                 <div class="kpi-box kpi-main">
-                    <div class="kpi-title" style="color:var(--text-main);">Cumplimiento (%)</div>
+                    <div class="kpi-title" style="color:var(--text-main);">Cumplimiento Plan (%)</div>
                     <div class="kpi-val val-main" id="kpi-cumplimiento">0%</div>
                 </div>
                 <div class="kpi-box">
@@ -215,9 +235,9 @@
                     <div class="kpi-sub">Por faltas y retrasos</div>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-title">Sobreocupación</div>
-                    <div class="kpi-val val-blue" id="kpi-sobreocupacion">+ 0 h</div>
-                    <div class="kpi-sub">Personal no programado</div>
+                    <div class="kpi-title">Operación No Planificada</div>
+                    <div class="kpi-val val-blue" id="kpi-sobreocupacion">0 Turnos</div>
+                    <div class="kpi-sub" id="kpi-extra-hrs">+ 0 h de Sobreocupación</div>
                 </div>
             </div>
 
@@ -246,6 +266,17 @@
                 </div>
             </div>
 
+            <div class="grid-half">
+                <div class="panel">
+                    <div class="panel-title" style="color: var(--st-completado);">Top 10 - Mejor Desempeño Operativo</div>
+                    <div class="ranking-list" id="rank-buenos"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title" style="color: var(--st-falta);">Top 10 - Mayor Alerta (Fugas)</div>
+                    <div class="ranking-list" id="rank-malos"></div>
+                </div>
+            </div>
+
             <div class="panel table-panel">
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; padding: 0 15px 15px 15px; flex-wrap: wrap; gap: 15px;">
                     <div>
@@ -264,10 +295,11 @@
                             <th>Fecha</th>
                             <th>Colaborador / Cédula</th>
                             <th>Cliente / Frente</th>
-                            <th>Origen</th>
+                            <th>Origen / Descanso</th>
                             <th>Turno Asignado</th>
                             <th>Marcación Real</th>
                             <th>Desviación</th>
+                            <th>Balance</th>
                             <th>Estado</th>
                         </tr>
                     </thead>
@@ -295,10 +327,8 @@
         Chart.defaults.plugins.tooltip.bodyColor = '#E2E8F0';
         Chart.defaults.plugins.tooltip.borderColor = '#2A3649';
         Chart.defaults.plugins.tooltip.borderWidth = 1;
-        Chart.defaults.plugins.tooltip.padding = 10;
-        Chart.defaults.plugins.tooltip.cornerRadius = 8;
 
-        const coloresEstado = { 'Cumplido': '#00E396', 'Con Novedad': '#775DD0', 'Falta': '#FF4560', 'Incompleto': '#FEB019', 'No Programado': '#008FFB' };
+        const coloresEstado = { 'Completado': '#00E396', 'Con Novedad': '#775DD0', 'Falta': '#FF4560', 'Incompleto': '#FEB019', 'No Programado': '#008FFB' };
         const palette = ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0', '#FF66C3', '#9D00FF'];
 
         let datosGlobales = [];
@@ -354,7 +384,6 @@
             try {
                 document.getElementById('loading-screen').innerText = `⏳ Consultando Vista Materializada...`;
 
-                // UNA SOLA LLAMADA MASIVA: Consulta directa a la vista de alta velocidad
                 const { data, error } = await clienteSupabase
                     .from('mv_asistencias_dashboard')
                     .select('*')
@@ -420,30 +449,33 @@
             renderTable();
             renderChartTendencia();
             renderChartDona();
+            renderRankings();
         }
 
         function actualizarKPIs() {
-            let turnosProg = 0, horasProg = 0;
-            let turnosEjec = 0, horasEjec = 0;
-            let horasDeficit = 0, horasSobreocupacion = 0;
+            let turnosProg = 0, horasProg = 0, turnosEjec = 0, horasEjec = 0;
+            let turnosExtra = 0, horasExtra = 0;
             
             datosFiltrados.forEach(d => {
-                if (d.estado_asistencia !== 'No Programado') {
+                const hp = parseFloat(d.horas_programadas) || 0;
+                const ht = parseFloat(d.horas_trabajadas) || 0;
+
+                if (d.estado_asistencia === 'No Programado') {
+                    turnosExtra++;
+                    horasExtra += ht;
+                } else {
                     turnosProg++;
-                    horasProg += parseFloat(d.horas_programadas) || 0;
+                    horasProg += hp;
+                    if (d.hora_entrada || d.hora_salida) {
+                        turnosEjec++;
+                        horasEjec += ht;
+                    }
                 }
-                if (d.hora_entrada || d.hora_salida) {
-                    turnosEjec++;
-                    horasEjec += parseFloat(d.horas_trabajadas) || 0;
-                }
-                horasDeficit += parseFloat(d.horas_deficit) || 0;
-                horasSobreocupacion += parseFloat(d.horas_sobreocupacion) || 0;
             });
             
-            let porcentajeCumplimiento = 0;
-            if (horasProg > 0) {
-                porcentajeCumplimiento = (horasEjec / horasProg) * 100;
-            }
+            let porcentajeCumplimiento = horasProg > 0 ? (horasEjec / horasProg) * 100 : 0;
+            let horasDeficit = horasProg - horasEjec;
+            if (horasDeficit < 0) horasDeficit = 0;
 
             document.getElementById('kpi-cumplimiento').innerText = porcentajeCumplimiento.toFixed(1) + '%';
             document.getElementById('kpi-prog-turnos').innerText = turnosProg.toLocaleString() + ' Turnos';
@@ -451,7 +483,49 @@
             document.getElementById('kpi-ejec-turnos').innerText = turnosEjec.toLocaleString() + ' Turnos';
             document.getElementById('kpi-ejec-horas').innerText = horasEjec.toFixed(1) + ' Hrs Reales';
             document.getElementById('kpi-deficit').innerText = '- ' + horasDeficit.toFixed(1) + ' h';
-            document.getElementById('kpi-sobreocupacion').innerText = '+ ' + horasSobreocupacion.toFixed(1) + ' h';
+            document.getElementById('kpi-sobreocupacion').innerText = turnosExtra.toLocaleString() + ' Turnos';
+            document.getElementById('kpi-extra-hrs').innerText = '+ ' + horasExtra.toFixed(1) + ' h de Sobreocupación';
+        }
+
+        function renderRankings() {
+            let datosCli = {};
+            datosFiltrados.forEach(d => {
+                if(!d.razon_social_cliente) return;
+                let c = d.razon_social_cliente;
+                if(!datosCli[c]) datosCli[c] = { hProg:0, hEjec:0, fugas:0 };
+                
+                if(d.estado_asistencia !== 'No Programado') {
+                    datosCli[c].hProg += parseFloat(d.horas_programadas)||0;
+                    datosCli[c].hEjec += parseFloat(d.horas_trabajadas)||0;
+                    if(['Falta','Con Novedad','Incompleto'].includes(d.estado_asistencia)) {
+                        datosCli[c].fugas++;
+                    }
+                }
+            });
+
+            let rankingArray = Object.keys(datosCli).map(cliente => {
+                let pct = datosCli[cliente].hProg > 0 ? (datosCli[cliente].hEjec / datosCli[cliente].hProg)*100 : 0;
+                let deficit = datosCli[cliente].hProg - datosCli[cliente].hEjec;
+                return { cliente, pct, def: deficit > 0 ? deficit : 0, fugas: datosCli[cliente].fugas };
+            });
+
+            let htmlBuenos = [...rankingArray].sort((a,b) => b.pct - a.pct).slice(0,10).map(r => `
+                <div class="rank-item">
+                    <div class="rank-header"><span>${r.cliente.substring(0,30)}</span><span style="color:var(--st-completado)">${r.pct.toFixed(1)}%</span></div>
+                    <div class="rank-metrics"><span>Fugas: ${r.fugas} casos</span> <span>Déficit: -${r.def.toFixed(1)}h</span></div>
+                    <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${r.pct}%; background:var(--st-completado);"></div></div>
+                </div>
+            `).join('');
+            document.getElementById('rank-buenos').innerHTML = htmlBuenos || '<div style="color:var(--text-muted); font-size:0.9rem;">Sin datos planificados suficientes</div>';
+
+            let htmlMalos = [...rankingArray].sort((a,b) => b.def - a.def).slice(0,10).map(r => `
+                <div class="rank-item">
+                    <div class="rank-header"><span>${r.cliente.substring(0,30)}</span><span style="color:var(--st-falta)">-${r.def.toFixed(1)}h</span></div>
+                    <div class="rank-metrics"><span>Cumplimiento: ${r.pct.toFixed(1)}%</span> <span>Fugas: ${r.fugas} casos</span></div>
+                    <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${r.pct}%; background:var(--st-falta);"></div></div>
+                </div>
+            `).join('');
+            document.getElementById('rank-malos').innerHTML = htmlMalos || '<div style="color:var(--text-muted); font-size:0.9rem;">Sin datos de déficit</div>';
         }
 
         function cambiarPagina(delta) {
@@ -471,17 +545,20 @@
 
             let html = "";
             datosPagina.forEach(d => {
-                const strAsignado = d.turno_inicio ? `${formatTime(d.turno_inicio)} - ${formatTime(d.turno_fin)}` : 'No asignado';
+                const tInicio = d.hora_inicio_turno || d.turno_inicio;
+                const tFin = d.hora_fin_turno || d.turno_fin;
+                
+                const strAsignado = tInicio ? `${formatTime(tInicio)} - ${formatTime(tFin)}` : 'No asignado';
                 const strReal = (d.hora_entrada || d.hora_salida) ? `${formatTime(d.hora_entrada)} - ${formatTime(d.hora_salida)}` : 'Sin marcas';
                 const claseBadge = `badge-${d.estado_asistencia.replace(/\s+/g, '').toLowerCase()}`;
                 
-                // Cálculo Matemático de Desviación Ignorando Desfases Nocturnos (Saltos de 24h)
+                // 1. Desviación
                 let htmlDesviacion = '<span style="color:var(--text-muted);">-</span>';
-                if (d.turno_inicio && (d.hora_entrada || d.hora_salida)) {
+                if (tInicio && (d.hora_entrada || d.hora_salida)) {
                     let lineas = [];
                     
-                    if (d.hora_entrada && d.turno_inicio) {
-                        let diffEntrada = (new Date(d.hora_entrada) - new Date(d.turno_inicio)) / 60000;
+                    if (d.hora_entrada && tInicio) {
+                        let diffEntrada = (new Date(d.hora_entrada) - new Date(tInicio)) / 60000;
                         let nEntrada = diffEntrada % 1440;
                         if (nEntrada > 720) nEntrada -= 1440;
                         if (nEntrada < -720) nEntrada += 1440;
@@ -491,8 +568,8 @@
                         }
                     }
                     
-                    if (d.hora_salida && d.turno_fin) {
-                        let diffSalida = (new Date(d.turno_fin) - new Date(d.hora_salida)) / 60000;
+                    if (d.hora_salida && tFin) {
+                        let diffSalida = (new Date(tFin) - new Date(d.hora_salida)) / 60000;
                         let nSalida = diffSalida % 1440;
                         if (nSalida > 720) nSalida -= 1440;
                         if (nSalida < -720) nSalida += 1440;
@@ -505,10 +582,22 @@
                     if (lineas.length > 0) {
                         htmlDesviacion = lineas.join('<br>');
                     } else {
-                        htmlDesviacion = '<span style="color:var(--st-cumplido); font-weight:700;">Ok</span>';
+                        htmlDesviacion = '<span style="color:var(--st-completado); font-weight:700;">Ok</span>';
                     }
                 } else if (d.estado_asistencia === 'Falta') {
                     htmlDesviacion = '<span style="color:var(--st-falta);">Ausente</span>';
+                }
+
+                // 2. Columna de Balance Total Corregida
+                let htmlBalance = '<span style="color:var(--text-muted);">-</span>';
+                if (d.balance_minutos !== null && d.balance_minutos !== undefined) {
+                    if (d.balance_minutos < 0) {
+                        htmlBalance = `<span style="color:var(--st-falta); font-weight:700;">${d.balance_minutos}m</span> <span style="font-size:0.8rem; color:var(--text-muted);">faltan</span>`;
+                    } else if (d.balance_minutos > 0) {
+                        htmlBalance = `<span style="color:var(--st-noprogramado); font-weight:700;">+${d.balance_minutos}m</span> <span style="font-size:0.8rem; color:var(--text-muted);">sobran</span>`;
+                    } else {
+                        htmlBalance = `<span style="color:var(--st-completado); font-weight:700;">Exacto</span>`;
+                    }
                 }
 
                 html += `<tr>
@@ -528,15 +617,19 @@
                             <span class="text-muted-small">${d.nombre_sucursal || 'Sin Frente'}</span>
                         </div>
                     </td>
-                    <td><span style="background:rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; font-size:0.8rem;">${d.origen_marcacion}</span></td>
+                    <td>
+                        <span style="background:rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; font-size:0.8rem;">${d.origen_marcacion}</span>
+                        <div class="text-muted-small" style="margin-top: 5px;">Descanso: ${d.horario_descanso || 'No asignado'}</div>
+                    </td>
                     <td>${strAsignado}</td>
                     <td>${strReal}</td>
                     <td>${htmlDesviacion}</td>
+                    <td>${htmlBalance}</td>
                     <td><span class="badge ${claseBadge}">${d.estado_asistencia}</span></td>
                 </tr>`;
             });
             
-            tbody.innerHTML = html || "<tr><td colspan='8' style='text-align:center;'>No hay registros para este filtro.</td></tr>";
+            tbody.innerHTML = html || "<tr><td colspan='9' style='text-align:center;'>No hay registros para este filtro.</td></tr>";
 
             document.getElementById('paginacion-info').innerText = `Página ${paginaActual} de ${totalPaginas} (${datosFiltrados.length} registros)`;
             document.getElementById('btn-prev').disabled = paginaActual === 1;
@@ -547,7 +640,7 @@
             let porDia = {};
             datosFiltrados.sort((a,b) => new Date(a.fecha_operacion) - new Date(b.fecha_operacion)).forEach(d => {
                 let f = d.fecha_operacion;
-                if(!porDia[f]) porDia[f] = { 'Cumplido': 0, 'Con Novedad': 0, 'Falta': 0, 'Incompleto': 0, 'No Programado': 0 };
+                if(!porDia[f]) porDia[f] = { 'Completado': 0, 'Con Novedad': 0, 'Falta': 0, 'Incompleto': 0, 'No Programado': 0 };
                 porDia[f][d.estado_asistencia]++;
             });
 
@@ -574,7 +667,7 @@
         }
 
         function renderChartDona() {
-            let conteo = { 'Cumplido': 0, 'Con Novedad': 0, 'Falta': 0, 'Incompleto': 0, 'No Programado': 0 };
+            let conteo = { 'Completado': 0, 'Con Novedad': 0, 'Falta': 0, 'Incompleto': 0, 'No Programado': 0 };
             datosFiltrados.forEach(d => { conteo[d.estado_asistencia]++; });
 
             const labels = Object.keys(conteo).filter(k => conteo[k] > 0);
