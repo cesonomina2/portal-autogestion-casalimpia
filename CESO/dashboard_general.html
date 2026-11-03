@@ -128,8 +128,9 @@
         
         .dash-subtext { font-size: 0.75rem; color: #64748B; margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--borde); display: flex; justify-content: space-between; flex-shrink: 0;}
         
+        /* Ajuste de Z-Index para que las Gráficas no tapen los desplegables */
         .chart-container { flex: 1 1 0; min-height: 0; width: 100%; position: relative; display: flex; justify-content: center; align-items: center;}
-        .chart-container canvas { position: relative; z-index: 10; }
+        .chart-container canvas { position: relative; z-index: 1; }
         .chart-inner-text { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); font-family: 'Outfit'; font-size: clamp(1.5rem, 2vw, 2.2rem); font-weight: 800; color: #0F172A; z-index: 0;}
         .chart-inner-text-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Outfit'; font-size: clamp(1.5rem, 2vw, 2.2rem); font-weight: 800; color: #0F172A; z-index: 0;}
         
@@ -148,10 +149,11 @@
         .item-inactivo-nombre { font-weight: 700; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
         .item-inactivo-sede { font-weight: 500; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; text-align: right; }
 
-        .choices { margin-bottom: 0; width: 100%; font-family: 'Roboto', sans-serif; }
+        /* Ajustes Estéticos para Choices.js (Z-Index Extremo para los menús) */
+        .choices { margin-bottom: 0; width: 100%; font-family: 'Roboto', sans-serif; position: relative; z-index: 50;}
         .choices__inner { background-color: #F8FAFC !important; border: 1px solid var(--borde) !important; border-radius: 6px !important; min-height: 28px !important; padding: 2px 4px !important; }
         .choices__input { color: var(--color-texto) !important; background-color: transparent !important; font-size: 0.75rem !important; }
-        .choices__list--dropdown { background-color: var(--color-blanco) !important; border: 1px solid var(--borde) !important; color: var(--color-texto) !important; z-index: 10 !important;}
+        .choices__list--dropdown { background-color: var(--color-blanco) !important; border: 1px solid var(--borde) !important; color: var(--color-texto) !important; z-index: 9999 !important;}
         .choices__list--multiple .choices__item { background-color: var(--color-azul-logo); border: none; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; font-weight: 600; margin-right: 3px; margin-bottom: 2px;}
     </style>
 </head>
@@ -182,7 +184,6 @@
                 </select>
             </div>
 
-            <!-- TARJETA 1 REDUCIDA -->
             <div class="dash-card border-robot" id="rob-card-1" style="flex: 0.6;">
                 <div class="dash-card-header">Estado de Flota <span id="r-badge-estado" class="badge">Calculando</span></div>
                 <div class="value-container">
@@ -191,7 +192,6 @@
                 <div class="dash-subtext"><span id="r-txt-inactivos">...</span></div>
             </div>
 
-            <!-- TARJETA 2 AMPLIADA -->
             <div class="dash-card border-robot" id="rob-card-2" style="flex: 1.8;">
                 <div class="dash-card-header">Volumen de Operación (Día Sel.)</div>
                 
@@ -210,7 +210,6 @@
                     </div>
                 </div>
                 
-                <!-- Gráfico expandido para evitar cortes -->
                 <div class="chart-container" style="flex: 1; min-height: 80px;"><canvas id="chartOperacion5Dias"></canvas></div>
                 <div class="dash-subtext"><span>Tendencia (Últimos 5 días)</span></div>
             </div>
@@ -235,41 +234,58 @@
             </div>
 
             <div class="dash-card border-biometria" id="bio-card-1">
-                <div class="dash-card-header">Cumplimiento Operativo <span id="b-badge-1" class="badge en-meta">Óptimo</span></div>
+                <div class="dash-card-header">Cumplimiento del Plan <span id="b-badge-1" class="badge en-meta">Óptimo</span></div>
                 <div class="chart-container">
                     <canvas id="chartBiometria"></canvas>
                     <div class="chart-inner-text" id="b-val-porcentaje">0%</div>
                 </div>
-                <div class="dash-subtext"><span>Basado en Horas Programadas</span></div>
+                <div class="dash-subtext"><span>Horas Ejec. vs Horas Prog.</span></div>
             </div>
 
-            <div class="dash-card border-biometria" id="bio-card-2">
-                <div class="dash-card-header">Personal Operativo <span id="b-badge-2" class="badge">Analizando</span></div>
-                <div class="value-container" style="flex-direction: row; justify-content: space-evenly; width: 100%;">
-                    <div style="text-align: center;">
-                        <div class="dash-value green" id="b-val-presentes">0</div>
-                        <div style="font-size: 0.85rem; font-weight: 700; color:#64748B;">Presentes</div>
+            <!-- TARJETA 2: Cuadrícula 2x2 para desglosar el personal planeado -->
+            <div class="dash-card border-biometria" id="bio-card-2" style="z-index: 2;">
+                <div class="dash-card-header">Ejecución de Turnos <span id="b-badge-2" class="badge">Analizando</span></div>
+                
+                <div class="value-container" style="flex-direction: row; flex-wrap: wrap; justify-content: space-evenly; align-content: center; gap: 5px; width: 100%;">
+                    <div style="text-align: center; width: 45%;">
+                        <div class="dash-value green" id="b-val-completados" style="font-size: 1.8rem;">0</div>
+                        <div style="font-size: 0.7rem; font-weight: 700; color:#64748B;">Completados</div>
                     </div>
-                    <div style="text-align: center;">
-                        <div class="dash-value red" id="b-val-faltas">0</div>
-                        <div style="font-size: 0.85rem; font-weight: 700; color:var(--st-falta);">Faltas</div>
+                    <div style="text-align: center; width: 45%;">
+                        <div class="dash-value" id="b-val-incompletos" style="font-size: 1.8rem; color: #FEB019;">0</div>
+                        <div style="font-size: 0.7rem; font-weight: 700; color:#64748B;">Incompletos</div>
+                    </div>
+                    <div style="text-align: center; width: 45%;">
+                        <div class="dash-value" id="b-val-novedad" style="font-size: 1.8rem; color: #775DD0;">0</div>
+                        <div style="font-size: 0.7rem; font-weight: 700; color:#64748B;">Con Novedad</div>
+                    </div>
+                    <div style="text-align: center; width: 45%;">
+                        <div class="dash-value red" id="b-val-faltas" style="font-size: 1.8rem;">0</div>
+                        <div style="font-size: 0.7rem; font-weight: 700; color:var(--st-falta);">Faltas</div>
                     </div>
                 </div>
-                <div class="dash-subtext"><span id="b-txt-personal">De 0 programados</span></div>
+
+                <div class="dash-subtext" style="align-items: center;">
+                    <span id="b-txt-personal">De 0 turnos programados</span>
+                    <span id="b-txt-extras" style="color: #0085CA; font-weight: 700; font-size: 0.7rem;">+0 Extras</span>
+                </div>
             </div>
 
-            <div class="dash-card border-biometria" id="bio-card-3" style="overflow: visible;">
+            <!-- TARJETA 3: Novedades con Z-Index Corregido -->
+            <div class="dash-card border-biometria" id="bio-card-3" style="overflow: visible; z-index: 100;">
                 <div class="dash-card-header" style="flex-direction: column; gap: 8px;">
                     <div style="display:flex; justify-content: space-between; width: 100%;">
                         Novedades Críticas <span id="b-badge-3" class="badge critico">Alerta</span>
                     </div>
-                    <select id="filtro-novedades-bio" multiple>
-                        <option value="Falta" selected>Faltas (Ausentes)</option>
-                        <option value="Incompleto" selected>Incompletos</option>
-                        <option value="Con Novedad" selected>Con Novedad</option>
-                    </select>
+                    <div style="position: relative; width: 100%; z-index: 200;">
+                        <select id="filtro-novedades-bio" multiple>
+                            <option value="Falta" selected>Faltas (Ausentes)</option>
+                            <option value="Incompleto" selected>Incompletos</option>
+                            <option value="Con Novedad" selected>Con Novedad</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="chart-container" style="flex: 1; min-height: 90px; position: relative;">
+                <div class="chart-container" style="flex: 1; min-height: 90px; position: relative; z-index: 1;">
                     <canvas id="chartNovedades"></canvas>
                     <div class="chart-inner-text-center" id="b-val-novedades">0</div>
                 </div>
@@ -709,16 +725,38 @@
             let dataLocal = datosBiometriaGlobal;
             if (clienteSelec !== 'all') { dataLocal = dataLocal.filter(d => d.razon_social_cliente === clienteSelec); }
 
-            let turnosProg = 0, turnosEjec = 0, horasProg = 0, horasEjec = 0;
+            let turnosProg = 0, horasProg = 0, horasEjec = 0, turnosExtra = 0;
+            let cCompletado = 0, cIncompleto = 0, cNovedad = 0, cFalta = 0;
             let countsNov = { 'Falta': 0, 'Incompleto': 0, 'Con Novedad': 0 };
             let casosNovedades = 0;
 
             dataLocal.forEach(d => {
-                if (d.estado_asistencia !== 'No Programado') { turnosProg++; horasProg += parseFloat(d.horas_programadas) || 0; }
-                if (d.hora_entrada || d.hora_salida) { turnosEjec++; horasEjec += parseFloat(d.horas_trabajadas) || 0; }
-                if (estadosSelec.includes(d.estado_asistencia)) { casosNovedades++; if (countsNov[d.estado_asistencia] !== undefined) countsNov[d.estado_asistencia]++; }
+                if (d.estado_asistencia === 'No Programado') {
+                    // Contamos los turnos fantasmas / apoyo
+                    turnosExtra++;
+                } else {
+                    // Contamos lo estrictamente programado
+                    turnosProg++; 
+                    horasProg += parseFloat(d.horas_programadas) || 0;
+                    if (d.hora_entrada || d.hora_salida) { 
+                        horasEjec += parseFloat(d.horas_trabajadas) || 0; 
+                    }
+                    
+                    // Conteo desglosado para la cuadrícula 2x2
+                    if (d.estado_asistencia === 'Completado' || d.estado_asistencia === 'Cumplido') cCompletado++;
+                    else if (d.estado_asistencia === 'Incompleto') cIncompleto++;
+                    else if (d.estado_asistencia === 'Con Novedad') cNovedad++;
+                    else if (d.estado_asistencia === 'Falta') cFalta++;
+                }
+                
+                // Novedades para el gráfico de Dona
+                if (estadosSelec.includes(d.estado_asistencia)) { 
+                    casosNovedades++; 
+                    if (countsNov[d.estado_asistencia] !== undefined) countsNov[d.estado_asistencia]++; 
+                }
             });
 
+            // 1. KPI Cumplimiento
             let pct = horasProg > 0 ? (horasEjec / horasProg) * 100 : 0;
             document.getElementById('b-val-porcentaje').innerText = pct.toFixed(1) + '%';
             chartInstBio.data.datasets[0].data = [pct, 100 - pct > 0 ? 100 - pct : 0];
@@ -729,15 +767,21 @@
             else { badge1.className = 'badge critico'; badge1.innerText = 'Crítico'; }
             chartInstBio.update();
 
-            let faltasFisicas = turnosProg - turnosEjec;
-            document.getElementById('b-val-presentes').innerText = turnosEjec;
-            document.getElementById('b-val-faltas').innerText = faltasFisicas >= 0 ? faltasFisicas : 0;
+            // 2. KPI Personal - Cuadrícula 2x2
+            document.getElementById('b-val-completados').innerText = cCompletado;
+            document.getElementById('b-val-incompletos').innerText = cIncompleto;
+            document.getElementById('b-val-novedad').innerText = cNovedad;
+            document.getElementById('b-val-faltas').innerText = cFalta;
+            
             document.getElementById('b-txt-personal').innerText = `De ${turnosProg} programados`;
+            document.getElementById('b-txt-extras').innerText = `+${turnosExtra} Extras`;
+            
             let badge2 = document.getElementById('b-badge-2');
             if(turnosProg === 0) { badge2.className = 'badge'; badge2.innerText = 'Sin turnos'; }
-            else if(faltasFisicas <= 0) { badge2.className = 'badge en-meta'; badge2.innerText = 'Completo'; }
-            else { badge2.className = 'badge atencion'; badge2.innerText = `Revisar Faltas`; }
+            else if(cFalta === 0 && cIncompleto === 0) { badge2.className = 'badge en-meta'; badge2.innerText = 'Limpio'; }
+            else { badge2.className = 'badge atencion'; badge2.innerText = `Revisar Fallos`; }
 
+            // 3. KPI Dona Novedades
             document.getElementById('b-val-novedades').innerText = casosNovedades;
             const labels = estadosSelec;
             const dataNov = labels.map(l => countsNov[l]);
